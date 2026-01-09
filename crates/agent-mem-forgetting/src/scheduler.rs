@@ -33,7 +33,7 @@
 
 use crate::curve::{EbbinghausCurve, ForgettingCurve};
 use crate::protection::{MemoryProtection, ProtectionLevel};
-use agent_mem_core::memories::Memory;
+use agent_mem_traits::abstractions::Memory;
 use agent_mem_event_bus::{EventBus, EventType};
 use agent_mem_traits::{AgentMemError, Result};
 use chrono::{DateTime, Duration, Utc};
@@ -195,7 +195,7 @@ impl ForgettingScheduler {
     pub async fn start(&self) -> Result<()> {
         let mut running = self.running.write().await;
         if *running {
-            return Err(AgentMemError::other("Scheduler already running"));
+            return Err(AgentMemError::MemoryError("Scheduler already running".to_string()));
         }
 
         *running = true;
@@ -247,7 +247,7 @@ impl ForgettingScheduler {
     pub async fn stop(&self) -> Result<()> {
         let mut running = self.running.write().await;
         if !*running {
-            return Err(AgentMemError::other("Scheduler not running"));
+            return Err(AgentMemError::MemoryError("Scheduler not running".to_string()));
         }
 
         *running = false;
@@ -295,7 +295,7 @@ impl ForgettingScheduler {
             stats.total_checked += 1;
 
             // Check protection
-            let memory_id = memory.id();
+            let memory_id = memory.id.as_str();
             if self.protection.is_permanently_protected(memory_id).await {
                 stats.total_protected += 1;
                 continue;
@@ -303,7 +303,8 @@ impl ForgettingScheduler {
 
             // Calculate time elapsed
             let created_at = memory.created_at();
-            let elapsed_days = (now - *created_at).num_days() as f64;
+            let duration = now - created_at;
+            let elapsed_days = duration.num_seconds() as f64 / 86400.0; // Convert seconds to days
 
             // Apply protection multiplier
             let effective_time = self
@@ -326,16 +327,16 @@ impl ForgettingScheduler {
                     memory_id, retention
                 );
 
-                forgotten.push(memory_id.clone());
+                forgotten.push(memory_id.to_string());
                 stats.total_forgotten += 1;
 
                 // Publish event
                 if enable_events {
                     if let Some(ref bus) = event_bus {
                         let event = agent_mem_event_bus::MemoryEvent::new(EventType::MemoryDeleted)
-                            .with_memory_id(memory_id.clone())
-                            .with_metadata("retention", serde_json::json!(retention))
-                            .with_metadata("reason", serde_json::json!("forgetting"));
+                            .with_memory_id(memory_id.to_string())
+                            .with_metadata("retention".to_string(), serde_json::json!(retention))
+                            .with_metadata("reason".to_string(), serde_json::json!("forgetting"));
                         let _ = bus.publish(event).await;
                     }
                 }

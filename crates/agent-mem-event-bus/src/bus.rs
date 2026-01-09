@@ -112,8 +112,8 @@ impl EventBus {
             Err(e) => {
                 // No subscribers
                 warn!("Failed to publish event (no receivers): {:?}", e.0);
-                Err(agent_mem_traits::AgentMemError::other(
-                    anyhow::anyhow!("No subscribers for event"),
+                Err(agent_mem_traits::AgentMemError::StorageError(
+                    "No subscribers for event".to_string(),
                 ))
             }
         }

@@ -17,7 +17,6 @@ pub trait EventHandler: Send + Sync {
 }
 
 /// Event filter for subscribing to specific event types
-#[derive(Debug, Clone, PartialEq)]
 pub enum EventFilter {
     /// Handle all events
     All,
@@ -30,6 +29,43 @@ pub enum EventFilter {
 
     /// Custom filter function
     Custom(Box<dyn Fn(&MemoryEvent) -> bool + Send + Sync>),
+}
+
+impl Clone for EventFilter {
+    fn clone(&self) -> Self {
+        match self {
+            EventFilter::All => EventFilter::All,
+            EventFilter::Type(t) => EventFilter::Type(t.clone()),
+            EventFilter::Types(ts) => EventFilter::Types(ts.clone()),
+            EventFilter::Custom(_) => {
+                // Cannot clone function pointers, so we return All as a fallback
+                EventFilter::All
+            }
+        }
+    }
+}
+
+impl PartialEq for EventFilter {
+    fn eq(&self, other: &Self) -> bool {
+        match (self, other) {
+            (EventFilter::All, EventFilter::All) => true,
+            (EventFilter::Type(a), EventFilter::Type(b)) => a == b,
+            (EventFilter::Types(a), EventFilter::Types(b)) => a == b,
+            (EventFilter::Custom(_), EventFilter::Custom(_)) => false, // Cannot compare functions
+            _ => false,
+        }
+    }
+}
+
+impl std::fmt::Debug for EventFilter {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            EventFilter::All => write!(f, "EventFilter::All"),
+            EventFilter::Type(t) => write!(f, "EventFilter::Type({:?})", t),
+            EventFilter::Types(ts) => write!(f, "EventFilter::Types({:?})", ts),
+            EventFilter::Custom(_) => write!(f, "EventFilter::Custom(<function>)"),
+        }
+    }
 }
 
 impl EventFilter {

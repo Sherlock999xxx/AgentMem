@@ -103,11 +103,11 @@ impl WorkingMemoryService {
         let session_items = self.storage.entry(item.session_id.clone()).or_default();
         if session_items.len() >= self.config.max_items_per_session {
             // Remove lowest priority item
-            if let Some((lowest_key, _)) = session_items
+            if let Some(lowest_ref) = session_items
                 .iter()
-                .min_by_key(|(_, a)| a.priority)
+                .min_by_key(|ref_item| ref_item.value().priority)
             {
-                session_items.remove(lowest_key);
+                session_items.remove(lowest_ref.key());
                 debug!("Removed lowest priority item due to capacity limit");
             }
         }
@@ -137,10 +137,10 @@ impl WorkingMemoryService {
 
     /// Get all items for a session
     pub async fn get_session_items(&self, session_id: &str) -> Result<Vec<WorkingMemoryItem>> {
-        let items = self
+        let items: Vec<WorkingMemoryItem> = self
             .storage
             .get(session_id)
-            .map(|map| map.iter().map(|(_, v)| v.clone()).collect())
+            .map(|map| map.iter().map(|ref_item| ref_item.value().clone()).collect())
             .unwrap_or_default();
 
         debug!(
@@ -167,13 +167,13 @@ impl WorkingMemoryService {
         session_id: &str,
         min_priority: i32,
     ) -> Result<Vec<WorkingMemoryItem>> {
-        let items = self
+        let items: Vec<WorkingMemoryItem> = self
             .storage
             .get(session_id)
             .map(|map| {
                 map.iter()
-                    .filter(|(_, v)| v.priority >= min_priority)
-                    .map(|(_, v)| v.clone())
+                    .filter(|ref_item| ref_item.value().priority >= min_priority)
+                    .map(|ref_item| ref_item.value().clone())
                     .collect()
             })
             .unwrap_or_default();
@@ -218,7 +218,7 @@ impl WorkingMemoryService {
         let count = self
             .storage
             .remove(session_id)
-            .map(|map| map.len() as i64)
+            .map(|(_, map)| map.len() as i64)
             .unwrap_or(0);
 
         if count > 0 {
@@ -252,13 +252,13 @@ impl WorkingMemoryService {
             // Find expired items
             let expired_ids: Vec<String> = session_map
                 .iter()
-                .filter(|(_, item)| {
-                    item
+                .filter(|ref_item| {
+                    ref_item.value()
                         .expires_at
                         .map(|exp| exp < now)
                         .unwrap_or(false)
                 })
-                .map(|(id, _)| id.clone())
+                .map(|ref_item| ref_item.key().clone())
                 .collect();
 
             // Remove expired items
@@ -317,13 +317,13 @@ impl WorkingMemoryService {
 
                     let expired_ids: Vec<String> = session_map
                         .iter()
-                        .filter(|(_, item)| {
-                            item
+                        .filter(|ref_item| {
+                            ref_item.value()
                                 .expires_at
                                 .map(|exp| exp < now)
                                 .unwrap_or(false)
                         })
-                        .map(|(id, _)| id.clone())
+                        .map(|ref_item| ref_item.key().clone())
                         .collect();
 
                     for id in expired_ids {

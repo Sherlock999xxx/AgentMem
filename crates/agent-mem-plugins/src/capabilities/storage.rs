@@ -143,10 +143,11 @@ mod tests {
 
         storage.clear().await?;
         assert_eq!(storage.count().await?, 0);
+        Ok(())
     }
-}
 
-    async fn test_storage_set_and_get() {
+    #[tokio::test]
+    async fn test_storage_set_and_get_duplicate() -> anyhow::Result<()> {
         let storage = StorageCapability::new();
 
         storage
@@ -156,6 +157,7 @@ mod tests {
 
         let value = storage.get("key1").await?;
         assert_eq!(value, Some("value1".to_string()));
+        Ok(())
     }
 
     #[tokio::test]
@@ -215,9 +217,9 @@ mod tests {
         storage.clear().await?;
         assert_eq!(storage.count().await?, 0);
     }
-}
 
-    async fn test_storage_delete() {
+    #[tokio::test]
+    async fn test_storage_delete_duplicate() -> anyhow::Result<()> {
         let storage = StorageCapability::new();
 
         storage
@@ -229,6 +231,7 @@ mod tests {
         let deleted = storage.delete("key1").await?;
         assert!(deleted);
         assert!(!storage.exists("key1").await?);
+        Ok(())
     }
 
     #[tokio::test]
@@ -273,9 +276,9 @@ mod tests {
         storage.clear().await?;
         assert_eq!(storage.count().await?, 0);
     }
-}
 
-    async fn test_storage_list_keys() {
+    #[tokio::test]
+    async fn test_storage_list_keys_duplicate() -> anyhow::Result<()> {
         let storage = StorageCapability::new();
 
         storage
@@ -296,10 +299,11 @@ mod tests {
         assert!(keys.contains(&"key1".to_string()));
         assert!(keys.contains(&"key2".to_string()));
         assert!(keys.contains(&"key3".to_string()));
+        Ok(())
     }
 
     #[tokio::test]
-    async fn test_storage_clear() -> anyhow::Result<()> {
+    async fn test_storage_clear_final() -> anyhow::Result<()> {
         let storage = StorageCapability::new();
 
         storage
@@ -315,24 +319,6 @@ mod tests {
 
         storage.clear().await?;
         assert_eq!(storage.count().await?, 0);
-    }
-}
-
-    async fn test_storage_clear() {
-        let storage = StorageCapability::new();
-
-        storage
-            .set("key1".to_string(), "value1".to_string())
-            .await
-            .unwrap();
-        storage
-            .set("key2".to_string(), "value2".to_string())
-            .await
-            .unwrap();
-
-        assert_eq!(storage.count().await?, 2);
-
-        storage.clear().await?;
-        assert_eq!(storage.count().await?, 0);
+        Ok(())
     }
 }

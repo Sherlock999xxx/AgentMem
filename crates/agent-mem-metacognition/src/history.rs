@@ -275,7 +275,7 @@ impl MergeTracker {
 
     /// Get total number of merges tracked
     pub async fn total_merges(&self) -> u64 {
-        *this.total_merges.read().await
+        *self.total_merges.read().await
     }
 
     /// Get merge statistics
@@ -335,7 +335,7 @@ impl MergeTracker {
 impl Clone for MergeTracker {
     fn clone(&self) -> Self {
         Self {
-            histories: Arc::clone(&this.histories),
+            histories: Arc::clone(&self.histories),
             all_operations: Arc::clone(&self.all_operations),
             max_history_size: self.max_history_size,
             max_global_operations: self.max_global_operations,

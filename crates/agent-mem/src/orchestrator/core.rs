@@ -1003,8 +1003,7 @@ impl MemoryOrchestrator {
     /// # 示例
     ///
     /// ```rust
-    /// let ids = orchestrator.add_batch(vec
-!["Memory 1", "Memory 2"]).await?;
+    /// let ids = orchestrator.add_batch(vec!["Memory 1", "Memory 2"]).await?;
     /// ```
     pub async fn add_batch(&self, contents: Vec<String>) -> Result<Vec<String>> {
         if contents.is_empty() {

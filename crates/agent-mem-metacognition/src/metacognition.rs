@@ -170,7 +170,7 @@ pub struct MergeStatisticsSummary {
 
 /// Metacognition service
 ///
-//! Monitors memory health and provides insights.
+/// Monitors memory health and provides insights.
 pub struct MetacognitionService {
     config: MetacognitionConfig,
     merge_tracker: MergeTracker,
@@ -296,8 +296,9 @@ impl MetacognitionService {
 
         // Trim historical scores
         let max_scores = (self.config.statistics_retention_days * 24) as usize;
-        if stats.historical_scores.len() > max_scores {
-            stats.historical_scores.drain(0..stats.historical_scores.len() - max_scores);
+        let current_len = stats.historical_scores.len();
+        if current_len > max_scores {
+            stats.historical_scores.drain(0..current_len - max_scores);
         }
 
         info!("Report generated: health score {:.1}", health_score);
@@ -315,7 +316,8 @@ impl MetacognitionService {
         let dormant_ratio = 0.2; // Placeholder
         let fragmentation_score = 0.1; // Placeholder
 
-        let health_score = (active_ratio * 60.0 + (1.0 - dormant_ratio) * 30.0 + (1.0 - fragmentation_score) * 10.0).min(100.0);
+        let score: f64 = active_ratio * 60.0 + (1.0 - dormant_ratio) * 30.0 + (1.0 - fragmentation_score) * 10.0;
+        let health_score: f64 = score.min(100.0);
 
         let consolidation_urgency = if total_memories > 500 {
             90.0

@@ -148,12 +148,12 @@ mod tests {
             max_tokens: Some(100),
             parameters: std::collections::HashMap::new(),
         };
-        Ok(())
         let response = llm.call_llm(request).await?;
 
         assert!(response.text.contains("summary"));
         assert_eq!(response.model, "gpt-4");
         assert!(response.tokens_used > 0);
+        Ok(())
     }
 
     #[tokio::test]
@@ -241,12 +241,11 @@ mod tests {
             parameters: std::collections::HashMap::new(),
         };
 
-        Ok(())
-
         llm.call_llm(request).await?;
         assert_eq!(llm.get_history().await.len(), 1);
 
         llm.clear_history().await?;
         assert_eq!(llm.get_history().await.len(), 0);
+        Ok(())
     }
 }

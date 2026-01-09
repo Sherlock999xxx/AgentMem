@@ -173,8 +173,8 @@ impl AutoConsolidationTrigger {
 
         let mut running = self.running.write().await;
         if *running {
-            return Err(agent_mem_traits::AgentMemError::other(
-                "Consolidation trigger already running",
+            return Err(agent_mem_traits::AgentMemError::MemoryError(
+                "Consolidation trigger already running".to_string(),
             ));
         }
 
@@ -236,15 +236,15 @@ impl AutoConsolidationTrigger {
                                 EventType::MemoryUpdated,
                             )
                             .with_metadata(
-                                "action",
+                                "action".to_string(),
                                 serde_json::json!("auto_consolidation"),
                             )
                             .with_metadata(
-                                "memory_count",
+                                "memory_count".to_string(),
                                 serde_json::json!(memory_count),
                             )
                             .with_metadata(
-                                "duration_ms",
+                                "duration_ms".to_string(),
                                 serde_json::json!(duration),
                             );
 
@@ -271,8 +271,8 @@ impl AutoConsolidationTrigger {
     pub async fn stop(&self) -> Result<()> {
         let mut running = self.running.write().await;
         if !*running {
-            return Err(agent_mem_traits::AgentMemError::other(
-                "Consolidation trigger not running",
+            return Err(agent_mem_traits::AgentMemError::MemoryError(
+                "Consolidation trigger not running".to_string(),
             ));
         }
 
@@ -331,9 +331,9 @@ impl AutoConsolidationTrigger {
         if self.config.enable_events {
             if let Some(ref bus) = self.event_bus {
                 let event = agent_mem_event_bus::MemoryEvent::new(EventType::MemoryUpdated)
-                    .with_metadata("action", serde_json::json!("manual_consolidation"))
-                    .with_metadata("memory_count", serde_json::json!(memory_count))
-                    .with_metadata("duration_ms", serde_json::json!(duration));
+                    .with_metadata("action".to_string(), serde_json::json!("manual_consolidation"))
+                    .with_metadata("memory_count".to_string(), serde_json::json!(memory_count))
+                    .with_metadata("duration_ms".to_string(), serde_json::json!(duration));
 
                 let _ = bus.publish(event).await;
             }
@@ -345,7 +345,7 @@ impl AutoConsolidationTrigger {
 
     pub async fn should_trigger(&self) -> bool {
         let memory_count = {
-            let cb = self.memory_count_cb.read().await;
+            let cb = self.memory_count_callback.read().await;
             cb.as_ref().map(|f| f()).unwrap_or(0)
         };
 

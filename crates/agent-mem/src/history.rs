@@ -382,7 +382,6 @@ mod tests {
             is_deleted: false,
             actor_id: Some("user_456".to_string()),
             role: Some("user".to_string()),
-        Ok(())
         };
 
         // 添加历史记录
@@ -453,7 +452,6 @@ mod tests {
             };
 
             manager.add_history(entry).await?;
-        Ok(())
         }
 
         // 获取统计
@@ -480,7 +478,6 @@ mod tests {
             is_deleted: false,
             actor_id: None,
             role: None,
-        Ok(())
         };
 
         manager.add_history(entry).await?;

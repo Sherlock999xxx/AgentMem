@@ -97,20 +97,18 @@ pub mod api_simplification;
 pub mod auto_config;
 pub mod builder;
 pub mod chat;
-pub mod batch;
 pub mod history;
 pub mod memory;
 pub mod orchestrator;
-pub mod search;
 pub mod types;
 pub mod visualization;
 
 // 重新导出核心类型
 pub use api_simplification::{EnhancedError, ErrorEnhancer, FluentMemory, SmartDefaults};
-pub use batch::BatchBuilder;
 pub use builder::MemoryBuilder;
 pub use memory::Memory;
-pub use search::{SearchBuilder, SearchOptions};
+// BatchBuilder and SearchBuilder are defined in orchestrator::core but not exported
+// They can be accessed via orchestrator methods
 pub use types::{
     AddMemoryOptions, AddResult, DeleteAllOptions, GetAllOptions, MemoryEvent, MemoryScope,
     MemoryStats, RelationEvent, SearchOptions,

@@ -591,7 +591,6 @@ mod tests {
         let config = MultimodalOptimizationConfig {
             batch_size: 2,
             ..Default::default()
-        Ok(())
         };
         let cross_modal_config = CrossModalConfig::default();
         let processor = BatchProcessor::new(config, cross_modal_config);
@@ -604,5 +603,6 @@ mod tests {
 
         let results = processor.batch_align(embeddings).await?;
         assert_eq!(results.len(), 3);
+        Ok(())
     }
 }

@@ -185,6 +185,7 @@ mod tests {
         assert_eq!(history.len(), 2);
         assert_eq!(history[0].prompt, "Test 1");
         assert_eq!(history[1].prompt, "Test 2");
+        Ok(())
     }
 
     #[tokio::test]
@@ -201,7 +202,7 @@ mod tests {
             parameters: std::collections::HashMap::new(),
         };
 
-        let response = llm.call_llm(request).await?;
+        llm.call_llm(request).await?;
 
         // Test translate
         let request = LlmRequest {
@@ -226,6 +227,7 @@ mod tests {
         };
         let response = llm.call_llm(request).await?;
         assert!(response.text.contains("Analysis"));
+        Ok(())
     }
 
     #[tokio::test]

@@ -193,10 +193,11 @@ mod tests {
 
         let results = search.search("hello", 10).await?;
         assert_eq!(results.len(), 2);
+        Ok(())
     }
 
     #[tokio::test]
-    async fn test_search_by_type() {
+    async fn test_search_by_type() -> anyhow::Result<()> {
         let search = SearchCapability::new();
 
         search
@@ -214,10 +215,11 @@ mod tests {
 
         let results = search.search_by_type("message", 10).await?;
         assert_eq!(results.len(), 2);
+        Ok(())
     }
 
     #[tokio::test]
-    async fn test_search_by_user() {
+    async fn test_search_by_user() -> anyhow::Result<()> {
         let search = SearchCapability::new();
 
         search
@@ -235,10 +237,11 @@ mod tests {
 
         let results = search.search_by_user("user1", 10).await?;
         assert_eq!(results.len(), 2);
+        Ok(())
     }
 
     #[tokio::test]
-    async fn test_search_limit() {
+    async fn test_search_limit() -> anyhow::Result<()> {
         let search = SearchCapability::new();
 
         for i in 0..10 {
@@ -251,11 +254,11 @@ mod tests {
                 ))
                 .await
                 .unwrap();
-        Ok(())
         }
 
         let results = search.search("test", 5).await?;
         assert_eq!(results.len(), 5);
+        Ok(())
     }
 
     #[tokio::test]
@@ -275,5 +278,6 @@ mod tests {
 
         search.clear().await?;
         assert_eq!(search.count().await?, 0);
+        Ok(())
     }
 }

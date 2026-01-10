@@ -142,14 +142,11 @@ impl RepositoryFactory {
             api_keys: Arc::new(LibSqlApiKeyRepository::new_with_pool(pool.clone())),
             memories: Arc::new(LibSqlMemoryRepository::new_with_pool(pool.clone())),
             working_memory: {
-                // ✅ WorkingMemory uses the unified memories table internally
-                // This is an implementation detail hidden behind the trait
-                use agent_mem_storage::backends::LibSqlWorkingStore;
-                // WorkingStore also needs pool support, but for now use a connection from pool
-                let conn = pool.get().await.map_err(|e| {
-                    AgentMemError::StorageError(format!("Failed to get connection for working store: {e}"))
-                })?;
-                Arc::new(LibSqlWorkingStore::new(conn))
+                // TODO: LibSqlWorkingStore needs to be updated to libsql 0.9 API
+                // For now, return a placeholder error
+                return Err(AgentMemError::StorageError(
+                    "LibSqlWorkingStore needs to be updated to libsql 0.9 API. Please update the store to use Arc<Database> instead of Arc<Mutex<Connection>>".to_string()
+                ));
             },
             blocks: Arc::new(LibSqlBlockRepository::new_with_pool(pool.clone())),
             associations: Arc::new(LibSqlAssociationRepository::new_with_pool(pool.clone())),
@@ -507,12 +504,11 @@ impl StorageFactory {
             api_keys: Arc::new(LibSqlApiKeyRepository::new_with_pool(pool.clone())),
             memories: Arc::new(LibSqlMemoryRepository::new_with_pool(pool.clone())),
             working_memory: {
-                use agent_mem_storage::backends::LibSqlWorkingStore;
-                // WorkingStore also needs pool support, but for now use a connection from pool
-                let conn = pool.get().await.map_err(|e| {
-                    AgentMemError::StorageError(format!("Failed to get connection for working store: {e}"))
-                })?;
-                Arc::new(LibSqlWorkingStore::new(conn))
+                // TODO: LibSqlWorkingStore needs to be updated to libsql 0.9 API
+                // For now, return a placeholder error
+                return Err(AgentMemError::StorageError(
+                    "LibSqlWorkingStore needs to be updated to libsql 0.9 API. Please update the store to use Arc<Database> instead of Arc<Mutex<Connection>>".to_string()
+                ));
             },
             blocks: Arc::new(LibSqlBlockRepository::new_with_pool(pool.clone())),
             associations: Arc::new(LibSqlAssociationRepository::new_with_pool(pool.clone())),

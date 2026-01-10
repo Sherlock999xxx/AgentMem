@@ -218,7 +218,7 @@ mod tests {
 
         // After 1 day, retention is still high (~86.5%)
         let retention = curve.retention(1.0);
-        assert!((retention - (-1.0 / 7.0).exp()).abs() < 0.01);
+        assert!((retention - (-1.0_f64 / 7.0_f64).exp()).abs() < 0.01);
     }
 
     #[test]

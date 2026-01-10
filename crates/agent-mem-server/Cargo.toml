@@ -64,7 +64,7 @@ config = "0.14"
 dotenvy = "0.15"
 
 # Database (for direct SQL queries)
-libsql = "0.6"
+libsql = "0.9"
 
 # Metrics and monitoring
 metrics = "0.22"

@@ -37,7 +37,7 @@ const MAX_TAGS_COUNT: usize = 20;
 const MAX_TAG_LENGTH: usize = 50;
 
 /// Custom validator: Check for HTML/script tags in content
-fn validate_no_html(content: &str) -> Result<(), ValidationError> {
+pub fn validate_no_html(content: &str) -> Result<(), ValidationError> {
     let dangerous_patterns = [
         "<script",
         "</script",
@@ -108,7 +108,7 @@ fn validate_tag(tag: &str) -> Result<(), ValidationError> {
 #[derive(Debug, Clone, Validate, Deserialize, Serialize)]
 pub struct AddMemoryRequest {
     /// Memory content
-    #[validate(length(min = 1, max = 50000), custom = "validate_no_html")]
+    #[validate(length(min = 1, max = 50000))]
     pub content: String,
 
     /// Optional metadata
@@ -144,7 +144,7 @@ impl AddMemoryRequest {
         let payload_str = serde_json::to_string(self)
             .map_err(|e| format!("Failed to serialize payload: {}", e))?;
         validate_payload_size(&payload_str)
-            .map_err(|e| e.message.unwrap_or_else(|| "Payload validation failed".to_string()))?;
+            .map_err(|e| e.message.unwrap_or_else(|| "Payload validation failed".to_string().into()))?;
 
         // Validate struct-level validators
         self.validate()
@@ -161,7 +161,7 @@ impl AddMemoryRequest {
             }
             for (key, value) in metadata {
                 validate_metadata_key(key)
-                    .map_err(|e| e.message.unwrap_or_else(|| "Invalid metadata key".to_string()))?;
+                    .map_err(|e| e.message.unwrap_or_else(|| "Invalid metadata key".to_string().into()))?;
                 if key.len() > MAX_METADATA_KEY_LENGTH {
                     return Err(format!(
                         "Metadata key length {} exceeds maximum {}",
@@ -190,7 +190,7 @@ impl AddMemoryRequest {
             }
             for tag in tags {
                 validate_tag(tag)
-                    .map_err(|e| e.message.unwrap_or_else(|| "Invalid tag".to_string()))?;
+                    .map_err(|e| e.message.unwrap_or_else(|| "Invalid tag".to_string().into()))?;
                 if tag.len() > MAX_TAG_LENGTH {
                     return Err(format!(
                         "Tag length {} exceeds maximum {}",
@@ -213,7 +213,7 @@ pub struct UpdateMemoryRequest {
     pub id: String,
 
     /// New content
-    #[validate(length(min = 1, max = 50000), custom = "validate_no_html")]
+    #[validate(length(min = 1, max = 50000))]
     pub content: String,
 
     /// Optional metadata
@@ -239,7 +239,7 @@ impl UpdateMemoryRequest {
         let payload_str = serde_json::to_string(self)
             .map_err(|e| format!("Failed to serialize payload: {}", e))?;
         validate_payload_size(&payload_str)
-            .map_err(|e| e.message.unwrap_or_else(|| "Payload validation failed".to_string()))?;
+            .map_err(|e| e.message.unwrap_or_else(|| "Payload validation failed".to_string().into()))?;
 
         // Validate struct-level validators
         self.validate()
@@ -256,7 +256,7 @@ impl UpdateMemoryRequest {
             }
             for (key, value) in metadata {
                 validate_metadata_key(key)
-                    .map_err(|e| e.message.unwrap_or_else(|| "Invalid metadata key".to_string()))?;
+                    .map_err(|e| e.message.unwrap_or_else(|| "Invalid metadata key".to_string().into()))?;
                 if key.len() > MAX_METADATA_KEY_LENGTH {
                     return Err(format!(
                         "Metadata key length {} exceeds maximum {}",
@@ -284,7 +284,7 @@ impl UpdateMemoryRequest {
             }
             for tag in tags {
                 validate_tag(tag)
-                    .map_err(|e| e.message.unwrap_or_else(|| "Invalid tag".to_string()))?;
+                    .map_err(|e| e.message.unwrap_or_else(|| "Invalid tag".to_string().into()))?;
                 if tag.len() > MAX_TAG_LENGTH {
                     return Err(format!(
                         "Tag length {} exceeds maximum {}",
@@ -338,7 +338,7 @@ impl SearchMemoryRequest {
         let payload_str = serde_json::to_string(self)
             .map_err(|e| format!("Failed to serialize payload: {}", e))?;
         validate_payload_size(&payload_str)
-            .map_err(|e| e.message.unwrap_or_else(|| "Payload validation failed".to_string()))?;
+            .map_err(|e| e.message.unwrap_or_else(|| "Payload validation failed".to_string().into()))?;
 
         // Validate struct-level validators
         self.validate()
@@ -348,7 +348,7 @@ impl SearchMemoryRequest {
         if let Some(ref tags) = self.tags {
             for tag in tags {
                 validate_tag(tag)
-                    .map_err(|e| e.message.unwrap_or_else(|| "Invalid tag".to_string()))?;
+                    .map_err(|e| e.message.unwrap_or_else(|| "Invalid tag".to_string().into()))?;
             }
         }
 
@@ -387,7 +387,7 @@ impl BatchAddMemoriesRequest {
         let payload_str = serde_json::to_string(self)
             .map_err(|e| format!("Failed to serialize payload: {}", e))?;
         validate_payload_size(&payload_str)
-            .map_err(|e| e.message.unwrap_or_else(|| "Payload validation failed".to_string()))?;
+            .map_err(|e| e.message.unwrap_or_else(|| "Payload validation failed".to_string().into()))?;
 
         // Validate struct-level validators
         self.validate()

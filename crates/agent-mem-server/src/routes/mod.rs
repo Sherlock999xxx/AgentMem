@@ -417,7 +417,7 @@ pub async fn create_router(
         .layer(axum_middleware::from_fn(metrics_middleware))
         // Add default auth middleware (injects default AuthUser when auth is disabled)
         .layer(axum_middleware::from_fn_with_state(
-            server_config.clone(),
+            config.clone(),
             require_auth_middleware,
         ))
         // Add shared state via Extension (must be after middleware that uses them)

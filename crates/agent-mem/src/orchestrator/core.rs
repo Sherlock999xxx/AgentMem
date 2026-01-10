@@ -921,10 +921,9 @@ impl MemoryOrchestrator {
                 "default".to_string(),
                 Some("default".to_string()),
                 None,
-                None,
             )
             .await
-            .map(|_| uuid::Uuid::new_v4().to_string())
+            .and_then(|r| Ok(r.results.first().map(|e| e.id.clone()).unwrap_or_else(|| uuid::Uuid::new_v4().to_string())))
         } else {
             // 降级到快速添加
             self.add_memory_fast(
@@ -980,11 +979,10 @@ impl MemoryOrchestrator {
                 content.to_string(),
                 agent_id.to_string(),
                 user_id.map(|u| u.to_string()),
-                memory_type,
                 metadata,
             )
             .await
-            .map(|_| uuid::Uuid::new_v4().to_string())
+            .and_then(|r| Ok(r.results.first().map(|e| e.id.clone()).unwrap_or_else(|| uuid::Uuid::new_v4().to_string())))
         } else {
             // 降级到快速添加
             self.add_memory_fast(
@@ -1058,7 +1056,7 @@ impl MemoryOrchestrator {
             if metadata.is_empty() { None } else { Some(metadata) },
         )
         .await
-        .map(|r| r.memory_id)
+        .and_then(|r| Ok(r.results.first().map(|e| e.id.clone()).unwrap_or_else(|| uuid::Uuid::new_v4().to_string())))
     }
 
     /// 添加音频记忆
@@ -1085,7 +1083,7 @@ impl MemoryOrchestrator {
             if metadata.is_empty() { None } else { Some(metadata) },
         )
         .await
-        .map(|r| r.memory_id)
+        .and_then(|r| Ok(r.results.first().map(|e| e.id.clone()).unwrap_or_else(|| uuid::Uuid::new_v4().to_string())))
     }
 
     /// 添加视频记忆
@@ -1112,7 +1110,7 @@ impl MemoryOrchestrator {
             if metadata.is_empty() { None } else { Some(metadata) },
         )
         .await
-        .map(|r| r.memory_id)
+        .and_then(|r| Ok(r.results.first().map(|e| e.id.clone()).unwrap_or_else(|| uuid::Uuid::new_v4().to_string())))
     }
 
     // ========== ✅ 新 API - 统一的查询 ==========
@@ -1214,15 +1212,13 @@ impl MemoryOrchestrator {
         threshold: Option<f32>,
         time_range: Option<(i64, i64)>,
     ) -> Result<Vec<MemoryItem>> {
-        let user_id = "default".to_string();
-
         // 执行搜索
         let mut results = if enable_hybrid {
             #[cfg(feature = "postgres")]
             {
                 self.search_memories_hybrid(
                     query.to_string(),
-                    user_id,
+                    "default".to_string(),
                     limit,
                     threshold,
                     None,
@@ -1235,7 +1231,7 @@ impl MemoryOrchestrator {
                 self.search_memories(
                     query.to_string(),
                     "default".to_string(),
-                    Some(user_id),
+                    Some("default".to_string()),
                     limit,
                     None,
                 )
@@ -1245,7 +1241,7 @@ impl MemoryOrchestrator {
             self.search_memories(
                 query.to_string(),
                 "default".to_string(),
-                Some(user_id),
+                Some("default".to_string()),
                 limit,
                 None,
             )
@@ -1255,7 +1251,7 @@ impl MemoryOrchestrator {
         // 应用重排序
         if enable_rerank {
             results = self
-                .context_aware_rerank(results, query, &user_id)
+                .context_aware_rerank(results, query, "default")
                 .await?;
         }
 
@@ -1438,7 +1434,7 @@ impl<'a> SearchBuilder<'a> {
     /// 执行搜索
     pub async fn execute(self) -> Result<Vec<MemoryItem>> {
         let mut builder = self;
-        let user_id = "default".to_string();
+        let user_id = "default";
 
         // 应用记忆调度逻辑
         if builder.enable_scheduler {
@@ -1473,7 +1469,7 @@ impl<'a> SearchBuilder<'a> {
                 builder.orchestrator
                     .search_memories_hybrid(
                         builder.query.clone(),
-                        user_id,
+                        user_id.to_string(),
                         builder.limit,
                         builder.threshold,
                         if builder.filters.is_empty() { None } else { Some(builder.filters) },
@@ -1486,8 +1482,8 @@ impl<'a> SearchBuilder<'a> {
                 builder.orchestrator
                     .search_memories(
                         builder.query.clone(),
-                        "default".to_string(),
-                        Some(user_id),
+                        user_id.to_string(),
+                        Some(user_id.to_string()),
                         builder.limit,
                         None,
                     )
@@ -1497,8 +1493,8 @@ impl<'a> SearchBuilder<'a> {
             builder.orchestrator
                 .search_memories(
                     builder.query.clone(),
-                    "default".to_string(),
-                    Some(user_id),
+                    user_id.to_string(),
+                    Some(user_id.to_string()),
                     builder.limit,
                     None,
                 )
@@ -1509,7 +1505,7 @@ impl<'a> SearchBuilder<'a> {
         if builder.enable_rerank {
             results = builder
                 .orchestrator
-                .context_aware_rerank(results, &builder.query, &user_id)
+                .context_aware_rerank(results, &builder.query, user_id)
                 .await?;
         }
 
@@ -1518,11 +1514,12 @@ impl<'a> SearchBuilder<'a> {
             results = results
                 .into_iter()
                 .filter(|memory| {
-                    if let Some(timestamp) = memory.metadata.timestamp {
-                        timestamp >= start && timestamp <= end
-                    } else {
-                        false
-                    }
+                    memory
+                        .metadata
+                        .get("timestamp")
+                        .and_then(|v| v.as_i64())
+                        .map(|timestamp| timestamp >= start && timestamp <= end)
+                        .unwrap_or(false)
                 })
                 .collect();
         }
@@ -1537,7 +1534,6 @@ impl<'a> SearchBuilder<'a> {
                         // 检查 metadata 中的字段
                         memory
                             .metadata
-                            .additional
                             .get(key)
                             .map(|v| v == value)
                             .unwrap_or(false)

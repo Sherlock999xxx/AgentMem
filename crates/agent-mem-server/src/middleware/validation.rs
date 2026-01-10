@@ -17,7 +17,7 @@ use axum::{
 use serde_json::json;
 use tracing::{error, warn};
 
-use crate::routes::memory::validators::{
+use crate::routes::memory::{
     AddMemoryRequest, UpdateMemoryRequest, SearchMemoryRequest,
     DeleteMemoryRequest, BatchAddMemoriesRequest,
 };
@@ -44,18 +44,18 @@ impl std::error::Error for ValidationError {}
 /// Convert ValidationError to HTTP response
 pub fn validation_error_response(error: String) -> Response {
     warn!("Request validation failed: {}", error);
-    
-    let body = Json(json!({
+
+    let body = json!({
         "success": false,
         "error": {
             "code": "VALIDATION_ERROR",
             "message": error,
             "details": "Request validation failed. Please check your input and try again."
         }
-    }));
+    });
 
     // Convert Json to response body
-    Json(body).into_response()
+    (StatusCode::BAD_REQUEST, Json(body)).into_response()
 }
 
 /// Validate add memory request

@@ -1,6 +1,4 @@
 //! AgentMem 2.6 功能验证测试
-#![allow(dead_code)]
-#![ignore = "API migration needed - pending scheduler trait updates"]
 //!
 //! 验证 P0-P2 核心功能的实现和可用性
 //!

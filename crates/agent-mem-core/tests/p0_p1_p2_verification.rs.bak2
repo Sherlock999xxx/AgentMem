@@ -1,6 +1,4 @@
 //! AgentMem 2.6 功能验证测试
-#![allow(dead_code)]
-#![ignore = "API migration needed - pending scheduler trait updates"]
 //!
 //! 验证 P0-P2 核心功能的实现和可用性
 //!
@@ -103,7 +101,7 @@ fn verify_p2_multilevel_cache_exists() {
 async fn verify_p0_p1_p2_integration() {
     // P0: 创建 scheduler
     let time_decay = agent_mem_core::ExponentialDecayModel::new(0.1);
-    let scheduler: Arc<dyn agent_mem_traits::MemoryScheduler> = Arc::new(time_decay);
+    let scheduler = Arc::new(time_decay);
 
     // P1: 创建带有开放属性的记忆
     let memories: Vec<Memory> = (0..5)
@@ -128,9 +126,9 @@ async fn verify_p0_p1_p2_integration() {
         .collect();
 
     // P0: 使用调度器
-    
+    let config = ScheduleConfig::default();
     let result = scheduler
-        .select_memories("query", memories, 3)
+        .select_memories("query", memories, 3, &config)
         .await;
 
     assert!(result.is_ok(), "Integration should work");

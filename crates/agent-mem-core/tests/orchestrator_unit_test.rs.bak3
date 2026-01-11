@@ -227,9 +227,6 @@ async fn test_memory_integrator_config() {
         semantic_weight: 0.85,
         enable_compression: true,
         compression_threshold: 5,
-            enable_active_retrieval: false,
-            enable_context_enhancement: false,
-            enable_graph_memory: false,
     };
     assert_eq!(custom_config.relevance_threshold, 0.8);
     assert_eq!(custom_config.max_memories, 20);

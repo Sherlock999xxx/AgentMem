@@ -74,7 +74,7 @@ mod validation_tests {
         }
 
         let duration = start.elapsed();
-        let avg_time = duration / iterations;
+        let avg_time = duration.div_f64(iterations as f64);
 
         // XxHash64 should be < 1μs per hash
         assert!(

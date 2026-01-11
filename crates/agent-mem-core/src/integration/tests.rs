@@ -416,22 +416,3 @@ mod tests {
     }
 }
 
-    async fn test_error_handling() {
-        let system_manager = create_test_system_manager().await?;
-        // 不启动系统，测试错误处理
-
-        // 测试在系统未运行时的操作
-        let memory = create_test_memory(MemoryType::Core, "错误测试记忆");
-        let result = system_manager.store_memory(memory).await;
-        assert!(result.is_err());
-
-        // 测试检索不存在的记忆
-        system_manager.start().await?;
-        let non_existent_id = Uuid::new_v4();
-        let result = system_manager.retrieve_memory(non_existent_id).await;
-        assert!(result.is_ok());
-        assert!(result.unwrap().is_none());
-
-        system_manager.stop().await?;
-    }
-}

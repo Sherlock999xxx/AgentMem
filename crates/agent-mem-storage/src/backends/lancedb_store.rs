@@ -944,7 +944,6 @@ mod tests {
     use tempfile::tempdir;
 
     #[tokio::test]
-    async fn test() -> anyhow::Result<()> {
     async fn test_lancedb_initialization() {
         let dir = tempdir().unwrap();
         let path = dir.path().join("test.lance");
@@ -959,7 +958,6 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test() -> anyhow::Result<()> {
     async fn test_lancedb_stats() {
         let dir = tempdir().unwrap();
         let path = dir.path().join("test.lance");
@@ -973,7 +971,6 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test() -> anyhow::Result<()> {
     async fn test_add_vectors() {
         let dir = tempdir().unwrap();
         let path = dir.path().join("test.lance");
@@ -1016,7 +1013,6 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test() -> anyhow::Result<()> {
     async fn test_add_vectors_multiple_batches() {
         let dir = tempdir().unwrap();
         let path = dir.path().join("test.lance");
@@ -1056,7 +1052,6 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test() -> anyhow::Result<()> {
     async fn test_search_vectors() {
         let dir = tempdir().unwrap();
         let path = dir.path().join("test.lance");
@@ -1107,7 +1102,6 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test() -> anyhow::Result<()> {
     async fn test_search_with_threshold() {
         let dir = tempdir().unwrap();
         let path = dir.path().join("test.lance");
@@ -1151,7 +1145,6 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test() -> anyhow::Result<()> {
     async fn test_delete_vectors() {
         let dir = tempdir().unwrap();
         let path = dir.path().join("test.lance");
@@ -1204,7 +1197,6 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test() -> anyhow::Result<()> {
     async fn test_delete_multiple_vectors() {
         let dir = tempdir().unwrap();
         let path = dir.path().join("test.lance");
@@ -1254,7 +1246,6 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test() -> anyhow::Result<()> {
     async fn test_delete_empty_list() {
         let dir = tempdir().unwrap();
         let path = dir.path().join("test.lance");
@@ -1268,7 +1259,6 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test() -> anyhow::Result<()> {
     async fn test_update_vectors() {
         let dir = tempdir().unwrap();
         let path = dir.path().join("test.lance");
@@ -1329,7 +1319,6 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test() -> anyhow::Result<()> {
     async fn test_get_vector() {
         let dir = tempdir().unwrap();
         let path = dir.path().join("test.lance");
@@ -1374,7 +1363,6 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test() -> anyhow::Result<()> {
     async fn test_get_vector_empty_metadata() {
         let dir = tempdir().unwrap();
         let path = dir.path().join("test.lance");
@@ -1403,7 +1391,6 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test() -> anyhow::Result<()> {
     async fn test_update_empty_list() {
         let dir = tempdir().unwrap();
         let path = dir.path().join("test.lance");
@@ -1419,7 +1406,6 @@ mod tests {
     /// 性能基准测试：向量插入性能
     /// 目标：> 1000 ops/s
     #[tokio::test]
-    async fn test() -> anyhow::Result<()> {
     async fn test_insert_performance() {
         let dir = tempdir().unwrap();
         let path = dir.path().join("test.lance");
@@ -1460,7 +1446,6 @@ mod tests {
     /// 性能基准测试：向量搜索性能 (1K 向量)
     /// 目标：< 50ms (LanceDB 嵌入式数据库的合理性能目标)
     #[tokio::test]
-    async fn test() -> anyhow::Result<()> {
     #[ignore] // 性能测试，可能因环境而异，在P1阶段专门优化
     async fn test_search_performance_1k() {
         let dir = tempdir().unwrap();
@@ -1504,7 +1489,6 @@ mod tests {
     /// 性能基准测试：向量搜索性能 (10K 向量)
     /// 目标：< 50ms (文档中是 100K，但为了测试速度，这里用 10K)
     #[tokio::test]
-    async fn test() -> anyhow::Result<()> {
     #[ignore] // 默认忽略，因为需要较长时间
     async fn test_search_performance_10k() {
         let dir = tempdir().unwrap();

@@ -38,16 +38,16 @@ mod tests {
 
     #[tokio::test]
     #[ignore] // Requires Supabase credentials
-    async fn test_supabase_store_creation() {
-        let store = create_test_store().await;
+    async fn test_supabase_store_creation() -> anyhow::Result<()> {
+        let store = create_test_store().await?;
         let count = store.count_vectors().await?;
         assert_eq!(count, 0);
     }
 
     #[tokio::test]
     #[ignore] // Requires Supabase credentials
-    async fn test_add_and_get_vector() {
-        let store = create_test_store().await;
+    async fn test_add_and_get_vector() -> anyhow::Result<()> {
+        let store = create_test_store().await?;
 
         let vector_data = create_test_vector("test1", vec![1.0, 2.0, 3.0, 4.0]);
         let ids = store.add_vectors(vec![vector_data.clone()]).await?;
@@ -74,8 +74,8 @@ mod tests {
 
     #[tokio::test]
     #[ignore] // Requires Supabase credentials
-    async fn test_search_vectors() {
-        let store = create_test_store().await;
+    async fn test_search_vectors() -> anyhow::Result<()> {
+        let store = create_test_store().await?;
 
         // 添加测试向量
         let vectors = vec![
@@ -97,8 +97,8 @@ mod tests {
 
     #[tokio::test]
     #[ignore] // Requires Supabase credentials
-    async fn test_search_with_threshold() {
-        let store = create_test_store().await;
+    async fn test_search_with_threshold() -> anyhow::Result<()> {
+        let store = create_test_store().await?;
 
         // 添加测试向量
         let vectors = vec![
@@ -122,8 +122,8 @@ mod tests {
 
     #[tokio::test]
     #[ignore] // Requires Supabase credentials
-    async fn test_update_vectors() {
-        let store = create_test_store().await;
+    async fn test_update_vectors() -> anyhow::Result<()> {
+        let store = create_test_store().await?;
 
         // 添加初始向量
         let vector_data = create_test_vector("test1", vec![1.0, 2.0, 3.0, 4.0]);
@@ -140,8 +140,8 @@ mod tests {
 
     #[tokio::test]
     #[ignore] // Requires Supabase credentials
-    async fn test_delete_vectors() {
-        let store = create_test_store().await;
+    async fn test_delete_vectors() -> anyhow::Result<()> {
+        let store = create_test_store().await?;
 
         // 添加测试向量
         let vectors = vec![
@@ -169,8 +169,8 @@ mod tests {
 
     #[tokio::test]
     #[ignore] // Requires Supabase credentials
-    async fn test_clear_store() {
-        let store = create_test_store().await;
+    async fn test_clear_store() -> anyhow::Result<()> {
+        let store = create_test_store().await?;
 
         // 添加测试向量
         let vectors = vec![
@@ -188,8 +188,8 @@ mod tests {
 
     #[tokio::test]
     #[ignore] // Requires Supabase credentials
-    async fn test_dimension_validation() {
-        let store = create_test_store().await;
+    async fn test_dimension_validation() -> anyhow::Result<()> {
+        let store = create_test_store().await?;
 
         // 尝试添加错误维度的向量
         let wrong_dimension_vector = create_test_vector("test1", vec![1.0, 2.0]); // 只有2维，期望4维
@@ -204,8 +204,8 @@ mod tests {
 
     #[tokio::test]
     #[ignore] // Requires Supabase credentials
-    async fn test_empty_id_generation() {
-        let store = create_test_store().await;
+    async fn test_empty_id_generation() -> anyhow::Result<()> {
+        let store = create_test_store().await?;
 
         // 创建一个空ID的向量
         let mut metadata = HashMap::new();
@@ -226,8 +226,8 @@ mod tests {
 
     #[tokio::test]
     #[ignore] // Requires Supabase credentials
-    async fn test_batch_operations() {
-        let store = create_test_store().await;
+    async fn test_batch_operations() -> anyhow::Result<()> {
+        let store = create_test_store().await?;
 
         // 批量添加向量
         let vectors = vec![
@@ -254,8 +254,8 @@ mod tests {
 
     #[tokio::test]
     #[ignore] // Requires Supabase credentials
-    async fn test_similarity_calculation() {
-        let store = create_test_store().await;
+    async fn test_similarity_calculation() -> anyhow::Result<()> {
+        let store = create_test_store().await?;
 
         // 添加已知向量
         let vectors = vec![
@@ -285,8 +285,8 @@ mod tests {
 
     #[tokio::test]
     #[ignore] // Requires Supabase credentials
-    async fn test_postgresql_features() {
-        let store = create_test_store().await;
+    async fn test_postgresql_features() -> anyhow::Result<()> {
+        let store = create_test_store().await?;
 
         // 添加包含丰富元数据的向量，测试 PostgreSQL JSONB 功能
         let mut metadata = HashMap::new();
@@ -324,8 +324,8 @@ mod tests {
 
     #[tokio::test]
     #[ignore] // Requires Supabase credentials
-    async fn test_realtime_capabilities() {
-        let store = create_test_store().await;
+    async fn test_realtime_capabilities() -> anyhow::Result<()> {
+        let store = create_test_store().await?;
 
         // 测试实时功能的配置（在实际实现中会启用实时订阅）
         // 这里我们测试基本的 CRUD 操作，验证实时更新场景
@@ -355,8 +355,8 @@ mod tests {
 
     #[tokio::test]
     #[ignore] // Requires Supabase credentials
-    async fn test_edge_computing_simulation() {
-        let store = create_test_store().await;
+    async fn test_edge_computing_simulation() -> anyhow::Result<()> {
+        let store = create_test_store().await?;
 
         // 测试边缘计算场景：快速的本地操作
         let start_time = std::time::Instant::now();
@@ -389,8 +389,8 @@ mod tests {
 
     #[tokio::test]
     #[ignore] // Requires Supabase credentials
-    async fn test_open_source_compatibility() {
-        let store = create_test_store().await;
+    async fn test_open_source_compatibility() -> anyhow::Result<()> {
+        let store = create_test_store().await?;
 
         // 测试开源友好的特性：标准的 PostgreSQL 兼容性
         let vector_data = create_test_vector("opensource_test", vec![1.0, 1.0, 1.0, 1.0]);

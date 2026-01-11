@@ -10,7 +10,7 @@ mod tests {
     use agent_mem_traits::{VectorData, VectorStore};
     use std::collections::HashMap;
 
-    async fn create_test_store() -> AzureAISearchStore {
+    async fn create_test_store() -> anyhow::Result<AzureAISearchStore> {
         let config = AzureAISearchConfig {
             service_name: "test-search-service".to_string(),
             api_key: "test-api-key".to_string(),
@@ -18,7 +18,7 @@ mod tests {
             vector_dimension: 4,
             ..Default::default()
         };
-        AzureAISearchStore::new(config).await?
+        Ok(AzureAISearchStore::new(config).await?)
     }
 
     fn create_test_vector(id: &str, vector: Vec<f32>) -> VectorData {
@@ -36,16 +36,16 @@ mod tests {
 
     #[tokio::test]
     #[ignore] // Requires Azure AI Search credentials
-    async fn test_azure_ai_search_store_creation() {
-        let store = create_test_store().await;
+    async fn test_azure_ai_search_store_creation() -> anyhow::Result<()> {
+        let store = create_test_store().await?;
         let count = store.count_vectors().await?;
         assert_eq!(count, 0);
     }
 
     #[tokio::test]
     #[ignore] // Requires Azure AI Search credentials
-    async fn test_add_and_get_vector() {
-        let store = create_test_store().await;
+    async fn test_add_and_get_vector() -> anyhow::Result<()> {
+        let store = create_test_store().await?;
 
         let vector_data = create_test_vector("test1", vec![1.0, 2.0, 3.0, 4.0]);
         let ids = store.add_vectors(vec![vector_data.clone()]).await?;
@@ -68,8 +68,8 @@ mod tests {
 
     #[tokio::test]
     #[ignore] // Requires Azure AI Search credentials
-    async fn test_search_vectors() {
-        let store = create_test_store().await;
+    async fn test_search_vectors() -> anyhow::Result<()> {
+        let store = create_test_store().await?;
 
         // 添加测试向量
         let vectors = vec![
@@ -91,8 +91,8 @@ mod tests {
 
     #[tokio::test]
     #[ignore] // Requires Azure AI Search credentials
-    async fn test_search_with_threshold() {
-        let store = create_test_store().await;
+    async fn test_search_with_threshold() -> anyhow::Result<()> {
+        let store = create_test_store().await?;
 
         // 添加测试向量
         let vectors = vec![
@@ -116,8 +116,8 @@ mod tests {
 
     #[tokio::test]
     #[ignore] // Requires Azure AI Search credentials
-    async fn test_update_vectors() {
-        let store = create_test_store().await;
+    async fn test_update_vectors() -> anyhow::Result<()> {
+        let store = create_test_store().await?;
 
         // 添加初始向量
         let vector_data = create_test_vector("test1", vec![1.0, 2.0, 3.0, 4.0]);
@@ -134,8 +134,8 @@ mod tests {
 
     #[tokio::test]
     #[ignore] // Requires Azure AI Search credentials
-    async fn test_delete_vectors() {
-        let store = create_test_store().await;
+    async fn test_delete_vectors() -> anyhow::Result<()> {
+        let store = create_test_store().await?;
 
         // 添加测试向量
         let vectors = vec![
@@ -163,8 +163,8 @@ mod tests {
 
     #[tokio::test]
     #[ignore] // Requires Azure AI Search credentials
-    async fn test_clear_store() {
-        let store = create_test_store().await;
+    async fn test_clear_store() -> anyhow::Result<()> {
+        let store = create_test_store().await?;
 
         // 添加测试向量
         let vectors = vec![
@@ -182,8 +182,8 @@ mod tests {
 
     #[tokio::test]
     #[ignore] // Requires Azure AI Search credentials
-    async fn test_dimension_validation() {
-        let store = create_test_store().await;
+    async fn test_dimension_validation() -> anyhow::Result<()> {
+        let store = create_test_store().await?;
 
         // 尝试添加错误维度的向量
         let wrong_dimension_vector = create_test_vector("test1", vec![1.0, 2.0]); // 只有2维，期望4维
@@ -198,8 +198,8 @@ mod tests {
 
     #[tokio::test]
     #[ignore] // Requires Azure AI Search credentials
-    async fn test_empty_id_generation() {
-        let store = create_test_store().await;
+    async fn test_empty_id_generation() -> anyhow::Result<()> {
+        let store = create_test_store().await?;
 
         // 创建一个空ID的向量
         let mut metadata = HashMap::new();
@@ -220,8 +220,8 @@ mod tests {
 
     #[tokio::test]
     #[ignore] // Requires Azure AI Search credentials
-    async fn test_batch_operations() {
-        let store = create_test_store().await;
+    async fn test_batch_operations() -> anyhow::Result<()> {
+        let store = create_test_store().await?;
 
         // 批量添加向量
         let vectors = vec![
@@ -248,8 +248,8 @@ mod tests {
 
     #[tokio::test]
     #[ignore] // Requires Azure AI Search credentials
-    async fn test_similarity_calculation() {
-        let store = create_test_store().await;
+    async fn test_similarity_calculation() -> anyhow::Result<()> {
+        let store = create_test_store().await?;
 
         // 添加已知向量
         let vectors = vec![
@@ -279,8 +279,8 @@ mod tests {
 
     #[tokio::test]
     #[ignore] // Requires Azure AI Search credentials
-    async fn test_enterprise_features() {
-        let store = create_test_store().await;
+    async fn test_enterprise_features() -> anyhow::Result<()> {
+        let store = create_test_store().await?;
 
         // 添加包含丰富元数据的向量
         let mut metadata = HashMap::new();
@@ -319,8 +319,8 @@ mod tests {
 
     #[tokio::test]
     #[ignore] // Requires Azure AI Search credentials
-    async fn test_search_performance() {
-        let store = create_test_store().await;
+    async fn test_search_performance() -> anyhow::Result<()> {
+        let store = create_test_store().await?;
 
         // 添加大量向量以测试搜索性能
         let mut vectors = Vec::new();

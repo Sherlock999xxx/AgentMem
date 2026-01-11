@@ -39,16 +39,16 @@ fn main() {
     );
 
     println!("✓ Memory created successfully");
-    println!("  - Agent ID: {}", memory.agent_id());
-    println!("  - Content: {}", memory.content());
-    println!("  - Importance: {}", memory.importance());
+    println!("  - Agent ID: {:?}", memory.agent_id());
+    println!("  - Content: {}", memory.content);
+    println!("  - Importance: {:?}", memory.importance());
     println!();
 
     // 验证 Memory V4 属性系统
     println!("3. 验证 Memory V4 开放属性系统");
     println!("----------------------------------------");
 
-    let attrs = memory.attributes();
+    let attrs = &memory.attributes;
     println!("✓ Memory has {} attributes", attrs.len());
 
     // 检查系统属性
@@ -75,14 +75,11 @@ fn main() {
     let cache_config = MultiLevelCacheConfig::default();
 
     println!("✓ MultiLevelCacheConfig created");
-    if cache_config.l1.is_some() {
+    if cache_config.enable_l1 {
         println!("  - L1 cache: enabled");
     }
-    if cache_config.l2.is_some() {
+    if cache_config.enable_l2 {
         println!("  - L2 cache: enabled");
-    }
-    if cache_config.l3.is_some() {
-        println!("  - L3 cache: enabled");
     }
     println!();
 

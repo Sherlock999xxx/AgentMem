@@ -435,7 +435,7 @@ impl MemoryOrchestrator {
 
     /// 添加记忆（快速模式）- 内部方法
     #[allow(dead_code)]
-    pub(crate) async fn add_memory_fast(
+    pub async fn add_memory_fast(
         &self,
         content: String,
         agent_id: String,
@@ -456,7 +456,7 @@ impl MemoryOrchestrator {
 
     /// 添加记忆（简单模式）- 内部方法
     #[allow(dead_code)]
-    pub(crate) async fn add_memory(
+    pub async fn add_memory(
         &self,
         content: String,
         agent_id: String,
@@ -477,7 +477,7 @@ impl MemoryOrchestrator {
 
     /// 添加记忆 v2（支持 infer 参数）- 内部方法
     #[allow(dead_code)]
-    pub(crate) async fn add_memory_v2(
+    pub async fn add_memory_v2(
         &self,
         content: String,
         agent_id: String,
@@ -597,7 +597,7 @@ impl MemoryOrchestrator {
 
     /// 批量添加记忆 - 内部方法
     #[allow(dead_code)]
-    pub(crate) async fn add_memories_batch(
+    pub async fn add_memories_batch(
         &self,
         items: Vec<(
             String,

@@ -131,7 +131,6 @@ mod search_builder_tests {
 
         // 使用时间范围
         let now = chrono::Utc::now().timestamp();
-        let one_hour_ago = now - 3600;
 
         let results = mem
             .search("消息")
@@ -231,7 +230,7 @@ mod batch_builder_tests {
         ];
 
         let ids = mem
-            .add_batch(contents)
+            .add_batch(contents, agent_mem::AddMemoryOptions::default())
             .await
             .expect("批量添加应该成功");
 
@@ -245,8 +244,7 @@ mod batch_builder_tests {
         let mem = create_test_memory().await;
 
         let ids = mem
-            .add_batch(vec
-!["记忆1".to_string(), "记忆2".to_string()])
+            .add_batch(vec!["记忆1".to_string(), "记忆2".to_string()], agent_mem::AddMemoryOptions::default())
             .await
             .expect("批量添加应该成功");
 
@@ -259,13 +257,12 @@ mod batch_builder_tests {
         // 测试设置 agent_id
         let mem = create_test_memory().await;
 
-        let contents = vec
-!["测试记忆".to_string()];
+        let contents = vec!["测试记忆".to_string()];
 
         // 注意：Memory API 的 add_batch 可能不支持设置 agent_id
         // 这是 Orchestrator 层的功能
         let ids = mem
-            .add_batch(contents)
+            .add_batch(contents, agent_mem::AddMemoryOptions::default())
             .await
             .expect("批量添加应该成功");
 
@@ -281,7 +278,7 @@ mod batch_builder_tests {
         let contents: Vec<String> = (0..50).map(|i| format!("记忆{}", i)).collect();
 
         let ids = mem
-            .add_batch(contents)
+            .add_batch(contents, agent_mem::AddMemoryOptions::default())
             .await
             .expect("批量添加应该成功");
 
@@ -297,7 +294,7 @@ mod batch_builder_tests {
         let contents: Vec<String> = (0..100).map(|i| format!("并发测试记忆{}", i)).collect();
 
         let ids = mem
-            .add_batch(contents)
+            .add_batch(contents, agent_mem::AddMemoryOptions::default())
             .await
             .expect("批量添加应该成功");
 
@@ -313,7 +310,7 @@ mod batch_builder_tests {
         let contents: Vec<String> = vec![];
 
         let ids = mem
-            .add_batch(contents)
+            .add_batch(contents, agent_mem::AddMemoryOptions::default())
             .await
             .expect("空批量应该成功");
 
@@ -331,7 +328,7 @@ mod batch_builder_tests {
             .collect();
 
         let ids = mem
-            .add_batch(contents)
+            .add_batch(contents, agent_mem::AddMemoryOptions::default())
             .await
             .expect("大批量添加应该成功");
 
@@ -414,7 +411,12 @@ mod unified_api_tests {
         let add_result = mem.add("原始内容").await.expect("添加应该成功");
         let memory_id = &add_result.results[0].id;
 
-        let result = mem.update(memory_id, "更新后的内容").await;
+        // update 方法需要 HashMap<String, Value>
+        use std::collections::HashMap;
+        let mut data = HashMap::new();
+        data.insert("content".to_string(), serde_json::json!("更新后的内容"));
+
+        let result = mem.update(memory_id, data).await;
         assert!(result.is_ok(), "update() 应该成功");
 
         println!("✅ 统一 update API 测试通过");
@@ -446,7 +448,7 @@ mod unified_api_tests {
         let _ = mem.add("记忆1").await;
         let _ = mem.add("记忆2").await;
 
-        let result = mem.delete_all().await;
+        let result = mem.delete_all(agent_mem::DeleteAllOptions::default()).await;
         assert!(result.is_ok(), "delete_all() 应该成功");
 
         // 验证全部删除
@@ -520,11 +522,14 @@ mod integration_tests {
 
         // 3. 获取单条记忆
         let memory = mem.get(&id1).await.unwrap();
-        assert!(memory.memory.contains("披萨"));
+        assert!(memory.content.contains("披萨"));
         println!("✅ 步骤 3: 获取单条记忆成功");
 
         // 4. 更新记忆
-        mem.update(&id1, "用户非常喜欢吃意大利披萨").await.unwrap();
+        use std::collections::HashMap;
+        let mut data = HashMap::new();
+        data.insert("content".to_string(), serde_json::json!("用户非常喜欢吃意大利披萨"));
+        mem.update(&id1, data).await.unwrap();
         println!("✅ 步骤 4: 更新记忆成功");
 
         // 5. 获取统计
@@ -554,7 +559,7 @@ mod integration_tests {
             .map(|i| format!("批量记忆 #{} - 内容描述", i))
             .collect();
 
-        let ids = mem.add_batch(contents).await.unwrap();
+        let ids = mem.add_batch(contents, agent_mem::AddMemoryOptions::default()).await.unwrap();
         assert_eq!(ids.len(), 100);
         println!("✅ 批量添加 100 条记忆成功");
 

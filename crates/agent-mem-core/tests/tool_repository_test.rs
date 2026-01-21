@@ -6,7 +6,6 @@ mod libsql_tool_tests {
     use agent_mem_core::storage::models::{Organization, Tool};
     use agent_mem_core::storage::traits::{OrganizationRepositoryTrait, ToolRepositoryTrait};
     use serde_json::json;
-    use std::sync::Arc;
     use tempfile::TempDir;
 
     async fn setup_test_db() -> (TempDir, LibSqlToolRepository, LibSqlOrganizationRepository) {

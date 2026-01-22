@@ -4,7 +4,7 @@
 
 use std::collections::HashMap;
 use std::sync::Arc;
-use tracing::{error, info, warn};
+use tracing::{debug, error, info, warn};
 
 use agent_mem_core::manager::MemoryManager;
 use agent_mem_core::managers::CoreMemoryManager;
@@ -1285,6 +1285,7 @@ impl MemoryOrchestrator {
         // 应用时间范围过滤
         if let Some((start_ts, end_ts)) = time_range {
             use chrono::{DateTime, Utc};
+            use std::time::UNIX_EPOCH;
             let start_time = DateTime::<Utc>::from(UNIX_EPOCH + std::time::Duration::from_secs(start_ts as u64));
             let end_time = DateTime::<Utc>::from(UNIX_EPOCH + std::time::Duration::from_secs(end_ts as u64));
 

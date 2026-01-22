@@ -96,6 +96,7 @@
 pub mod api_simplification;
 pub mod auto_config;
 pub mod builder;
+pub mod cache;
 pub mod chat;
 pub mod history;
 pub mod memory;

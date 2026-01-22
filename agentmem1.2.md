@@ -784,7 +784,113 @@ pub struct CachedVectorStore {
 }
 ```
 
-### 4.2 Phase 1.5: 性能优化（2-3周）⏳ **待实施**
+### 4.2 Phase 1.5: 性能优化（2-3周）⏳ **进行中**
+
+#### 任务清单（部分完成）
+
+```
+┌────────────────────────────────────────────────────────────┐
+│           Phase 1.5: 性能优化任务清单 ⏳ 进行中              │
+├────────────────────────────────────────────────────────────┤
+│                                                            │
+│  ┌──────────────────────────────────────────────────────┐ │
+│  │ 任务 T6: 实现真批量写入 🔄 部分完成                   │ │
+│  │ ────────────────────────────────────────────────────│ │
+│  │ 状态: 🔄 分析中                                       │ │
+│  │ 说明: MemoryOperations trait 已有 batch 方法         │ │
+│  │      但实现仍是逐条插入（InMemoryOperations）       │ │
+│  │      需要 LibSQL 批量 INSERT 优化                    │ │
+│  │                                                     │ │
+│  └──────────────────────────────────────────────────────┘ │
+│                                                            │
+│  ┌──────────────────────────────────────────────────────┐ │
+│  │ 任务 T7: 实现查询嵌入缓存 ✅ 已完成                     │ │
+│  │ ────────────────────────────────────────────────────│ │
+│  │ 状态: ✅ 完成 (2026-01-22)                             │ │
+│  │ 实现: QueryEmbeddingCache LRU 缓存                     │ │
+│  │ 位置: agent-mem/src/cache/embedding_cache.rs          │ │
+│  │ 功能:                                                 │ │
+│  │  ├─ LRU 缓存（默认 1000 条）                          │ │
+│  │  ├─ 查询标准化（trim + lowercase）                    │ │
+│  │  ├─ 缓存统计（hits/misses/hit_rate）                  │ │
+│  │  └─ 预期提升: 40-60% 命中率，50-200x 加速             │ │
+│  │                                                     │ │
+│  └──────────────────────────────────────────────────────┘ │
+│                                                            │
+│  ┌──────────────────────────────────────────────────────┐ │
+│  │ 任务 T8: 集成缓存到检索流程 ⏳ 待实施                    │ │
+│  │ ────────────────────────────────────────────────────│ │
+│  │ 状态: ⏳ 待实施                                        │ │
+│  │ 需求: 在 retrieval.rs 中使用 QueryEmbeddingCache       │ │
+│  │ 位置: orchestrator/retrieval.rs:58, 207               │ │
+│  │                                                     │ │
+│  └──────────────────────────────────────────────────────┘ │
+│                                                            │
+└────────────────────────────────────────────────────────────┘
+```
+
+#### T7: 查询嵌入缓存实现 ✅
+
+```rust
+// agent-mem/src/cache/embedding_cache.rs
+
+pub struct QueryEmbeddingCache {
+    cache: Arc<RwLock<LruCache<String, CachedEmbedding>>>,
+    max_size: usize,
+    hits: Arc<RwLock<u64>>,
+    misses: Arc<RwLock<u64>>,
+}
+
+impl QueryEmbeddingCache {
+    pub async fn get_or_generate<F, Fut>(
+        &self,
+        query: &str,
+        generator: F,
+    ) -> Result<Vec<f32>>
+    where
+        F: FnOnce(String) -> Fut,
+        Fut: std::future::Future<Output = Result<Vec<f32>>>,
+    {
+        let normalized_query = Self::normalize_query(query);
+
+        // 尝试从缓存获取
+        {
+            let mut cache = self.cache.write().await;
+            if let Some(entry) = cache.get_mut(&normalized_query) {
+                entry.mark_accessed();
+                *self.hits.write().await += 1;
+                return Ok(entry.embedding.clone());
+            }
+        }
+
+        // 缓存未命中，生成嵌入
+        *self.misses.write().await += 1;
+        let embedding = generator(query.to_string()).await?;
+
+        // 存入缓存
+        let entry = CachedEmbedding::new(embedding.clone());
+        cache.put(normalized_query, entry);
+
+        Ok(embedding)
+    }
+
+    pub async fn stats(&self) -> (u64, u64, f64, usize) {
+        let hits = *self.hits.read().await;
+        let misses = *self.misses.read().await;
+        let total = hits + misses;
+        let hit_rate = if total > 0 { hits as f64 / total as f64 } else { 0.0 };
+        let size = self.cache.read().await.len();
+        (hits, misses, hit_rate, size)
+    }
+}
+```
+
+**性能预期**:
+- 缓存命中: <1ms（vs 50-200ms 嵌入生成）
+- 典型命中率: 40-60%
+- 内存占用: ~6MB（1000条 × 1536维 × 4字节）
+
+### 4.3 Phase 2.5: 三层缓存（3-4周）⏳ **待实施**
 │  │ ────────────────────────────────────────────────────│ │
 │  │ 优先级: 🟡 P1                                         │ │
 │  │ 预期提升: 2x (删除性能)                                │ │

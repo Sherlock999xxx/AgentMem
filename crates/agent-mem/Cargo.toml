@@ -43,6 +43,9 @@ tracing.workspace = true
 uuid.workspace = true
 chrono.workspace = true
 
+# 缓存
+lru = "0.12"
+
 # 数据库（用于历史记录）
 sqlx = { version = "0.7", features = ["runtime-tokio-rustls", "sqlite"] }
 

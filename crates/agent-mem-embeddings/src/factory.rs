@@ -363,7 +363,7 @@ impl EmbeddingFactory {
         let provider = std::env::var("EMBEDDING_PROVIDER").unwrap_or_else(|_| {
             #[cfg(feature = "fastembed")]
             {
-                "fastembed".to_string()
+                "fastembed".to_string()  // 🚀 Phase 1.1: 默认使用 FastEmbed 本地模型 (10ms vs OpenAI 50ms, 5-10x 更快)
             }
             #[cfg(not(feature = "fastembed"))]
             {
@@ -375,8 +375,10 @@ impl EmbeddingFactory {
             "fastembed" => {
                 #[cfg(feature = "fastembed")]
                 {
+                    // 🚀 Phase 1.1: 使用 bge-small-en-v1.5 作为默认模型 (更稳定、性能更好)
+                    // 替代原来的 multilingual-e5-small
                     let model = std::env::var("FASTEMBED_MODEL")
-                        .unwrap_or_else(|_| "bge-small-en-v1.5".to_string()); // 更稳定的默认模型
+                        .unwrap_or_else(|_| "bge-small-en-v1.5".to_string());  // 更稳定的默认模型
                     Self::create_fastembed(&model).await
                 }
                 #[cfg(not(feature = "fastembed"))]

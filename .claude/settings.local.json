@@ -3,7 +3,8 @@
     "allow": [
       "Edit",
       "Bash(cargo:*)",
-      "Bash(wc:*)"
+      "Bash(wc:*)",
+      "Bash(find:*)"
     ]
   },
   "statusLine": {

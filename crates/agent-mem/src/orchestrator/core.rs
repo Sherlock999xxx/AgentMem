@@ -42,6 +42,12 @@ pub struct OrchestratorConfig {
     pub embedder_cache_size: Option<usize>,
     /// 嵌入缓存 TTL 秒数（默认 3600 秒 = 1 小时）
     pub embedder_cache_ttl_secs: Option<u64>,
+    /// 是否启用向量缓存（Phase 2.5 优化：启用 CachedVectorStore）
+    pub enable_vector_cache: Option<bool>,
+    /// 向量缓存大小（默认 10000）
+    pub vector_cache_size: Option<usize>,
+    /// 向量缓存 TTL 秒数（默认 3600 秒 = 1 小时）
+    pub vector_cache_ttl_seconds: Option<u64>,
 }
 
 impl Default for OrchestratorConfig {
@@ -60,6 +66,9 @@ impl Default for OrchestratorConfig {
             enable_embedder_cache: Some(true), // P0 优化：默认启用嵌入缓存（2-5x 性能提升）
             embedder_cache_size: Some(1000), // 默认缓存 1000 个嵌入
             embedder_cache_ttl_secs: Some(3600), // 默认 TTL 1 小时
+            enable_vector_cache: Some(true), // Phase 2.5 优化：默认启用向量缓存
+            vector_cache_size: Some(10000), // 默认缓存 10000 个向量
+            vector_cache_ttl_seconds: Some(3600), // 默认 TTL 1 小时
         }
     }
 }

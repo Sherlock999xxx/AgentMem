@@ -751,7 +751,26 @@ impl InitializationModule {
                         "✅ 向量存储创建成功（{} 模式，维度: {}）",
                         provider, vector_dimension
                     );
-                    Ok(Some(store))
+
+                    // Phase 2.5 优化：用 CachedVectorStore 包装启用向量缓存
+                    if config.enable_vector_cache.unwrap_or(false) {
+                        use agent_mem_storage::cache::{CacheConfig, CachedVectorStore};
+                        let cache_config = CacheConfig {
+                            max_entries: config.vector_cache_size.unwrap_or(10000),
+                            default_ttl_seconds: config.vector_cache_ttl_seconds,
+                            enable_lru: true,
+                            ..Default::default()
+                        };
+
+                        info!("Phase 2.5: 启用向量缓存（max_entries={}, ttl={:?})",
+                              cache_config.max_entries, cache_config.default_ttl_seconds);
+
+                        let cached_store = CachedVectorStore::new(store, cache_config);
+                        Ok(Some(Arc::new(cached_store)
+                            as Arc<dyn agent_mem_traits::VectorStore + Send + Sync>))
+                    } else {
+                        Ok(Some(store))
+                    }
                 }
                 Err(e) => {
                     warn!("创建向量存储失败: {}，降级到内存存储", e);
@@ -763,8 +782,28 @@ impl InitializationModule {
                     match MemoryVectorStore::new(fallback_config).await {
                         Ok(fallback_store) => {
                             info!("✅ 降级到内存向量存储成功（维度: {}）", vector_dimension);
-                            Ok(Some(Arc::new(fallback_store)
-                                as Arc<dyn agent_mem_traits::VectorStore + Send + Sync>))
+
+                            // Phase 2.5 优化：即使降级也启用缓存
+                            if config.enable_vector_cache.unwrap_or(false) {
+                                use agent_mem_storage::cache::{CacheConfig, CachedVectorStore};
+                                let cache_config = CacheConfig {
+                                    max_entries: config.vector_cache_size.unwrap_or(10000),
+                                    default_ttl_seconds: config.vector_cache_ttl_seconds,
+                                    enable_lru: true,
+                                    ..Default::default()
+                                };
+
+                                info!("Phase 2.5: 启用向量缓存（降级模式）");
+                                let cached_store = CachedVectorStore::new(
+                                    Arc::new(fallback_store) as Arc<dyn agent_mem_traits::VectorStore + Send + Sync>,
+                                    cache_config
+                                );
+                                Ok(Some(Arc::new(cached_store)
+                                    as Arc<dyn agent_mem_traits::VectorStore + Send + Sync>))
+                            } else {
+                                Ok(Some(Arc::new(fallback_store)
+                                    as Arc<dyn agent_mem_traits::VectorStore + Send + Sync>))
+                            }
                         }
                         Err(e2) => {
                             warn!("创建内存向量存储也失败: {}, 向量存储功能将不可用", e2);
@@ -787,9 +826,29 @@ impl InitializationModule {
                         "✅ 向量存储创建成功（Memory 模式，维度: {}）",
                         vector_dimension
                     );
-                    Ok(Some(
-                        Arc::new(store) as Arc<dyn agent_mem_traits::VectorStore + Send + Sync>
-                    ))
+
+                    // Phase 2.5 优化：启用向量缓存
+                    if config.enable_vector_cache.unwrap_or(false) {
+                        use agent_mem_storage::cache::{CacheConfig, CachedVectorStore};
+                        let cache_config = CacheConfig {
+                            max_entries: config.vector_cache_size.unwrap_or(10000),
+                            default_ttl_seconds: config.vector_cache_ttl_seconds,
+                            enable_lru: true,
+                            ..Default::default()
+                        };
+
+                        info!("Phase 2.5: 启用向量缓存（Memory 模式）");
+                        let cached_store = CachedVectorStore::new(
+                            Arc::new(store) as Arc<dyn agent_mem_traits::VectorStore + Send + Sync>,
+                            cache_config
+                        );
+                        Ok(Some(Arc::new(cached_store)
+                            as Arc<dyn agent_mem_traits::VectorStore + Send + Sync>))
+                    } else {
+                        Ok(Some(
+                            Arc::new(store) as Arc<dyn agent_mem_traits::VectorStore + Send + Sync>
+                        ))
+                    }
                 }
                 Err(e) => {
                     warn!("创建向量存储失败: {}, 向量存储功能将不可用", e);

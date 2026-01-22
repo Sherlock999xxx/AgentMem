@@ -39,6 +39,20 @@ pub async fn check_memory_permission(
     if let Some(user) = user_ctx {
         let result = RbacChecker::check_resource_action(&user.roles, Resource::Memory, action);
 
+        // ✅ 从 request 中提取 IP 和 User-Agent
+        let client_ip = req
+            .headers()
+            .get("x-forwarded-for")
+            .or_else(|| req.headers().get("x-real-ip"))
+            .and_then(|v| v.to_str().ok())
+            .map(|s| s.to_string());
+
+        let user_agent = req
+            .headers()
+            .get("user-agent")
+            .and_then(|v| v.to_str().ok())
+            .map(|s| s.to_string());
+
         // 记录审计日志
         let audit_log = AuditLogEntry::new(
             user.user_id.clone(),
@@ -47,8 +61,8 @@ pub async fn check_memory_permission(
             None,
             result.is_ok(),
             user.roles.clone(),
-            None, // TODO: 从request中提取IP
-            None, // TODO: 从request中提取User-Agent
+            client_ip,
+            user_agent,
         );
         audit_log.log();
 

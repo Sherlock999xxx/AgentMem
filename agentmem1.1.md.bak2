@@ -533,7 +533,7 @@ pub struct SimpleMemory {
 
 **发现的问题**:
 1. **备份文件**: 39 个备份文件 (.bak2, .bak3, .bak10 等) ✅ 已清理
-2. **TODO 注释**: 100 个 TODO/FIXME 注释 ⏳ 待处理
+2. **TODO 注释**: 102 个 TODO/FIXME 注释 ⏳ 待处理
 
 **步骤**:
 1. ✅ 删除所有备份文件 (.bak2, .bak3, .bak10 等) - **已完成**

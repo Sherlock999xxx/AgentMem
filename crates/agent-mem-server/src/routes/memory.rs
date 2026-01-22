@@ -278,7 +278,7 @@ impl MemoryManager {
         let db_memory = agent_mem_core::storage::models::DbMemory {
             id: memory_id.clone(),
             organization_id,                // 使用Agent的organization_id或默认值
-            user_id: "default".to_string(), // 使用默认user (TODO: 应该从auth获取实际user)
+            user_id: user_id_val.clone(),     // ✅ 修复：使用实际的 user_id 而非硬编码
             agent_id: effective_agent_id.clone(),
             content,
             hash: Some(content_hash),

@@ -1282,8 +1282,30 @@ impl MemoryOrchestrator {
                 .await?;
         }
 
-        // TODO: 应用时间范围过滤
-        // if let Some((start, end)) = time_range { ... }
+        // 应用时间范围过滤
+        if let Some((start_ts, end_ts)) = time_range {
+            use chrono::{DateTime, Utc};
+            let start_time = DateTime::<Utc>::from(UNIX_EPOCH + std::time::Duration::from_secs(start_ts as u64));
+            let end_time = DateTime::<Utc>::from(UNIX_EPOCH + std::time::Duration::from_secs(end_ts as u64));
+
+            let before_count = results.len();
+            results = results
+                .into_iter()
+                .filter(|memory| {
+                    // 检查记忆的创建时间是否在时间范围内
+                    let created_at = memory.created_at;
+                    created_at >= start_time && created_at <= end_time
+                })
+                .collect();
+
+            debug!(
+                "✅ 时间范围过滤: {} ~ {}, 结果数: {} -> {}",
+                start_time.format("%Y-%m-%d %H:%M"),
+                end_time.format("%Y-%m-%d %H:%M"),
+                before_count,
+                results.len()
+            );
+        }
 
         Ok(results)
     }

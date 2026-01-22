@@ -1,4 +1,11 @@
 {
+  "permissions": {
+    "allow": [
+      "Edit",
+      "Bash(cargo:*)",
+      "Bash(wc:*)"
+    ]
+  },
   "statusLine": {
     "type": "command",
     "command": "~/.claude/ccline/ccline",
@@ -6,11 +13,5 @@
   },
   "enabledPlugins": {
     "rust-analyzer-lsp@claude-plugins-official": true
-  },
-  "permissions": {
-    "allow": [
-      "Edit",
-      "Bash(cargo:*)"
-    ]
   }
 }

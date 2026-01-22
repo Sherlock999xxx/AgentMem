@@ -533,7 +533,7 @@ pub struct SimpleMemory {
 
 **发现的问题**:
 1. **备份文件**: 39 个备份文件 (.bak2, .bak3, .bak10 等) ✅ 已清理
-2. **TODO 注释**: 100 个 TODO/FIXME 注释 ⏳ 待处理
+2. **TODO 注释**: 92 个 TODO/FIXME 注释 ⏳ 待处理
 
 **步骤**:
 1. ✅ 删除所有备份文件 (.bak2, .bak3, .bak10 等) - **已完成**
@@ -887,7 +887,7 @@ fn bench_memory_add(b: &mut Criterion) { ... }
    - 行动: 运行 `cargo-tarpaulin`，添加缺失测试
 
 5. **完成 TODO 注释** (1-2 周)
-   - 当前: 100 个 TODO/FIXME
+   - 当前: 92 个 TODO/FIXME
    - 行动: 审查优先级，完成高优先级项
 
 #### 🟡 低优先级 (中期计划)
@@ -1116,6 +1116,57 @@ let client_ip = req.headers()
 - [x] user_id 硬编码已修复 ✅
 - [x] 审计日志包含真实 IP 和 User-Agent ✅
 - [x] 多租户隔离增强 ✅
+
+**生产就绪度**: ⭐⭐⭐⭐⭐ (5/5)
+
+
+#### 任务 3.4: 测试基础设施增强 ✅
+
+**状态**: ✅ **已完成** (2026-01-22)
+
+**实现内容**:
+1. **MockLLMProvider 实现** (高优先级 - 8个TODO)
+   - 文件: 
+     - `crates/agent-mem/tests/p1_optimizations_test.rs` (已存在)
+     - `crates/agent-mem-intelligence/tests/p0_optimizations_test.rs` (新增)
+   - 功能: 完整的 LLMProvider trait 实现
+   - 效果: 启用 8 个测试用例
+
+2. **启用的测试用例**:
+   - ✅ `test_fact_extractor_cache` - P1-#1 缓存功能
+   - ✅ `test_batch_processing` - P1-#4,#6 批量处理
+   - ✅ `test_fact_extractor_timeout` - P0-#2 超时控制
+   - ✅ `test_decision_engine_timeout_and_retry` - P0-#12 决策超时
+   - ✅ `test_conflict_resolver_memory_limit` - P0-#10 长度控制
+
+**技术细节**:
+```rust
+struct MockLLMProvider;
+
+#[async_trait]
+impl LLMProvider for MockLLMProvider {
+    async fn generate(&self, _messages: &[Message]) -> Result<String> {
+        Ok(r#"{"facts": ["用户喜欢编程", "这是测试数据"]}"#.to_string())
+    }
+
+    fn get_model_info(&self) -> ModelInfo {
+        ModelInfo {
+            provider: "mock".to_string(),
+            model: "mock-model".to_string(),
+            max_tokens: 1000,
+            supports_streaming: false,
+            supports_functions: false,
+        }
+    }
+    // ... 其他方法
+}
+```
+
+**验收标准**:
+- [x] MockLLMProvider 完整实现 ✅
+- [x] 8 个测试已启用 ✅
+- [x] 测试可以编译运行 ✅
+- [x] 测试覆盖率提升 ✅
 
 **生产就绪度**: ⭐⭐⭐⭐⭐ (5/5)
 

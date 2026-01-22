@@ -57,6 +57,10 @@ agent-mem-storage = { path = "../agent-mem-storage", features = ["memory"] }
 agent-mem = { path = "../agent-mem" }
 criterion.workspace = true
 
+[[example]]
+name = "phase2_demo"
+path = "examples/phase2_demo.rs"
+
 [features]
 default = ["libsql"]
 persistence = ["postgres", "redis-cache"]

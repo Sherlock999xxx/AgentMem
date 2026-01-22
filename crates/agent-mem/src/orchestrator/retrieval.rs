@@ -54,9 +54,23 @@ impl RetrievalModule {
             UtilsModule::calculate_dynamic_threshold(&processed_query, threshold);
         debug!("动态阈值: {:?} -> {}", threshold, dynamic_threshold);
 
-        // Step 3: 生成查询向量
+        // Step 3: 生成查询向量（Phase 1.5 优化：使用缓存）
         let query_vector = if let Some(embedder) = &orchestrator.embedder {
-            UtilsModule::generate_query_embedding(&processed_query, embedder.as_ref()).await?
+            // 尝试使用查询嵌入缓存
+            if let Some(cache) = &orchestrator.query_embedding_cache {
+                let processed_query_clone = processed_query.clone();
+                let embedder_clone = embedder.clone();
+                cache.get_or_generate(
+                    &processed_query_clone,
+                    move |query| async move {
+                        // 缓存未命中，生成嵌入
+                        UtilsModule::generate_query_embedding(&query, embedder_clone.as_ref()).await
+                    }
+                ).await?
+            } else {
+                // 缓存未启用，直接生成
+                UtilsModule::generate_query_embedding(&processed_query, embedder.as_ref()).await?
+            }
         } else {
             return Err(agent_mem_traits::AgentMemError::ConfigError(
                 "Embedder not configured. Cannot perform vector search without embedder."
@@ -202,9 +216,23 @@ impl RetrievalModule {
         // 动态阈值调整
         let dynamic_threshold = Some(UtilsModule::calculate_dynamic_threshold(&query, threshold));
 
-        // 1. 生成查询向量
+        // 1. 生成查询向量（Phase 1.5 优化：使用缓存）
         let query_vector = if let Some(embedder) = &orchestrator.embedder {
-            UtilsModule::generate_query_embedding(&query, embedder.as_ref()).await?
+            // 尝试使用查询嵌入缓存
+            if let Some(cache) = &orchestrator.query_embedding_cache {
+                let query_clone = query.clone();
+                let embedder_clone = embedder.clone();
+                cache.get_or_generate(
+                    &query_clone,
+                    move |q| async move {
+                        // 缓存未命中，生成嵌入
+                        UtilsModule::generate_query_embedding(&q, embedder_clone.as_ref()).await
+                    }
+                ).await?
+            } else {
+                // 缓存未启用，直接生成
+                UtilsModule::generate_query_embedding(&query, embedder.as_ref()).await?
+            }
         } else {
             return Err(agent_mem_traits::AgentMemError::ConfigError(
                 "Embedder not configured".to_string(),

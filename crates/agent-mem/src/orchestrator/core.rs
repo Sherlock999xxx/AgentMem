@@ -158,6 +158,8 @@ pub struct MemoryOrchestrator {
     pub(crate) embedder: Option<Arc<dyn agent_mem_traits::Embedder + Send + Sync>>,
     /// CachedEmbedder 引用，用于缓存管理（如果启用了缓存）
     pub(crate) cached_embedder: Option<Arc<agent_mem_embeddings::CachedEmbedder>>,
+    /// QueryEmbeddingCache，用于缓存查询嵌入向量（Phase 1.5 优化）
+    pub(crate) query_embedding_cache: Option<crate::cache::QueryEmbeddingCache>,
 
     // ========== LLM 缓存 ==========
     pub(crate) facts_cache:
@@ -442,6 +444,15 @@ impl MemoryOrchestrator {
                 } else {
                     None
                 }
+            },
+
+            // Phase 1.5: 查询嵌入缓存（新增）
+            query_embedding_cache: if config.enable_embedder_cache.unwrap_or(false) {
+                use crate::cache::QueryEmbeddingCache;
+                let cache_size = config.embedder_cache_size.unwrap_or(1000);
+                Some(QueryEmbeddingCache::new(cache_size))
+            } else {
+                None
             },
 
             // Phase 2: LLM 缓存

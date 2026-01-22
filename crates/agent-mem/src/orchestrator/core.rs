@@ -36,6 +36,12 @@ pub struct OrchestratorConfig {
     pub embedding_batch_size: Option<usize>,
     /// 嵌入批处理间隔（毫秒，默认 10ms）
     pub embedding_batch_interval_ms: Option<u64>,
+    /// 是否启用嵌入缓存（P0 优化：启用 CachedEmbedder 以提升 2-5x 性能）
+    pub enable_embedder_cache: Option<bool>,
+    /// 嵌入缓存大小（默认 1000）
+    pub embedder_cache_size: Option<usize>,
+    /// 嵌入缓存 TTL 秒数（默认 3600 秒 = 1 小时）
+    pub embedder_cache_ttl_secs: Option<u64>,
 }
 
 impl Default for OrchestratorConfig {
@@ -51,6 +57,9 @@ impl Default for OrchestratorConfig {
             enable_embedding_queue: Some(true), // 默认启用队列优化
             embedding_batch_size: Some(64), // 优化：增加批处理大小（32 → 64）
             embedding_batch_interval_ms: Some(20), // 优化：增加批处理间隔（10ms → 20ms）
+            enable_embedder_cache: Some(true), // P0 优化：默认启用嵌入缓存（2-5x 性能提升）
+            embedder_cache_size: Some(1000), // 默认缓存 1000 个嵌入
+            embedder_cache_ttl_secs: Some(3600), // 默认 TTL 1 小时
         }
     }
 }

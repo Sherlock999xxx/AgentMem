@@ -407,7 +407,7 @@ impl InitializationModule {
                         Ok(embedder) => {
                             let dim = embedder.dimension();
                             info!("成功创建 FastEmbed Embedder ({}, {}维)", model, dim);
-                            
+
                             // P1 优化：如果启用嵌入队列，包装为队列化嵌入器
                             let embedder = if config.enable_embedding_queue.unwrap_or(true) {
                                 use agent_mem_embeddings::providers::QueuedEmbedder;
@@ -424,7 +424,26 @@ impl InitializationModule {
                             } else {
                                 embedder
                             };
-                            
+
+                            // P0 优化：如果启用嵌入缓存，包装为 CachedEmbedder（预期 2-5x 性能提升）
+                            let embedder = if config.enable_embedder_cache.unwrap_or(true) {
+                                use agent_mem_embeddings::cached_embedder::CachedEmbedder;
+                                use agent_mem_intelligence::caching::CacheConfig;
+                                let cache_size = config.embedder_cache_size.unwrap_or(1000);
+                                let cache_ttl = config.embedder_cache_ttl_secs.unwrap_or(3600);
+                                let cache_config = CacheConfig {
+                                    size: cache_size,
+                                    ttl_secs: cache_ttl,
+                                    enabled: true,
+                                };
+                                info!("✅ 嵌入缓存已启用（缓存大小: {}, TTL: {}秒）",
+                                    cache_size, cache_ttl);
+                                let cached = CachedEmbedder::new(embedder, cache_config);
+                                Arc::new(cached) as Arc<dyn Embedder + Send + Sync>
+                            } else {
+                                embedder
+                            };
+
                             Ok(Some(embedder))
                         }
                         Err(e) => {
@@ -467,7 +486,26 @@ impl InitializationModule {
                         } else {
                             embedder
                         };
-                        
+
+                        // P0 优化：如果启用嵌入缓存，包装为 CachedEmbedder（预期 2-5x 性能提升）
+                        let embedder = if config.enable_embedder_cache.unwrap_or(true) {
+                            use agent_mem_embeddings::cached_embedder::CachedEmbedder;
+                            use agent_mem_intelligence::caching::CacheConfig;
+                            let cache_size = config.embedder_cache_size.unwrap_or(1000);
+                            let cache_ttl = config.embedder_cache_ttl_secs.unwrap_or(3600);
+                            let cache_config = CacheConfig {
+                                size: cache_size,
+                                ttl_secs: cache_ttl,
+                                enabled: true,
+                            };
+                            info!("✅ 嵌入缓存已启用（缓存大小: {}, TTL: {}秒）",
+                                cache_size, cache_ttl);
+                            let cached = CachedEmbedder::new(embedder, cache_config);
+                            Arc::new(cached) as Arc<dyn Embedder + Send + Sync>
+                        } else {
+                            embedder
+                        };
+
                         info!("成功创建 OpenAI Embedder (text-embedding-ada-002, 1536维)");
                         Ok(Some(embedder))
                     }

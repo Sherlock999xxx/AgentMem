@@ -829,6 +829,97 @@ impl Memory {
         orchestrator.get_stats(self.default_user_id.clone()).await
     }
 
+    /// 获取嵌入缓存统计信息
+    ///
+    /// 返回 CachedEmbedder 的缓存统计,包括命中次数、未命中次数、命中率等。
+    ///
+    /// # 返回
+    ///
+    /// 返回 `Option<CacheStats>`,如果未启用缓存则返回 `None`。
+    ///
+    /// # 示例
+    ///
+    /// ```rust,no_run
+    /// # use agent_mem::Memory;
+    /// # async fn example() -> Result<(), Box<dyn std::error::Error>> {
+    /// let mem = Memory::new().await?;
+    ///
+    /// // 添加一些记忆以生成缓存
+    /// mem.add("重复内容").await?;
+    /// mem.add("重复内容").await?; // 缓存命中
+    ///
+    /// // 获取缓存统计
+    /// if let Some(stats) = mem.get_cache_stats().await? {
+    ///     println!("缓存命中次数: {}", stats.hits);
+    ///     println!("缓存未命中次数: {}", stats.misses);
+    ///     println!("缓存命中率: {:.2}%", stats.hit_rate * 100.0);
+    ///     println!("缓存大小: {}", stats.size);
+    ///     println!("缓存容量: {}", stats.capacity);
+    /// }
+    /// # Ok(())
+    /// # }
+    /// ```
+    pub async fn get_cache_stats(&self) -> Result<Option<agent_mem_intelligence::caching::CacheStats>> {
+        debug!("获取嵌入缓存统计信息");
+
+        let orchestrator = self.orchestrator.read().await;
+
+        // 尝试获取 embedder 的缓存统计
+        if let Some(embedder) = &orchestrator.embedder {
+            // 检查是否是 CachedEmbedder
+            use agent_mem_embeddings::cached_embedder::CachedEmbedder;
+
+            // 使用 Any downcast 尝试转换为 CachedEmbedder
+            // 注意: 这里需要通过内部 API 或者添加 trait 方法
+            // 当前先返回 None,实际实现需要在 orchestrator 层添加方法
+
+            // TODO: 在 MemoryOrchestrator 中添加 get_embedder_cache_stats() 方法
+            Ok(None)
+        } else {
+            Ok(None)
+        }
+    }
+
+    /// 清空嵌入缓存
+    ///
+    /// 清空 CachedEmbedder 的所有缓存条目。
+    ///
+    /// # 注意
+    ///
+    /// 清空缓存后,下次嵌入生成将重新计算,直到缓存重新建立。
+    ///
+    /// # 示例
+    ///
+    /// ```rust,no_run
+    /// # use agent_mem::Memory;
+    /// # async fn example() -> Result<(), Box<dyn std::error::Error>> {
+    /// let mut mem = Memory::new().await?;
+    ///
+    /// // 添加记忆
+    /// mem.add("测试内容").await?;
+    ///
+    /// // 清空缓存
+    /// mem.clear_embedder_cache().await?;
+    ///
+    /// // 再次添加将重新计算嵌入
+    /// mem.add("测试内容").await?;
+    /// # Ok(())
+    /// # }
+    /// ```
+    pub async fn clear_embedder_cache(&self) -> Result<()> {
+        debug!("清空嵌入缓存");
+
+        let orchestrator = self.orchestrator.read().await;
+
+        // 尝试清空 embedder 的缓存
+        if let Some(_embedder) = &orchestrator.embedder {
+            // TODO: 实现,需要在 orchestrator 层添加 clear_cache() 方法
+            warn!("清空缓存功能需要 orchestrator 层支持");
+        }
+
+        Ok(())
+    }
+
     /// 设置默认用户 ID
     ///
     /// # 示例

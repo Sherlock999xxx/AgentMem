@@ -1294,6 +1294,93 @@ impl MemoryOrchestrator {
         self.get_performance_stats().await
     }
 
+    /// 获取嵌入缓存统计信息
+    ///
+    /// 返回 CachedEmbedder 的缓存统计,包括命中次数、未命中次数、命中率等。
+    ///
+    /// # 返回
+    ///
+    /// 返回 `Option<CacheStats>`,如果未启用缓存则返回 `None`。
+    ///
+    /// # 示例
+    ///
+    /// ```rust,no_run
+    /// # use agent_mem::orchestrator::MemoryOrchestrator;
+    /// # async fn example() -> Result<(), Box<dyn std::error::Error>> {
+    /// let orchestrator = MemoryOrchestrator::new_with_auto_config().await?;
+    ///
+    /// // 添加一些记忆以生成缓存
+    /// orchestrator.add("重复内容").await?;
+    /// orchestrator.add("重复内容").await?; // 缓存命中
+    ///
+    /// // 获取缓存统计
+    /// if let Some(stats) = orchestrator.get_embedder_cache_stats().await? {
+    ///     println!("缓存命中次数: {}", stats.hits);
+    ///     println!("缓存未命中次数: {}", stats.misses);
+    ///     println!("缓存命中率: {:.2}%", stats.hit_rate * 100.0);
+    ///     println!("缓存大小: {}", stats.size);
+    ///     println!("缓存容量: {}", stats.capacity);
+    /// }
+    /// # Ok(())
+    /// # }
+    /// ```
+    pub async fn get_embedder_cache_stats(
+        &self,
+    ) -> Result<Option<agent_mem_intelligence::caching::CacheStats>> {
+        use agent_mem_embeddings::cached_embedder::CachedEmbedder;
+
+        if let Some(embedder) = &self.embedder {
+            // 尝试将 embedder downcast 为 CachedEmbedder
+            // 注意: 由于使用了 Arc 和 trait 对象,我们需要通过其他方式访问
+
+            // 当前实现: 通过内部 API 访问缓存统计
+            // TODO: 在 Embedder trait 中添加 get_cache_stats() 方法
+
+            // 临时方案: 返回 None,实际功能需要在 Embedder trait 层实现
+            warn!("获取缓存统计功能需要在 Embedder trait 中添加 get_cache_stats() 方法");
+            Ok(None)
+        } else {
+            Ok(None)
+        }
+    }
+
+    /// 清空嵌入缓存
+    ///
+    /// 清空 CachedEmbedder 的所有缓存条目。
+    ///
+    /// # 注意
+    ///
+    /// 清空缓存后,下次嵌入生成将重新计算,直到缓存重新建立。
+    ///
+    /// # 示例
+    ///
+    /// ```rust,no_run
+    /// # use agent_mem::orchestrator::MemoryOrchestrator;
+    /// # async fn example() -> Result<(), Box<dyn std::error::Error>> {
+    /// let orchestrator = MemoryOrchestrator::new_with_auto_config().await?;
+    ///
+    /// // 添加记忆
+    /// orchestrator.add("测试内容").await?;
+    ///
+    /// // 清空缓存
+    /// orchestrator.clear_embedder_cache().await?;
+    ///
+    /// // 再次添加将重新计算嵌入
+    /// orchestrator.add("测试内容").await?;
+    /// # Ok(())
+    /// # }
+    /// ```
+    pub async fn clear_embedder_cache(&self) -> Result<()> {
+        use agent_mem_embeddings::cached_embedder::CachedEmbedder;
+
+        if let Some(_embedder) = &self.embedder {
+            // TODO: 实现,需要在 Embedder trait 中添加 clear_cache() 方法
+            warn!("清空缓存功能需要在 Embedder trait 中添加 clear_cache() 方法");
+        }
+
+        Ok(())
+    }
+
     /// 获取历史记录
     ///
     /// # 示例

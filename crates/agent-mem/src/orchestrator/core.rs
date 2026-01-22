@@ -156,6 +156,8 @@ pub struct MemoryOrchestrator {
     // ========== 辅助组件 ==========
     pub(crate) llm_provider: Option<Arc<dyn agent_mem_llm::LLMProvider + Send + Sync>>,
     pub(crate) embedder: Option<Arc<dyn agent_mem_traits::Embedder + Send + Sync>>,
+    /// CachedEmbedder 引用，用于缓存管理（如果启用了缓存）
+    pub(crate) cached_embedder: Option<Arc<agent_mem_embeddings::CachedEmbedder>>,
 
     // ========== LLM 缓存 ==========
     pub(crate) facts_cache:
@@ -424,7 +426,23 @@ impl MemoryOrchestrator {
 
             // 辅助组件
             llm_provider: intelligence_components.llm_provider,
-            embedder,
+            embedder: embedder.clone(),
+
+            // 尝试提取 CachedEmbedder 引用（如果启用了缓存）
+            cached_embedder: {
+                use agent_mem_embeddings::CachedEmbedder;
+                if let Some(emb) = &embedder {
+                    // 尝试通过内部方法获取 CachedEmbedder 引用
+                    // 注意：这里使用一个技巧 - 我们知道启用缓存时会包装为 CachedEmbedder
+                    // 由于 Rust 的 trait 对象限制，我们需要在初始化时保存引用
+                    // 当前方案：如果 embedder 启用了缓存，我们假设它是 CachedEmbedder
+                    // 并在创建 embedder 时同时保存引用（需要修改 create_embedder）
+                    // 暂时设置为 None，待实现
+                    None
+                } else {
+                    None
+                }
+            },
 
             // Phase 2: LLM 缓存
             facts_cache,

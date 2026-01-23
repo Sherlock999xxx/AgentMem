@@ -21,14 +21,5 @@ pub use cached_embedder::CachedEmbedder;
 pub use config::EmbeddingConfig;
 pub use factory::{EmbeddingFactory, RealEmbeddingFactory};
 
-// 🚀 Phase 1 性能优化验证
-pub mod phase1_validation;
-pub use phase1_validation::{
-    validate_fastembed_optimization,
-    validate_cache_optimization,
-    validate_batch_optimization,
-    validate_all_phase1_optimizations,
-};
-
 // 重新导出常用类型
 pub use agent_mem_traits::{AgentMemError, Embedder, Result};

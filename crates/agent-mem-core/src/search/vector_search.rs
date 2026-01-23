@@ -235,7 +235,9 @@ impl VectorSearchEngine {
         // 🚀 Phase 2.3: 使用完整向量哈希 (而非只取前10个元素)
         // 这可以显著提升缓存命中率,减少重复计算
         // 性能影响: 哈希时间增加 <1ms,但缓存命中节省 40-50ms
-        query_vector.hash(&mut hasher);
+        for &val in query_vector.iter() {
+            val.to_bits().hash(&mut hasher);
+        }
 
         query.limit.hash(&mut hasher);
         if let Some(threshold) = query.threshold {

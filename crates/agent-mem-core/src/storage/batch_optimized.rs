@@ -350,9 +350,14 @@ impl OptimizedBatchOperations {
             &T,
         ) -> sqlx::query::Query<'_, sqlx::Postgres, sqlx::postgres::PgArguments>,
     {
+        // ✅ Security: Validate table name and columns to prevent SQL injection
+        crate::security::validate_table_name(table_name)?;
+        crate::security::validate_column_names(columns)?;
+
         let column_list = columns.join(", ");
         let num_columns = columns.len();
 
+        // ✅ Safe to use now (validated above)
         let mut query = format!("INSERT INTO {} ({}) VALUES ", table_name, column_list);
 
         let mut values = Vec::new();

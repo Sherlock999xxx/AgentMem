@@ -353,7 +353,6 @@ impl OptimizedBatchOperations {
         // ✅ Security: Validate table name and columns to prevent SQL injection
         crate::security::validate_table_name(table_name)?;
         crate::security::validate_column_names(columns)?;
-
         let column_list = columns.join(", ");
         let num_columns = columns.len();
 
@@ -393,6 +392,9 @@ impl OptimizedBatchOperations {
             return Ok(0);
         }
 
+        // ✅ Security: Validate table name to prevent SQL injection
+        crate::security::validate_table_name(table)?;
+
         let pool = self.pool.clone();
         let table = table.to_string();
         let ids = ids.to_vec();
@@ -402,6 +404,7 @@ impl OptimizedBatchOperations {
             let table = table.clone();
             let ids = ids.clone();
             async move {
+                // ✅ Safe to use now (validated above)
                 let query = format!(
                     "UPDATE {} SET is_deleted = TRUE, updated_at = $1 WHERE id = ANY($2) AND is_deleted = FALSE",
                     table

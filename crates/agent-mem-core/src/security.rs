@@ -14,6 +14,12 @@ use lazy_static::lazy_static;
 use regex::Regex;
 use std::collections::HashSet;
 
+/// Maximum table name length (PostgreSQL limit is 63, we use 64 for safety)
+const MAX_TABLE_NAME_LENGTH: usize = 64;
+
+/// Maximum column name length
+const MAX_COLUMN_NAME_LENGTH: usize = 64;
+
 lazy_static! {
     /// Whitelist of allowed table names
     static ref ALLOWED_TABLES: HashSet<&'static str> = {
@@ -36,12 +42,6 @@ lazy_static! {
 
     /// Column name validation regex
     static ref COLUMN_NAME_REGEX: Regex = Regex::new(r"^[a-zA-Z_][a-zA-Z0-9_]{0,63}$").unwrap();
-
-    /// Maximum table name length (PostgreSQL limit is 63, we use 64 for safety)
-    const MAX_TABLE_NAME_LENGTH: usize = 64;
-
-    /// Maximum column name length
-    const MAX_COLUMN_NAME_LENGTH: usize = 64;
 }
 
 /// Validates a table name against whitelist and pattern rules

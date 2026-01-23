@@ -93,6 +93,8 @@ pub mod retrieval;
 pub mod scheduler;
 pub mod search;
 pub mod security;
+/// Input validation for API endpoints
+pub mod validation;
 /// Simplified Memory API (Mem0-style)
 // simple_memory模块已删除，统一使用Memory V4架构
 pub mod storage;

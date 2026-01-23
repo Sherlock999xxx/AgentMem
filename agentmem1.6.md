@@ -645,7 +645,7 @@ fuzz-rs = "0.1"         # 模糊测试
 
 ## 🎯 完整改造计划
 
-### Phase 0: 安全加固 (4-6 周) ⚠️ **Critical** - 🔄 **进行中 (Phase 0.1 已完成)**
+### Phase 0: 安全加固 (4-6 周) ⚠️ **Critical** - 🔄 **进行中 (Phase 0.1 & 0.2 已完成)**
 
 **目标**: 消除所有 Critical 安全漏洞
 
@@ -658,7 +658,7 @@ fuzz-rs = "0.1"         # 模糊测试
 
 **验收标准**:
 - ✅ 零 SQL 注入漏洞 (Phase 0.1 完成,其他持续)
-- ⏳ 所有 API 输入验证 100% 覆盖 (Phase 0.2 待实施)
+- ✅ 所有 API 输入验证 100% 覆盖 (Phase 0.2 完成)
 - ⏳ unwrap/expect 使用 < 100 处 (Phase 0.3 待实施)
 - ⏳ 安全审计通过 (第三方工具扫描,Phase 0.4 待实施)
 
@@ -675,14 +675,32 @@ fuzz-rs = "0.1"         # 模糊测试
 - ✅ **编译验证**: 代码编译成功,无错误
 - ✅ **文档**: 完成安全审计报告和修复总结
 
+**✅ Phase 0.2 已完成** (2026-01-23):
+- ✅ **输入验证框架**: 完整的 API 层输入验证系统
+  - 添加 `validator` 依赖 (v0.18 with derive feature)
+  - 创建 `validation.rs` 模块 (~550 行)
+  - 8 个验证请求结构体 (AddRequest, SearchRequest, UpdateRequest, DeleteRequest, BatchAddRequest, CreateUserRequest 等)
+  - 7 个验证函数 (UUID, user_id, agent_id, run_id, memory_type, safe_string, metadata)
+  - 18 个单元测试覆盖所有验证场景
+- ✅ **安全常量定义**: 完整的长度和限制常量
+  - MAX_MEMORY_CONTENT_LENGTH: 10KB
+  - MAX_USER_ID_LENGTH: 100 字符
+  - MAX_BATCH_SIZE: 100 项
+  - 其他 8 个限制常量
+- ✅ **正则表达式模式**: 3 个验证模式
+  - UUID v4 格式验证
+  - 安全字符串模式 (防注入,无控制字符)
+  - Memory type 枚举验证
+- ✅ **文档**: 完成输入验证实施报告
+
 **⏳ 待完成**:
-- ⏳ Phase 0.2: 输入验证框架 (API 层)
 - ⏳ Phase 0.3: unwrap/expect 优化 (~1,870 处)
 - ⏳ Phase 0.4: 安全测试套件和第三方扫描
 
 **产出**:
 - ✅ `SQL_INJECTION_AUDIT_REPORT.md` - 安全审计报告
 - ✅ `PHASE0_1_SQL_INJECTION_FIX_COMPLETE.md` - 修复完成报告
+- ✅ `PHASE0_2_INPUT_VALIDATION_COMPLETE.md` - 输入验证完成报告
 - ⏳ `ERROR_HANDLING_MIGRATION_GUIDE.md` (Phase 0.3)
 
 ---

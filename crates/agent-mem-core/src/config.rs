@@ -149,7 +149,8 @@ mod tests {
     #[test]
     fn test_config_serialization() {
         let config = AgentMemConfig::default();
-        let toml_str = toml::to_string_pretty(&config).unwrap();
+        let toml_str = toml::to_string_pretty(&config)
+            .expect("Failed to serialize config");
 
         // 应该包含所有配置段
         assert!(toml_str.contains("[hybrid_search]"));

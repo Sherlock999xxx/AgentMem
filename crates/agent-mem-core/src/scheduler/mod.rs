@@ -75,7 +75,11 @@ impl DefaultMemoryScheduler {
     /// );
     /// ```
     pub fn new(config: ScheduleConfig, time_decay_model: impl TimeDecayModel + 'static) -> Self {
-        config.validate().expect("Invalid scheduler config");
+        config.validate().map_err(|e| {
+            agent_mem_traits::AgentMemError::Configuration(
+                format!("Invalid scheduler config: {}", e)
+            )
+        }).expect("Scheduler config validation failed");
 
         Self {
             config,

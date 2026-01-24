@@ -729,6 +729,7 @@ fuzz-rs = "0.1"         # 模糊测试
 - ✅ `PHASE0_3_ERROR_HANDLING_ANALYSIS.md` - 错误处理分析报告
 - ✅ `PHASE0_3_MIGRATION_GUIDE.md` - 迁移实施指南
 - ✅ `PHASE0_3_IMPLEMENTATION_SUMMARY.md` - Phase 0.3 实施总结
+- ✅ `PHASE0_3_1_P0_FIXES_COMPLETE.md` (新增) - Phase 0.3.1 完成报告
 - ⏳ `PHASE0_3_CODE_APPLICATION_REPORT.md` (待 Phase 0.3.1-3 完成后)
 
 ---
@@ -1035,3 +1036,7 @@ Month 8-9:  Phase 4 (文档) 📚 Low [与 Phase 3 部分重叠]
 ---
 
 **下一步**: 等待团队审核,确定优先级和资源分配后开始实施 Phase 0。
+
+---
+
+### Phase 1: 性能优化 (8-12 周) ⚡ **High**

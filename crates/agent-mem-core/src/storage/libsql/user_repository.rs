@@ -512,8 +512,9 @@ mod tests {
         let mut updated_user = user.clone();
         updated_user.name = "Updated User".to_string();
         repo.update(&updated_user).await?;
-        let found = repo.find_by_id(&user.id).await?.unwrap();
-        assert_eq!(found.name, "Updated User");
+        let found = repo.find_by_id(&user.id).await?;
+        assert!(found.is_some());
+        assert_eq!(found.as_ref().unwrap().name, "Updated User");
 
         // Delete
         repo.delete(&user.id).await?;

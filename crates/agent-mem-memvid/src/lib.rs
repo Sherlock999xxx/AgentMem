@@ -58,11 +58,6 @@ mod integration_tests;
 pub mod memvid_store;
 
 // Re-exports
-pub use store::{MemvidStore, StoreStats};
-pub use store_trait::MemoryStore;
-pub use conversion::{MemoryConverter, FrameConverter};
-pub use search::{SearchBuilder, SearchResult};
-pub use timeline::{TimeTravel, VersionInfo, VersionChange};
 pub use error::{MemvidError, Result};
 pub use advanced_search::{AdvancedSearch, SearchOptions, SearchResult as AdvancedSearchResult};
 
@@ -71,8 +66,13 @@ pub use embedding::{EmbeddingVector, OpenAIEmbedding, LocalEmbedding};
 pub use embedding::{cosine_similarity, euclidean_distance, SimilarityResult, SimilarityType};
 pub use vector_search::{VectorSearchConfig, VectorSearchResult, VectorIndex, HybridSearcher, HybridSearchResult, EmbeddingGenerator};
 
-// Real MemVid exports
-pub use memvid_store::{RealMemvidStore, Memvid, PutOptions, SearchRequest, TimelineQuery, OpenReadOptions};
+// Real MemVid exports (main API)
+pub use memvid_store::{
+    MemvidStore,           // Public facade (implements MemoryProvider trait)
+    MemvidStoreImpl,       // Internal implementation
+    Memvid, PutOptions, SearchRequest, TimelineQuery, OpenReadOptions,
+    VersionInfo,
+};
 
 
 /// MemVid store configuration

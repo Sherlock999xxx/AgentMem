@@ -1178,6 +1178,102 @@ curl -L 'https://huggingface.co/BAAI/bge-small-en-v1.5/resolve/main/tokenizer.js
 
 ### 📋 待实施（Phase 2.3+）
 
+## 🔧 技术债务与架构改进
+
+### ✅ 已解决的编译问题
+
+1. **✅ Metadata 类型冲突**
+2. **✅ LRU NonZeroUsize**
+3. **✅ RwLock write() 锁**
+4. **✅ serde_json Number 处理**
+5. **✅ VersionChange Clone**
+6. **✅ 清理未使用导入**
+7. **✅ Async trait object 兼容性**
+8. **✅ MemVid API 集成 (SearchRequest/SearchResponse)**
+
+### ✅ 已完成的代码清理 (v2.8)
+
+**删除冗余模块** (2026-02-04):
+- ✅ 删除 `store.rs` (433行) - 旧的模拟存储
+- ✅ 删除 `store_trait.rs` (60行) - 旧的 trait 定义
+- ✅ 删除 `search.rs` (285行) - 旧的搜索实现
+- ✅ 删除 `timeline.rs` (299行) - 未使用的时间旅行
+- ✅ 删除 `conversion.rs` (309行) - 旧的类型转换
+- ✅ 删除 `benches/memvid_bench.rs` - 旧的基准测试
+
+**总计删除**: ~1,400 行冗余代码
+
+### 🚧 待解决的架构问题
+
+#### 问题 1: 违反依赖倒置原则
+
+**当前实现**:
+```rust
+// ❌ 直接使用具体类型
+pub struct RealMemvidStore { ... }
+let store = RealMemvidStore::create("memory.mv2").await?;
+```
+
+**问题**:
+- 没有实现 `agent-mem-traits::MemoryProvider` trait
+- 无法与其他存储后端互换
+- 高层模块依赖具体实现
+
+**应该的架构**:
+```rust
+// ✅ 依赖抽象
+pub struct MemvidStore;
+impl MemoryProvider for MemvidStore { ... }
+
+// 用户代码依赖抽象
+let store: Box<dyn MemoryProvider> = Box::new(MemvidStore::create("memory.mv2").await?);
+```
+
+#### 问题 2: 类型不一致
+
+- `agent-mem-traits` 使用 `MemoryItem` (已废弃)
+- `agent-mem-memvid` 使用 `Memory` (MemoryV4)
+- 缺少统一的转换层
+
+#### 问题 3: Session 隔离未实现
+
+- `MemoryProvider` trait 假设有多租户 session 概念
+- MemVid 是单文件存储，需要通过 URI prefix 或 tag 实现 session 隔离
+
+### 📋 架构重构计划 (Phase 2.4)
+
+#### 目标
+- 实现 `MemoryProvider` trait
+- 添加类型转换层
+- 实现 session 隔离
+- 符合 SOLID 原则
+
+#### 方案
+
+```rust
+// 1. 重命名内部实现
+pub struct MemvidStoreImpl { ... }
+
+// 2. 创建 public facade
+pub struct MemvidStore {
+    inner: MemvidStoreImpl,
+}
+
+// 3. 实现 trait
+#[async_trait]
+impl MemoryProvider for MemvidStore {
+    async fn add(&self, messages: &[Message], session: &Session) -> Result<Vec<MemoryItem>> {
+        // Message → Memory 转换
+        // Session 隔离 (URI prefix)
+        // 调用 inner.add()
+        // Memory → MemoryItem 转换
+    }
+    // ...
+}
+```
+
+**详细分析**: 参见 [ARCHITECTURE_ANALYSIS.md](./ARCHITECTURE_ANALYSIS.md)
+
 1. **⏳ 混合搜索**
    - [ ] HybridSearcher 实现
    - [ ] 全文 + 向量结果融合
@@ -1192,6 +1288,12 @@ curl -L 'https://huggingface.co/BAAI/bge-small-en-v1.5/resolve/main/tokenizer.js
    - [x] 性能测试 ✅
    - [x] 压力测试 ✅
    - [ ] 大规模测试 (需要配置更大的 MemVid 文件大小限制)
+
+3. **🚧 架构重构 (Phase 2.4 - 待实施)**
+   - [ ] 实现 MemoryProvider trait
+   - [ ] 添加类型转换层
+   - [ ] 实现 session 隔离
+   - [ ] 更新测试和文档
 
 ## 核心功能优先级总结
 

@@ -1,4 +1,34 @@
-//! Real MemVid API integration using memvid-core 2.0
+//! MemVid 存储 backend - 实现 MemoryProvider trait
+//!
+//! ## 架构设计
+//!
+//! 本模块采用**高内聚、低耦合**的设计原则：
+//!
+//! - **MemvidStoreImpl**: 内部实现，负责与 MemVid API 交互
+//! - **MemvidStore**: Public facade，实现 `MemoryProvider` trait
+//! - **适配器层**: 处理类型转换和 session 隔离
+//!
+//! ## 依赖关系
+//!
+//! ```
+//! 应用层
+//!    ↓ 依赖抽象 (trait)
+//! ┌─────────────────────────────────────┐
+//! │  MemoryProvider trait (抽象)         │
+//! └─────────────────────────────────────┘
+//!    ↑ 实现
+//! ┌─────────────────────────────────────┐
+//! │  MemvidStore (facade + 适配器)      │
+//! └─────────────────────────────────────┘
+//!    ↓ 委托
+//! ┌─────────────────────────────────────┐
+//! │  MemvidStoreImpl (内部实现)          │
+//! └─────────────────────────────────────┘
+//!    ↓ 使用
+//! ┌─────────────────────────────────────┐
+//! │  memvid-core (MemVid API)           │
+//! └─────────────────────────────────────┘
+//! ```
 
 use crate::error::{MemvidError, Result};
 use agent_mem_traits::{Memory, MemoryId, Content, AttributeSet, MetadataV4};
@@ -16,8 +46,23 @@ pub use memvid_core::{
 
 use memvid_core::types::FrameStatus;
 
-/// Real MemVid store implementation using memvid-core 2.0
-pub struct RealMemvidStore {
+/// 版本信息
+#[derive(Debug, Clone)]
+pub struct VersionInfo {
+    pub version: u32,
+    pub timestamp: i64,
+    pub status: String,
+}
+
+// ============================================================================
+// 内部实现 (MemvidStoreImpl)
+// ============================================================================
+
+/// MemVid 存储的内部实现
+///
+/// 负责与 memvid-core API 的直接交互，不实现任何 trait，
+/// 保持高内聚，专注于 MemVid 特定的操作。
+pub struct MemvidStoreImpl {
     /// Path to the .mv2 file
     path: String,
 
@@ -25,7 +70,7 @@ pub struct RealMemvidStore {
     cache: Arc<RwLock<lru::LruCache<String, Memory>>>,
 }
 
-impl RealMemvidStore {
+impl MemvidStoreImpl {
     /// Create a new MemVid file
     pub async fn create(path: impl Into<String>) -> Result<Self> {
         let path = path.into();
@@ -586,6 +631,61 @@ impl RealMemvidStore {
         Ok(ids)
     }
 
+    /// Clear all memories (for testing)
+    pub async fn clear(&self) -> Result<()> {
+        info!("Clearing all memories");
+
+        let mut mem = Memvid::open(Path::new(&self.path))
+            .map_err(|e| MemvidError::Memvid(format!("Failed to open: {}", e)))?;
+
+        // Get all frame IDs
+        let stats = mem.stats()
+            .map_err(|e| MemvidError::Memvid(format!("Failed to get stats: {}", e)))?;
+        let mut cleared = 0;
+
+        for frame_id in 0..stats.frame_count {
+            if let Ok(frame) = mem.frame_by_id(frame_id) {
+                // Only delete memory frames
+                if let Some(uri) = &frame.uri {
+                    if uri.starts_with("mv2://memory/") {
+                        let _ = mem.delete_frame(frame_id);
+                        cleared += 1;
+                    }
+                }
+            }
+        }
+
+        if cleared > 0 {
+            mem.commit()
+                .map_err(|e| MemvidError::Memvid(format!("Failed to commit: {}", e)))?;
+        }
+
+        // Clear cache
+        let mut cache = self.cache.write().await;
+        cache.clear();
+
+        info!("Cleared {} memories", cleared);
+        Ok(())
+    }
+
+    /// Get version info for a memory
+    pub async fn get_version_info(&self, id: &MemoryId) -> Result<Option<VersionInfo>> {
+        let uri = format!("mv2://memory/{}", id.as_str());
+
+        let mem = Memvid::open_read_only(Path::new(&self.path))
+            .map_err(|e| MemvidError::Memvid(format!("Failed to open: {}", e)))?;
+
+        if let Ok(frame) = mem.frame_by_uri(&uri) {
+            Ok(Some(VersionInfo {
+                version: 1, // MemVid 使用增量版本号，这里简化为 1
+                timestamp: frame.timestamp,
+                status: "Active".to_string(),
+            }))
+        } else {
+            Ok(None)
+        }
+    }
+
     // Helper: Convert Memory to bytes
     fn memory_to_bytes(&self, memory: &Memory) -> Result<Vec<u8>> {
         // For now, just serialize the content
@@ -609,7 +709,7 @@ mod tests {
         let path = "test_real_basic.mv2";
 
         // Create store
-        let store = RealMemvidStore::create(path).await.unwrap();
+        let store = MemvidStoreImpl::create(path).await.unwrap();
 
         // Add a memory
         let memory = Memory {
@@ -635,7 +735,7 @@ mod tests {
     async fn test_real_memvid_count() {
         let path = "test_real_count.mv2";
 
-        let store = RealMemvidStore::create(path).await.unwrap();
+        let store = MemvidStoreImpl::create(path).await.unwrap();
 
         // Add 5 memories
         for i in 0..5 {
@@ -655,5 +755,273 @@ mod tests {
 
         // Cleanup
         let _ = std::fs::remove_file(path);
+    }
+}
+
+// ============================================================================
+// Public Facade: MemvidStore (实现 MemoryProvider trait)
+// ============================================================================
+
+use agent_mem_traits::{MemoryProvider, Message, Session, MemoryItem, HistoryEntry, AgentMemError, MemoryEvent};
+use agent_mem_traits::{MemoryType, Entity, Relation};
+use async_trait::async_trait;
+use chrono::Utc;
+use std::collections::HashMap;
+use uuid::Uuid;
+
+/// MemVid 存储的 Public Facade
+///
+/// 实现 `MemoryProvider` trait，提供标准的存储接口。
+/// 通过适配器模式，将 trait 调用转换为内部实现。
+///
+/// ## 架构优势
+///
+/// - **依赖倒置**: 用户代码依赖 `MemoryProvider` trait，而非具体实现
+/// - **高内聚**: `MemvidStoreImpl` 专注于 MemVid API 交互
+/// - **低耦合**: 可以轻松替换为其他存储实现（SQLite, PostgreSQL 等）
+/// - **可测试**: 通过 mock `MemoryProvider` trait 进行单元测试
+///
+/// ## 使用示例
+///
+/// ```no_run
+/// use agent_mem_memvid::MemvidStore;
+/// use agent_mem_traits::MemoryProvider;
+///
+/// # async fn example() -> Result<(), Box<dyn std::error::Error>> {
+/// // 创建存储实例
+/// let store = MemvidStore::create("memory.mv2").await?;
+///
+/// // 使用 trait 接口（依赖抽象）
+/// let messages = vec![/* ... */];
+/// let session = Session::default();
+/// let memories = store.add(&messages, &session).await?;
+/// # Ok(())
+/// # }
+/// ```
+pub struct MemvidStore {
+    /// 内部实现
+    inner: MemvidStoreImpl,
+}
+
+impl MemvidStore {
+    /// 创建新的 MemVid 文件
+    pub async fn create(path: impl Into<String>) -> Result<Self> {
+        Ok(Self {
+            inner: MemvidStoreImpl::create(path).await?,
+        })
+    }
+
+    /// 打开已存在的 MemVid 文件
+    pub async fn open(path: impl Into<String>) -> Result<Self> {
+        Ok(Self {
+            inner: MemvidStoreImpl::open(path).await?,
+        })
+    }
+
+    /// 获取内部实现的引用（用于高级操作）
+    pub fn inner(&self) -> &MemvidStoreImpl {
+        &self.inner
+    }
+
+    /// 获取可变内部实现的引用（用于高级操作）
+    pub fn inner_mut(&mut self) -> &mut MemvidStoreImpl {
+        &mut self.inner
+    }
+
+    // ========================================================================
+    // 辅助方法：类型转换和适配
+    // ========================================================================
+
+    /// 将 Message 转换为 Memory
+    fn message_to_memory(&self, msg: &Message, _session: &Session) -> Memory {
+        use uuid::Uuid;
+        Memory {
+            id: MemoryId::from_string(Uuid::new_v4().to_string()),
+            content: Content::text(&msg.content),
+            attributes: AttributeSet::new(),
+            relations: Default::default(),
+            metadata: MetadataV4 {
+                created_at: msg.timestamp.unwrap_or_else(|| Utc::now()),
+                ..Default::default()
+            },
+        }
+    }
+
+    /// 将 Memory 转换为 MemoryItem（向后兼容）
+    fn memory_to_item(&self, mem: Memory) -> MemoryItem {
+        // 注意：MemoryItem 已被标记为 deprecated
+        // 这里提供转换以保持向后兼容
+        let metadata_map = if let Ok(value) = serde_json::to_value(mem.metadata) {
+            if let Some(obj) = value.as_object() {
+                obj.into_iter().map(|(k, v)| (k.clone(), v)).collect()
+            } else {
+                std::collections::HashMap::new()
+            }
+        } else {
+            std::collections::HashMap::new()
+        };
+
+        MemoryItem {
+            id: mem.id.as_str().to_string(),
+            content: mem.content.to_string(),
+            hash: None,
+            metadata: metadata_map,
+            score: None,
+            created_at: mem.metadata.created_at.unwrap_or(Utc::now()),
+            updated_at: mem.metadata.updated_at,
+            session: Session::default(),
+            memory_type: MemoryType::Semantic,
+            entities: vec![],
+            relations: vec![],
+            agent_id: "memvid".to_string(),
+            user_id: None,
+            importance: 0.5,
+            embedding: None,
+            last_accessed_at: Utc::now(),
+            access_count: 0,
+            expires_at: None,
+            version: 1,
+        }
+    }
+
+    /// 应用 session 隔离（通过 URI prefix）
+    fn apply_session_isolation(&self, uri: &str, session: &Session) -> String {
+        // 使用 session id 作为 URI prefix 实现隔离
+        if session.id.is_empty() {
+            uri.to_string()
+        } else {
+            format!("mv2://session/{}/{}", session.id, uri.strip_prefix("mv2://").unwrap_or(uri))
+        }
+    }
+}
+
+/// 实现 MemoryProvider trait
+///
+/// 这是核心的适配器层，将 `MemoryProvider` trait 的标准接口
+/// 转换为 MemVid 特定的操作。
+#[async_trait]
+impl MemoryProvider for MemvidStore {
+    /// 添加新记忆
+    async fn add(&self, messages: &[Message], session: &Session) -> std::result::Result<Vec<MemoryItem>, AgentMemError> {
+        let mut results = Vec::new();
+
+        for msg in messages {
+            // 1. Message → Memory 转换
+            let memory = self.message_to_memory(msg, session);
+
+            // 2. 调用内部实现添加，转换错误类型
+            self.inner.add(&memory).await
+                .map_err(|e| AgentMemError::StorageError(format!("Failed to add memory: {}", e)))?;
+
+            // 3. Memory → MemoryItem 转换（返回值）
+            results.push(self.memory_to_item(memory));
+        }
+
+        Ok(results)
+    }
+
+    /// 获取特定记忆
+    async fn get(&self, id: &str) -> std::result::Result<Option<MemoryItem>, AgentMemError> {
+        let memory_id = MemoryId::from_string(id.to_string());
+
+        match self.inner.get(&memory_id).await
+            .map_err(|e| AgentMemError::StorageError(format!("Failed to get memory: {}", e)))?
+        {
+            Some(memory) => Ok(Some(self.memory_to_item(memory))),
+            None => Ok(None),
+        }
+    }
+
+    /// 搜索记忆
+    async fn search(&self, query: &str, _session: &Session, limit: usize) -> std::result::Result<Vec<MemoryItem>, AgentMemError> {
+        // 注意：当前搜索不区分 session（session 隔离需要在查询时应用）
+        // TODO: 实现基于 session 的过滤
+        let memories = self.inner.search(query, limit).await
+            .map_err(|e| AgentMemError::StorageError(format!("Failed to search: {}", e)))?;
+
+        Ok(memories.into_iter()
+            .map(|m| self.memory_to_item(m))
+            .collect())
+    }
+
+    /// 更新记忆
+    async fn update(&self, id: &str, data: &str) -> std::result::Result<(), AgentMemError> {
+        let memory_id = MemoryId::from_string(id.to_string());
+
+        // 获取现有记忆
+        if let Some(mut existing) = self.inner.get(&memory_id).await
+            .map_err(|e| AgentMemError::StorageError(format!("Failed to get memory: {}", e)))?
+        {
+            // 更新内容
+            existing.content = Content::text(data);
+
+            // 写回
+            self.inner.update(&existing).await
+                .map_err(|e| AgentMemError::StorageError(format!("Failed to update memory: {}", e)))?;
+        }
+
+        Ok(())
+    }
+
+    /// 删除记忆
+    async fn delete(&self, id: &str) -> std::result::Result<(), AgentMemError> {
+        let memory_id = MemoryId::from_string(id.to_string());
+        self.inner.delete(&memory_id).await
+            .map_err(|e| AgentMemError::StorageError(format!("Failed to delete memory: {}", e)))
+    }
+
+    /// 获取记忆历史
+    async fn history(&self, id: &str) -> std::result::Result<Vec<HistoryEntry>, AgentMemError> {
+        // MemVid 支持版本历史，这里提供一个基本实现
+        let memory_id = MemoryId::from_string(id.to_string());
+
+        // 尝试获取版本信息
+        match self.inner.get_version_info(&memory_id).await
+            .map_err(|e| AgentMemError::StorageError(format!("Failed to get version info: {}", e)))?
+        {
+            Some(version_info) => {
+                // 转换为 HistoryEntry
+                let entry = HistoryEntry {
+                    id: Uuid::new_v4().to_string(),
+                    memory_id: id.to_string(),
+                    event: MemoryEvent::Update,
+                    timestamp: Utc::now(),
+                    data: Some(serde_json::json!({
+                        "version": version_info.version,
+                        "timestamp": version_info.timestamp
+                    })),
+                };
+                Ok(vec![entry])
+            }
+            None => Ok(vec![]),
+        }
+    }
+
+    /// 获取 session 的所有记忆
+    async fn get_all(&self, _session: &Session) -> std::result::Result<Vec<MemoryItem>, AgentMemError> {
+        // 注意：当前实现获取所有记忆，不区分 session
+        // TODO: 实现基于 session 的过滤
+        let count = self.inner.count().await
+            .map_err(|e| AgentMemError::StorageError(format!("Failed to count: {}", e)))?;
+
+        // 简化实现：返回最近的一些记忆
+        // 实际应用中应该实现完整的分页和过滤
+        if count == 0 {
+            return Ok(vec![]);
+        }
+
+        // 获取前 100 个记忆（示例）
+        let memories = self.inner.search("*", count.min(100)).await
+            .map_err(|e| AgentMemError::StorageError(format!("Failed to search: {}", e)))?;
+
+        Ok(memories.into_iter()
+            .map(|m| self.memory_to_item(m))
+            .collect())
+    }
+
+    /// 重置所有记忆（用于测试）
+    async fn reset(&self) -> std::result::Result<(), AgentMemError> {
+        self.inner.clear().await
+            .map_err(|e| AgentMemError::StorageError(format!("Failed to clear: {}", e)))
     }
 }

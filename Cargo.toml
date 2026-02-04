@@ -22,6 +22,7 @@ members = [
     "crates/agent-mem-storage",
     "crates/agent-mem-embeddings",
     "crates/agent-mem-intelligence",
+    "crates/agent-mem-memvid",  # ✨ 新增：MemVid 存储后端
     "crates/agent-mem-server",  # ✅ Re-enabled for justfile build support
     "crates/agent-mem-client",
     "crates/agent-mem-performance",

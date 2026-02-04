@@ -6,9 +6,6 @@
 
 use crate::error::{MemvidError, Result};
 use memvid_core::{Memvid, SearchRequest, SearchHit, SearchResponse};
-use agent_mem_traits::{MemoryId};
-use std::path::Path;
-use std::io::Read;
 
 /// Advanced search options
 #[derive(Debug, Clone)]

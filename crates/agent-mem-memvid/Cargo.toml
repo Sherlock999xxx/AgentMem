@@ -36,6 +36,9 @@ uuid = { version = "1.0", features = ["v4", "serde"] }
 # Caching
 lru = "0.12"
 
+# HTTP client for embedding APIs
+reqwest = { version = "0.12", features = ["json"] }
+
 [features]
 default = ["lex", "vec"]
 lex = ["memvid-core/lex"]
@@ -48,3 +51,4 @@ full = ["lex", "vec", "temporal_track", "parallel_segments", "encryption"]
 [dev-dependencies]
 tokio-test = "0.4"
 criterion = "0.5"
+rand = "0.8"

@@ -321,4 +321,152 @@ mod benchmarks {
         // Cleanup
         let _ = tokio::fs::remove_file("bench_large_batch.mv2").await;
     }
+
+    // ============================================================
+    // 向量搜索基准测试
+    // ============================================================
+
+    use crate::vector_search::{VectorIndex, VectorSearchConfig, EmbeddingGenerator};
+    use crate::embedding::LocalEmbedding;
+    use std::sync::Arc;
+
+    #[tokio::test]
+    async fn bench_vector_upsert_single() {
+        let embedding_gen = Arc::new(LocalEmbedding::new(128)) as Arc<dyn EmbeddingGenerator>;
+        let index = VectorIndex::new(embedding_gen);
+
+        let iterations = 100;
+        let start = std::time::Instant::now();
+
+        for i in 0..iterations {
+            let _ = index.upsert(
+                &format!("id-{}", i),
+                &format!("Test memory content number {}", i)
+            ).await;
+        }
+
+        let duration = start.elapsed();
+        let ops_per_sec = iterations as f64 / duration.as_secs_f64();
+
+        println!("\n=== Vector Upsert Single Benchmark ===");
+        println!("Iterations: {}", iterations);
+        println!("Total time: {:?}", duration);
+        println!("Throughput: {:.0} ops/sec", ops_per_sec);
+        println!("Average: {:.2} ms/op", duration.as_millis() as f64 / iterations as f64);
+    }
+
+    #[tokio::test]
+    async fn bench_vector_upsert_batch() {
+        let embedding_gen = Arc::new(LocalEmbedding::new(128)) as Arc<dyn EmbeddingGenerator>;
+        let index = VectorIndex::new(embedding_gen);
+
+        let batch_size = 100;
+        let items: Vec<(String, String)> = (0..batch_size)
+            .map(|i| (
+                format!("batch-id-{}", i),
+                format!("Batch test content {}", i)
+            ))
+            .collect();
+
+        let start = std::time::Instant::now();
+        let _ = index.upsert_batch(items).await;
+        let duration = start.elapsed();
+
+        let ops_per_sec = batch_size as f64 / duration.as_secs_f64();
+
+        println!("\n=== Vector Upsert Batch Benchmark ===");
+        println!("Batch size: {}", batch_size);
+        println!("Total time: {:?}", duration);
+        println!("Throughput: {:.0} ops/sec", ops_per_sec);
+        println!("Average: {:.2} ms/op", duration.as_millis() as f64 / batch_size as f64);
+    }
+
+    #[tokio::test]
+    async fn bench_vector_search_scales() {
+        let embedding_gen = Arc::new(LocalEmbedding::new(128)) as Arc<dyn EmbeddingGenerator>;
+        let index = VectorIndex::new(embedding_gen);
+
+        let scales = vec![10, 50, 100, 500, 1000];
+
+        println!("\n=== Vector Search Scaling Benchmark ===");
+        println!("{:>6} | {:>10} | {:>10} | {:>10}",
+            "Size", "Build(ms)", "Search(ms)", "Throughput");
+        println!("{:-<54}", "");
+
+        for size in scales {
+            // Build index
+            let items: Vec<(String, String)> = (0..size)
+                .map(|i| (
+                    format!("scale-{}-{}", size, i),
+                    format!("Content {} for scale {}", i, size)
+                ))
+                .collect();
+
+            let build_start = std::time::Instant::now();
+            let _ = index.upsert_batch(items).await;
+            let build_duration = build_start.elapsed();
+
+            // Perform searches
+            let search_iterations = 10;
+            let search_start = std::time::Instant::now();
+
+            for _ in 0..search_iterations {
+                let config = VectorSearchConfig {
+                    top_k: 10,
+                    min_similarity: 0.0,
+                    enable_cache: false,
+                };
+                let _ = index.search("test query", &config).await;
+            }
+
+            let search_duration = search_start.elapsed();
+            let avg_search_ms = search_duration.as_millis() as f64 / search_iterations as f64;
+
+            println!("{:>6} | {:>10.2} | {:>10.2} | {:>10.0}",
+                size,
+                build_duration.as_millis(),
+                avg_search_ms,
+                1000.0 / avg_search_ms
+            );
+
+            // Clear for next scale
+            let _ = index.clear().await;
+        }
+    }
+
+    #[tokio::test]
+    async fn bench_vector_similarity_computation() {
+        use crate::embedding::cosine_similarity;
+
+        let dimension = 128;
+        let iterations = 1000;
+
+        // Generate test vectors
+        let vectors: Vec<Vec<f32>> = (0..iterations)
+            .map(|_| {
+                (0..dimension)
+                    .map(|_| rand::random::<f32>())
+                    .collect()
+            })
+            .collect();
+
+        let query_vec: Vec<f32> = (0..dimension)
+            .map(|_| rand::random::<f32>())
+            .collect();
+
+        let start = std::time::Instant::now();
+
+        for vec in &vectors {
+            let _ = cosine_similarity(&query_vec, vec);
+        }
+
+        let duration = start.elapsed();
+
+        println!("\n=== Vector Similarity Computation Benchmark ===");
+        println!("Dimension: {}", dimension);
+        println!("Iterations: {}", iterations);
+        println!("Total time: {:?}", duration);
+        println!("Throughput: {:.0} comps/sec", iterations as f64 / duration.as_secs_f64());
+        println!("Average: {:.2} µs/comp", duration.as_micros() as f64 / iterations as f64);
+    }
 }

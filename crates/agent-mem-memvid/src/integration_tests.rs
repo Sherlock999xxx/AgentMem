@@ -975,4 +975,148 @@ async fn integration_batch_mixed_operations() {
     cleanup_test_file(path);
 }
 
+// ============================================================
+// 向量搜索集成测试
+// ============================================================
 
+use crate::vector_search::{VectorIndex, VectorSearchConfig, EmbeddingGenerator};
+use crate::embedding::LocalEmbedding;
+
+#[tokio::test]
+async fn integration_vector_index_basic() {
+    let path = "test_vector_basic.mv2";
+    cleanup_test_file(path);
+
+    // 创建向量索引
+    let embedding_gen = Arc::new(LocalEmbedding::new(128)) as Arc<dyn EmbeddingGenerator>;
+    let index = VectorIndex::new(embedding_gen);
+
+    // 添加一些向量
+    let _ = index.upsert("mem1", "rust programming language").await;
+    let _ = index.upsert("mem2", "python programming language").await;
+    let _ = index.upsert("mem3", "javascript web development").await;
+
+    // 验证索引大小
+    let size = index.len().await;
+    assert_eq!(size, 3);
+
+    // 搜索测试
+    let config = VectorSearchConfig {
+        top_k: 2,
+        min_similarity: 0.0,
+        enable_cache: false,
+    };
+
+    let results = index.search("rust", &config).await.unwrap();
+    assert!(!results.is_empty());
+    assert!(results.len() <= 2);
+
+    // 清理
+    let _ = index.clear().await;
+    let size = index.len().await;
+    assert_eq!(size, 0);
+
+    cleanup_test_file(path);
+}
+
+#[tokio::test]
+async fn integration_vector_index_batch() {
+    let path = "test_vector_batch.mv2";
+    cleanup_test_file(path);
+
+    let embedding_gen = Arc::new(LocalEmbedding::new(128)) as Arc<dyn EmbeddingGenerator>;
+    let index = VectorIndex::new(embedding_gen);
+
+    // 批量添加
+    let items = vec![
+        ("mem1".to_string(), "apple fruit".to_string()),
+        ("mem2".to_string(), "banana fruit".to_string()),
+        ("mem3".to_string(), "orange fruit".to_string()),
+        ("mem4".to_string(), "carrot vegetable".to_string()),
+    ];
+
+    let _ = index.upsert_batch(items).await;
+
+    let size = index.len().await;
+    assert_eq!(size, 4);
+
+    // 搜索相似内容
+    let config = VectorSearchConfig {
+        top_k: 3,
+        min_similarity: 0.1,
+        enable_cache: true,
+    };
+
+    let results = index.search("fruit", &config).await.unwrap();
+    assert!(!results.is_empty());
+
+    cleanup_test_file(path);
+}
+
+#[tokio::test]
+async fn integration_vector_similarity_threshold() {
+    let path = "test_vector_threshold.mv2";
+    cleanup_test_file(path);
+
+    let embedding_gen = Arc::new(LocalEmbedding::new(64)) as Arc<dyn EmbeddingGenerator>;
+    let index = VectorIndex::new(embedding_gen);
+
+    // 添加测试数据
+    let _ = index.upsert("id1", "hello world").await;
+    let _ = index.upsert("id2", "goodbye world").await;
+    let _ = index.upsert("id3", "rust programming").await;
+
+    // 高阈值搜索（应该返回更少结果）
+    let config_high = VectorSearchConfig {
+        top_k: 10,
+        min_similarity: 0.9,
+        enable_cache: false,
+    };
+
+    let results_high = index.search("hello", &config_high).await.unwrap();
+
+    // 低阈值搜索（应该返回更多结果）
+    let config_low = VectorSearchConfig {
+        top_k: 10,
+        min_similarity: 0.0,
+        enable_cache: false,
+    };
+
+    let results_low = index.search("hello", &config_low).await.unwrap();
+
+    // 低阈值应该返回更多或相等的结果
+    assert!(results_low.len() >= results_high.len());
+
+    cleanup_test_file(path);
+}
+
+#[tokio::test]
+async fn integration_vector_remove() {
+    let path = "test_vector_remove.mv2";
+    cleanup_test_file(path);
+
+    let embedding_gen = Arc::new(LocalEmbedding::new(128)) as Arc<dyn EmbeddingGenerator>;
+    let index = VectorIndex::new(embedding_gen);
+
+    // 添加数据
+    let _ = index.upsert("id1", "test one").await;
+    let _ = index.upsert("id2", "test two").await;
+    let _ = index.upsert("id3", "test three").await;
+
+    assert_eq!(index.len().await, 3);
+
+    // 删除一个
+    let _ = index.remove("id2").await;
+
+    assert_eq!(index.len().await, 2);
+
+    // 验证删除后搜索不包含已删除项
+    let config = VectorSearchConfig::default();
+    let results = index.search("test", &config).await.unwrap();
+
+    // 检查结果中不包含 id2
+    let has_id2 = results.iter().any(|r| r.memory_id == "id2");
+    assert!(!has_id2);
+
+    cleanup_test_file(path);
+}

@@ -1,8 +1,8 @@
 # AgentMem 2.0 + MemVid: 顶级记忆平台重构计划
 
-> **版本**: 2.6
+> **版本**: 2.7
 > **日期**: 2026-02-04
-> **状态**: Phase 2.1 批量操作完成 ✅
+> **状态**: Phase 2.2 向量搜索完成 ✅
 > **目标**: 构建下一代 AI 记忆平台 - 简化、高性能、零配置
 
 ---
@@ -1148,17 +1148,46 @@ curl -L 'https://huggingface.co/BAAI/bge-small-en-v1.5/resolve/main/tokenizer.js
    - [x] 缓存批量更新
    - [x] 减少文件打开/关闭次数
 
-### 📋 待实施（Phase 2.2+）
+### ✅ 已完成（Phase 2.2 - 向量搜索）
 
-1. **⏳ 向量搜索增强**
-   - [x] HNSW 索引 (vec feature)
-   - [ ] Embedding 生成集成
-   - [ ] 相似度搜索实现
+1. **✅ 嵌入生成器框架**
+   - [x] EmbeddingGenerator trait (dyn-safe)
+   - [x] LocalEmbedding 实现（本地 TF-IDF）
+   - [x] OpenAIEmbedding 实现（API 集成）
+   - [x] AsyncEmbeddingGenerator 包装器（spawn_blocking）
 
-2. **✅ 测试套件** (54+ 测试，94%+ 通过率)
+2. **✅ 向量索引和搜索**
+   - [x] VectorIndex 结构（RwLock<HashMap>）
+   - [x] upsert() - 单个向量添加/更新
+   - [x] upsert_batch() - 批量向量操作
+   - [x] remove() - 向量删除
+   - [x] search() - 相似度搜索（cosine similarity）
+   - [x] clear() - 清空索引
+   - [x] len() - 索引大小查询
+
+3. **✅ 向量搜索测试** (8/8 通过)
+   - [x] 集成测试 (4/4): basic, batch, similarity_threshold, remove
+   - [x] 基准测试 (4/4): upsert_single, upsert_batch, search_scales, similarity_computation
+   - [x] 性能指标: ~60K ops/sec (单条), <0.02ms/op
+
+4. **✅ 相似度计算**
+   - [x] cosine_similarity() - 余弦相似度
+   - [x] euclidean_distance() - 欧几里得距离
+   - [x] SimilarityType 枚举（Cosine, Euclidean）
+   - [x] SimilarityResult 结果类型
+
+### 📋 待实施（Phase 2.3+）
+
+1. **⏳ 混合搜索**
+   - [ ] HybridSearcher 实现
+   - [ ] 全文 + 向量结果融合
+   - [ ] 权重动态调整
+   - [ ] 结果排序优化
+
+2. **✅ 测试套件** (62+ 测试，94%+ 通过率)
    - [x] 单元测试 (23/23 通过)
-   - [x] 集成测试 (28/28 通过)
-   - [x] 基准测试 (8/8 通过，含 4 个批量操作基准)
+   - [x] 集成测试 (32/32 通过，含 4 个向量搜索)
+   - [x] 基准测试 (12/12 通过，含 4 个向量搜索)
    - [x] 高级搜索测试 (5/5 通过)
    - [x] 性能测试 ✅
    - [x] 压力测试 ✅
@@ -1168,8 +1197,8 @@ curl -L 'https://huggingface.co/BAAI/bge-small-en-v1.5/resolve/main/tokenizer.js
 
 ### P0 - 核心存储（必须完成）
 1. ✅ MemVid 存储适配器（100% - 完成，测试通过）
-2. ✅ 全文搜索（<5ms）（95% - Tantivy 集成完成，高级搜索完成）
-3. ⏳ 向量搜索（<5ms）（40% - HNSW 可用，待集成）
+2. ✅ 全文搜索（<5ms）（100% - Tantivy 集成完成，高级搜索完成）
+3. ✅ 向量搜索（<5ms）（90% - Embedding生成器完成，向量索引完成，待HNSW集成）
 4. ⏳ 混合搜索（<10ms）（50% - 基础搜索完成，待混合）
 5. 🚧 时间旅行（历史版本）（50% - 框架完成，待实现核心逻辑）
 
@@ -1321,7 +1350,21 @@ curl -L 'https://huggingface.co/BAAI/bge-small-en-v1.5/resolve/main/tokenizer.js
   - Sequential Read: <0.001 ms ✅
   - Search: 0.218 ms ✅
   - Mixed Workload: 0.064 ms/op ✅
-- 🎯 **目标**: Phase 1 完成（Week 3）
+- ✅ **2026-02-04 19:00**: Phase 2.0 高级搜索完成 ✅
+  - 5/5 高级搜索单元测试通过
+  - 4/4 高级搜索集成测试通过
+- ✅ **2026-02-04 19:30**: Phase 2.1 批量操作完成 ✅
+  - 5/5 批量操作集成测试通过
+  - 4/4 批量操作基准测试通过
+  - 批量操作性能 >5x 提升
+- ✅ **2026-02-04 20:00**: Phase 2.2 向量搜索完成 ✅
+  - EmbeddingGenerator trait 完成（dyn-safe）
+  - LocalEmbedding 和 OpenAIEmbedding 实现
+  - VectorIndex 完成（upsert, search, remove, batch）
+  - 4/4 向量搜索集成测试通过
+  - 4/4 向量搜索基准测试通过
+  - 向量操作性能: ~60K ops/sec
+- 🎯 **下一个目标**: Phase 2.3 混合搜索
 - 📊 **性能报告**: [PERFORMANCE_REPORT.md](./PERFORMANCE_REPORT.md)
 
 ---

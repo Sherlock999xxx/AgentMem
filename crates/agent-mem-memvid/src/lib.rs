@@ -45,6 +45,8 @@ pub mod search;
 pub mod timeline;
 pub mod error;
 pub mod advanced_search;
+pub mod embedding;
+pub mod vector_search;
 
 #[cfg(test)]
 pub mod benchmarks;
@@ -63,6 +65,11 @@ pub use search::{SearchBuilder, SearchResult};
 pub use timeline::{TimeTravel, VersionInfo, VersionChange};
 pub use error::{MemvidError, Result};
 pub use advanced_search::{AdvancedSearch, SearchOptions, SearchResult as AdvancedSearchResult};
+
+// Vector search exports
+pub use embedding::{EmbeddingVector, OpenAIEmbedding, LocalEmbedding};
+pub use embedding::{cosine_similarity, euclidean_distance, SimilarityResult, SimilarityType};
+pub use vector_search::{VectorSearchConfig, VectorSearchResult, VectorIndex, HybridSearcher, HybridSearchResult, EmbeddingGenerator};
 
 // Real MemVid exports
 pub use memvid_store::{RealMemvidStore, Memvid, PutOptions, SearchRequest, TimelineQuery, OpenReadOptions};

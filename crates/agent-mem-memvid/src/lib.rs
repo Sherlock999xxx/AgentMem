@@ -44,6 +44,16 @@ pub mod conversion;
 pub mod search;
 pub mod timeline;
 pub mod error;
+pub mod advanced_search;
+
+#[cfg(test)]
+pub mod benchmarks;
+
+#[cfg(test)]
+mod integration_tests;
+
+// Real MemVid API integration
+pub mod memvid_store;
 
 // Re-exports
 pub use store::{MemvidStore, StoreStats};
@@ -52,6 +62,10 @@ pub use conversion::{MemoryConverter, FrameConverter};
 pub use search::{SearchBuilder, SearchResult};
 pub use timeline::{TimeTravel, VersionInfo, VersionChange};
 pub use error::{MemvidError, Result};
+pub use advanced_search::{AdvancedSearch, SearchOptions, SearchResult as AdvancedSearchResult};
+
+// Real MemVid exports
+pub use memvid_store::{RealMemvidStore, Memvid, PutOptions, SearchRequest, TimelineQuery, OpenReadOptions};
 
 
 /// MemVid store configuration

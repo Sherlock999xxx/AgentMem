@@ -1,0 +1,38 @@
+[package]
+name = "agent-mem-category"
+version = "0.1.0"
+edition = "2021"
+authors = ["AgentMem Team"]
+description = "Category hierarchy system for AgentMem - hierarchical organization of memory items"
+license = "Apache-2.0"
+
+[dependencies]
+# Async runtime
+tokio = { version = "1.35", features = ["full"] }
+async-trait = "0.1"
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# Error handling
+thiserror = "1.0"
+
+# ID generation
+uuid = { version = "1.6", features = ["v4", "serde"] }
+
+# Date/time
+chrono = { version = "0.4", features = ["serde"] }
+
+# Embedding support (for category search)
+ndarray = "0.15"
+
+# Optional: LLM integration for summary generation
+# agent-mem-llm = { path = "../agent-mem-llm", optional = true }
+
+[dev-dependencies]
+tokio-test = "0.4"
+
+[features]
+default = []
+# llm-summary = ["agent-mem-llm"]

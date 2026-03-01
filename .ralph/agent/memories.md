@@ -2,6 +2,10 @@
 
 ## Patterns
 
+### mem-1772343795-74a3
+> Cleanup pattern: Root directory should contain only essential project docs (README, INSTALL, CONTRIBUTING, CHANGELOG, CODE_OF_CONDUCT). Remove intermediate analysis/evaluation files. Archive reports to claudedocs/archived/ following the pattern from logs/archived/
+<!-- tags: cleanup, organization, documentation | created: 2026-03-01 -->
+
 ### mem-1772342953-503b
 > Large-scale cleanup: use claudedocs/archived/ for intermediate reports and analysis files. Keep only essential docs (README, CHANGELOG, CONTRIBUTING, INSTALL) in root. Git recognizes bulk file moves as renames.
 <!-- tags: cleanup, organization, git | created: 2026-03-01 -->

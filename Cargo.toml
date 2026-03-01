@@ -18,6 +18,10 @@ members = [
     "crates/agent-mem-config",
     "crates/agent-mem-core",
     "crates/agent-mem",  # 新增：统一 API
+    "crates/agent-mem-resource",  # ✨ 新增：Resource 资源抽象层
+    "crates/agent-mem-category",  # ✨ 新增：Category 类别层级系统
+    "crates/agent-mem-extraction", # ✨ 新增：Extraction 提取管道框架
+    "crates/agent-mem-proactive", # ✨ 新增：Proactive 主动代理
     "crates/agent-mem-llm",
     "crates/agent-mem-storage",
     "crates/agent-mem-embeddings",

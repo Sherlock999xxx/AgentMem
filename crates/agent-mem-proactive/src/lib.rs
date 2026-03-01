@@ -51,6 +51,7 @@
 //! ```
 
 pub mod error;
+pub mod executors;
 pub mod models;
 pub mod scheduler;
 
@@ -62,6 +63,12 @@ pub use models::{
     TaskStatus, TriggerType, TaskId,
 };
 pub use scheduler::{TaskExecutor, TaskScheduler};
+
+// Re-export executors
+pub use executors::{
+    AutoCategorizeExecutor, DedupeMergeExecutor, GenerateSummariesExecutor,
+    HealthCheckExecutor, IndexOptimizationExecutor, ResourceArchivalExecutor,
+};
 
 /// Version information
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");

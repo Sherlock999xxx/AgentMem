@@ -2,6 +2,10 @@
 
 ## Patterns
 
+### mem-1772346713-06b6
+> AgentMem vs memU 差距: (1)无资源抽象层-直接插入MemoryItem无来源追踪, (2)无层级类别-只能按类型过滤不能按主题浏览, (3)搜索无类别上下文-只能搜索记忆不能搜索类别, (4)无充足度检查-无早期退出机制, (5)无主动代理-无24/7后台整理。
+<!-- tags: agentmem, memU, comparison, gap-analysis | created: 2026-03-01 -->
+
 ### mem-1772345038-5b5e
 > memU retrieval strategy: Two pipelines (retrieve_rag with embedding ranking, retrieve_llm with LLM ranking). 7-stage: route intention → category recall → sufficiency check → item recall → resource recall → sufficiency check → build response. Category-based organization enables hierarchical navigation.
 <!-- tags: memU, retrieval, search | created: 2026-03-01 -->
@@ -39,6 +43,10 @@
 <!-- tags: cleanup, version-control | created: 2026-03-01 -->
 
 ## Decisions
+
+### mem-1772346712-34a3
+> AgentMem 改造分析完成: 创建 todo3.md (1331行中文详细版), 772个Rust文件分析完成, 101K LOC核心引擎, 改造计划6阶段14-19周。核心策略: 保留85%, 新增4个crates(~5K LOC), 重构15%。双API兼容, 渐进交付。
+<!-- tags: agentmem, reform, planning, architecture | created: 2026-03-01 -->
 
 ### mem-1772345139-b340
 > AgentMem review: Conditional approval with Phase 0 validation required. Key findings: (1) Add validation PoC before implementation, (2) Resolve critical decisions: backwards compat (dual model), resource storage (blobs vs refs), multi-tenancy for categories, (3) Enhance testing strategy with regression/migration tests, (4) Performance baseline needed before resource layer. Confidence: 75/100. Strengths: comprehensive analysis, clear vision. Gaps: no validation phase, unresolved decisions.

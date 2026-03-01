@@ -1,107 +1,240 @@
-# AgentMem 文件核心改造 - 循环记录
+# AgentMem 文件核心改造 - 分析与规划
 
-## 循环 1 - 2026-03-01 14:07
-
-### 目标完成状态
-✅ **目标已达成**: 全面分析 AgentMem 代码，对比 memU 找出差距，制定文件核心改造计划，将 todo list 写入 todo2.md，使用中文说明
-
-### 完成的工作
-
-1. **验证现有分析文档**
-   - 确认 `.ralph/agent/scratchpad.md` 已包含详细差距分析
-   - 确认 todo2.md 已存在但为英文版本
-   - 确认 claudedocs/agentmem-reform-summary.md 执行摘要已存在
-
-2. **创建中文版文档**
-   - 创建 TODO_CN.md (360 行中文完整版)
-   - 包含执行摘要、理念对比表
-   - 六阶段详细路线图说明
-   - 架构改造前后对比图
-   - 关键决策问题清单
-   - 成功指标和风险缓解策略
-
-3. **更新 todo2.md**
-   - 添加中文说明头部，引用 TODO_CN.md
-   - 部分章节标题翻译为中文
-   - 保持英文技术细节以确保准确性
-
-4. **提交文档**
-   - Git commit: da5010f
-   - 包含完整的中英文文档
-   - 提交信息详细记录改造目标
-
-### 文档结构
-
-```
-agentmen/
-├── TODO_CN.md                      # 中文完整版 (新建)
-├── todo2.md                         # 英文技术详细版 (已更新)
-├── claudedocs/
-│   └── agentmem-reform-summary.md   # 执行摘要 (已存在)
-└── .ralph/agent/
-    ├── memories.md                  # 包含 5 个关键模式/决策
-    └── tasks.jsonl                  # 8 个顺序任务
-```
-
-### 关键成果
-
-**理念对比** (类型核心 vs 文件核心):
-
-| 维度 | AgentMem 当前 | 改造目标 |
-|------|--------------|---------|
-| 组织 | 按类型分类 | 按类别分层 (如文件夹) |
-| 来源 | 直接插入 MemoryItem | 从 Resource 提取 |
-| 导航 | 类型 + 属性过滤 | 类别路径浏览 |
-| 检索 | 5 种搜索引擎 | 类别召回 + 充足度检查 |
-| 整理 | 手动组织 | 24/7 后台代理自动整理 |
-
-**六阶段路线图**:
-1. 基础架构 (第 1-3 周) - Resource 资源抽象
-2. 类别层级 (第 4-6 周) - Category 系统
-3. 提取管道 (第 7-10 周) - ExtractionPipeline
-4. 增强检索 (第 11-13 周) - 类别感知搜索
-5. 主动代理 (第 14-16 周) - ProactiveAgent
-6. 集成迁移 (第 17-19 周) - SDK 更新和数据迁移
-
-### 存储的记忆
-- mem-1772345396-67e4: 改造完成总结
-- mem-1772345036-80e3: memU 文件核心哲学
-- mem-1772345037-6ac5: memU 摄入管道模式
-- mem-1772345038-5b5e: memU 检索策略
-- mem-1772345039-99fe: AgentMem vs memU 架构差距
-- mem-1772345039-1227: AgentMem 改造愿景
-
-### Ralph 任务状态
-所有 7 个任务当前为 blocked 状态，等待第一个审查任务完成：
-- task-review-analysis (需要创建 - 审查和批准架构)
-- task-design-resource-model (blocked by review)
-- task-implement-media-detection (blocked by design)
-- task-create-category-hierarchy (blocked by design)
-- task-build-extraction-pipeline (blocked by media + category)
-- task-implement-enhanced-search (blocked by pipeline)
-- task-develop-proactive-agent (blocked by search)
-- task-integrate-migrate-sdk (blocked by proactive)
-
-### 下一步行动
-1. **团队审查** - 评审 `.ralph/agent/scratchpad.md` 详细分析
-2. **架构批准** - 接受或修改改造计划
-3. **解决决策** - 向后兼容、存储策略、性能目标
-4. **启动第一阶段** - Resource 数据模型设计
-
-### 成功指标 (技术)
-- 性能: >100K ops/sec (含资源层)
-- 延迟: P95 <150ms (vs 当前 <100ms)
-- 内存: <50MB 基础占用
-- 可靠性: 99.9% 正常运行时间
-
-### 风险与缓解
-**高风险**:
-1. 资源层性能下降 → 缓解: 积极缓存, 应急: 可选资源层
-2. 类别层级复杂性 → 缓解: 扁平开始, 应急: 保留扁平备选
-3. 迁移挑战 → 缓解: 迁移工具, 应急: 双 API 支持 6+ 月
+**日期**: 2026-03-01
+**目标**: 将 AgentMem 从类型核心改造为文件核心记忆平台
 
 ---
 
-**循环状态**: ✅ 完成
-**文档状态**: ✅ 中英文双版本
-**Git 提交**: da5010f
+## 当前理解
+
+### 已完成的工作
+1. **代码分析完成** ✅
+   - AgentMem (Rust) 架构已分析: 18个crates, Memory V4, 8个专业代理
+   - memU (Python) 架构已分析: 文件系统隐喻, 工作流管道, 3层数据模型
+
+2. **文档已创建** ✅
+   - `todo2.md` (670行): 英文详细技术实现计划
+   - `TODO_CN.md` (360行): 中文完整版执行计划
+   - `claudedocs/agentmem-reform-summary.md`: 执行摘要
+
+3. **关键差距已识别** ✅
+   - Resource 抽象层缺失 (文件类实体)
+   - Category 层级缺失 (只有扁平类型)
+   - 提取管道缺失 (直接插入 vs 提取)
+   - 充足度检查缺失 (无早期退出)
+
+### 核心理念对比
+
+| 维度 | AgentMem (当前) | memU (参考) | 目标设计 |
+|------|----------------|-------------|----------|
+| 组织方式 | 按类型 (Episodic/Semantic/Procedural) | 按类别 (文件夹层级) | 按类别层级 |
+| 记忆来源 | 直接插入 MemoryItem | 从 Resource 提取 | Resource → 提取 → MemoryItem |
+| 导航方式 | 类型过滤 + 属性查询 | 路径浏览 (`/偏好/沟通/风格`) | 路径浏览 |
+| 检索策略 | 5引擎并行 | 类别召回 + 充足度检查 | 7阶段检索 |
+| 主动整理 | 手动 | 24/7 后台代理 | 后台自动整理 |
+
+---
+
+## 改造策略
+
+### 充分复用 AgentMem 的能力
+1. **保留高性能引擎**: Vector, BM25, Full-Text, Fuzzy, RRF
+2. **保留专业代理**: 8个代理 (Core, Episodic, Knowledge等)
+3. **保留企业特性**: RBAC, 审计日志, 多租户
+4. **保留V4抽象**: Memory traits 可以扩展支持文件核心模式
+
+### 需要新增的能力
+1. **Resource 层**: ResourceManager, MediaTypeDetector, URIResolver
+2. **Category 层**: CategoryManager, 路径解析, 层级导航
+3. **Extraction 层**: 内容提取器 (对话/文档/图片/音频), 去重, 自动分类
+4. **Proactive 层**: 后台任务调度, 自动整理, 意图预测
+
+### 需要删除/简化的代码
+1. **类型硬编码**: 移除固定的 Episodic/Semantic/Procedural 类型限制
+2. **直接插入逻辑**: 改为通过 Resource 提取
+3. **扁平组织**: 替换为 Category 层级
+
+---
+
+## 实施路线图 (6阶段, 14-19周)
+
+### Phase 1: Resource 资源抽象 (第1-3周)
+**目标**: 建立文件类实体抽象层
+
+关键任务:
+- Resource 数据模型 (ID, URI, MediaType, metadata, status)
+- ResourceManager 接口 (mount, unmount, get, list)
+- MediaType 检测器 (文本/图片/音频/视频/对话/文档)
+- URI 解析器 (file://, http://, conv://, doc://)
+- 存储扩展 (resources 表, 支持所有后端)
+- 单元测试 + 文档
+
+**成功标准**:
+- ResourceManager 处理 10K+ 资源
+- URI 解析支持 4+ 协议
+- 性能下降 <10%
+
+### Phase 2: Category 层级系统 (第4-6周)
+**目标**: 建立分层类别组织
+
+关键任务:
+- Category 数据模型 (ID, name, parent_id, 层级)
+- CategoryManager (CRUD + 路径解析)
+- LLM 驱动的类别摘要
+- 类别嵌入 (语义搜索)
+- 浏览/导航 API
+- 单元测试 + 文档
+
+**成功标准**:
+- 处理 1000+ 类别
+- 导航延迟 <50ms P95
+- 类别摘要有用性 >3/5
+
+### Phase 3: Extraction 提取管道 (第7-10周)
+**目标**: 自动从资源提取结构化记忆
+
+关键任务:
+- ExtractionWorkflow 框架
+- ExtractionPipeline 引擎
+- 对话提取器 (解析消息, 提取事实/偏好/技能)
+- 文档提取器 (PDF, DOCX, TXT, Markdown)
+- 图片/视觉提取器 (OCR + 视觉描述)
+- 音频/视频提取器 (转录 + 帧提取)
+- 去重与合并
+- 自动分类器
+- 端到端测试 + 文档
+
+**成功标准**:
+- 处理 5+ 内容类型
+- 准确率 >80%
+- 可扩展性验证
+
+### Phase 4: Enhanced Retrieval 增强检索 (第11-13周)
+**目标**: 类别感知的智能搜索
+
+关键任务:
+- 类别召回 (浏览匹配类别)
+- 类别嵌入搜索
+- 资源召回 (返回源资源)
+- 充足度检查算法
+- Query V4 增强 (类别/资源过滤器)
+- 7阶段搜索管道:
+  1. 路由意图
+  2. 查询重写 (可选)
+  3. 类别召回 ⭐
+  4. 充足度检查 (可选)
+  5. 项目召回 (Vector + BM25 + RRF)
+  6. 资源召回 ⭐
+  7. 充足度检查 (可选)
+  8. 构建响应
+- 性能测试 + 文档
+
+**成功标准**:
+- 搜索延迟 <150ms P95
+- 相关性提升 >15%
+- LLM 调用减少 >30%
+
+### Phase 5: Proactive Agent 主动代理 (第14-16周)
+**目标**: 24/7 后台记忆组织
+
+关键任务:
+- ProactiveAgent 架构
+- 任务调度器 (Cron 风格)
+- 类别摘要更新任务
+- 重复检测任务
+- 记忆整合任务
+- 意图预测
+- 主动建议 API
+- 通知系统
+- 测试 + 文档
+
+**成功标准**:
+- 建议有用性 >70%
+- CPU 开销 <5%
+- 预测准确率 >60%
+
+### Phase 6: Integration & Migration 集成迁移 (第17-19周)
+**目标**: 完整集成并迁移现有系统
+
+关键任务:
+- 集成 8 个专业代理
+- 混合操作模式 (支持新旧 API)
+- 迁移策略设计 (合成资源)
+- 迁移工具实现 (CLI + 进度跟踪)
+- 更新所有 SDK (Python, JavaScript, Go, Cangjie)
+- 迁移指南文档
+- 更新示例 + API 参考
+- 端到端测试 + 性能验证
+- Beta 测试计划
+
+**成功标准**:
+- 80%+ 用户在3个月内迁移
+- 所有 SDK 支持新特性
+- 数据丢失率 <1%
+
+---
+
+## 待决策问题
+
+### 技术决策 (关键路径)
+1. **向后兼容策略** - 第2周前
+   - A: 迁移工具 (合成资源)
+   - B: 双模型 (同时支持)
+   - C: 破坏性变更 (明确路径)
+
+2. **存储标准化** - 第2周前
+   - 保持多后端 vs 单一后端
+
+3. **性能目标** - 第4周前
+   - 资源层开销可接受范围
+   - P95 延迟目标
+
+### 产品决策
+1. **默认类别结构** - 第6周前
+   - 预定义 vs 用户定义 vs 混合
+
+2. **主动特性范围** - 第14周前
+   - 完整 24/7 代理 vs 定时任务
+   - 云端 vs 自托管
+
+---
+
+## 风险与缓解
+
+### 高风险
+1. **性能下降** - 缓解: 积极缓存, 异步管道; 应急: 可选资源层
+2. **类别复杂性** - 缓解: 扁平开始, 增量层级; 应急: 保留扁平备选
+3. **迁移挑战** - 缓解: 全面工具, 回滚支持; 应急: 双API 6+个月
+
+### 中风险
+1. **提取器质量** - 缓解: A/B测试; 应急: 手动修正
+2. **主动资源** - 缓解: 可配置频率; 应急: 选择性特性
+
+---
+
+## 下一步行动
+
+### 当前迭代
+1. ✅ 验证现有文档完整性
+2. ⏳ 创建 Ralph 任务跟踪实施
+3. ⏳ 等待团队审查批准
+
+### 准备启动 (待批准)
+- Phase 1.1: Resource 数据模型设计
+- Phase 1.2: ResourceManager 接口设计
+- Phase 1.3: MediaType 检测器实现
+
+---
+
+## 关键参考
+
+- **AgentMem**: `./crates/agent-mem/` (Rust, 18 crates)
+- **memU**: `source/memU/` (Python, 文件核心参考)
+- **详细TODO**: `todo2.md` (英文详细版)
+- **中文总结**: `TODO_CN.md` (中文完整版)
+- **执行摘要**: `claudedocs/agentmem-reform-summary.md`
+
+---
+
+**状态**: 分析完成, 等待审查批准
+**下一里程碑**: Phase 1 启动 (Resource 资源抽象设计)

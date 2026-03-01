@@ -853,7 +853,7 @@ impl MemvidStore {
         // 这里提供转换以保持向后兼容
         let metadata_map = if let Ok(value) = serde_json::to_value(mem.metadata) {
             if let Some(obj) = value.as_object() {
-                obj.into_iter().map(|(k, v)| (k.clone(), v)).collect()
+                obj.into_iter().map(|(k, v)| (k.clone(), v.clone())).collect()
             } else {
                 std::collections::HashMap::new()
             }
@@ -867,8 +867,8 @@ impl MemvidStore {
             hash: None,
             metadata: metadata_map,
             score: None,
-            created_at: mem.metadata.created_at.unwrap_or(Utc::now()),
-            updated_at: mem.metadata.updated_at,
+            created_at: mem.metadata.created_at,
+            updated_at: Some(mem.metadata.updated_at),
             session: Session::default(),
             memory_type: MemoryType::Semantic,
             entities: vec![],
@@ -876,6 +876,37 @@ impl MemvidStore {
             agent_id: "memvid".to_string(),
             user_id: None,
             importance: 0.5,
+            embedding: None,
+            last_accessed_at: Utc::now(),
+            access_count: 0,
+            expires_at: None,
+            version: 1,
+        }
+    }
+
+    /// 将 SearchHit 转换为 MemoryItem
+    fn search_hit_to_item(&self, hit: SearchHit) -> MemoryItem {
+        // Extract memory ID from URI
+        let id = hit.uri
+            .strip_prefix("mv2://memory/")
+            .unwrap_or(&hit.uri)
+            .to_string();
+
+        MemoryItem {
+            id,
+            content: hit.snippet.unwrap_or_default(),
+            hash: None,
+            metadata: std::collections::HashMap::new(),
+            score: Some(hit.score),
+            created_at: Utc::now(),
+            updated_at: None,
+            session: Session::default(),
+            memory_type: MemoryType::Semantic,
+            entities: vec![],
+            relations: vec![],
+            agent_id: "memvid".to_string(),
+            user_id: None,
+            importance: hit.score.max(0.0).min(1.0),
             embedding: None,
             last_accessed_at: Utc::now(),
             access_count: 0,
@@ -936,11 +967,11 @@ impl MemoryProvider for MemvidStore {
     async fn search(&self, query: &str, _session: &Session, limit: usize) -> std::result::Result<Vec<MemoryItem>, AgentMemError> {
         // 注意：当前搜索不区分 session（session 隔离需要在查询时应用）
         // TODO: 实现基于 session 的过滤
-        let memories = self.inner.search(query, limit).await
+        let hits = self.inner.search(query, limit).await
             .map_err(|e| AgentMemError::StorageError(format!("Failed to search: {}", e)))?;
 
-        Ok(memories.into_iter()
-            .map(|m| self.memory_to_item(m))
+        Ok(hits.into_iter()
+            .map(|hit| self.search_hit_to_item(hit))
             .collect())
     }
 
@@ -1011,11 +1042,11 @@ impl MemoryProvider for MemvidStore {
         }
 
         // 获取前 100 个记忆（示例）
-        let memories = self.inner.search("*", count.min(100)).await
+        let hits = self.inner.search("*", count.min(100)).await
             .map_err(|e| AgentMemError::StorageError(format!("Failed to search: {}", e)))?;
 
-        Ok(memories.into_iter()
-            .map(|m| self.memory_to_item(m))
+        Ok(hits.into_iter()
+            .map(|hit| self.search_hit_to_item(hit))
             .collect())
     }
 

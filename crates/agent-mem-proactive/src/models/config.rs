@@ -1,6 +1,6 @@
 //! Configuration for ProactiveAgent
 
-use chrono::{DateTime, Duration, Utc};
+use chrono::Duration;
 use serde::{Deserialize, Serialize};
 
 /// Trigger type for proactive tasks

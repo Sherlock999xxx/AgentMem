@@ -3,16 +3,16 @@
 use std::sync::Arc;
 use std::time::Duration;
 use async_trait::async_trait;
-use chrono::{DateTime, Utc};
+use chrono::Utc;
 use tokio::sync::{mpsc, RwLock};
 use tokio::time::interval;
-use tracing::{debug, error, info, warn};
+use tracing::{error, info, warn};
 
 use crate::error::{ProactiveError, Result};
 use crate::models::{
     ProactiveConfig, ProactiveTask, ScheduledTask, SchedulerState, SchedulerStateInner,
     SchedulerStats, TaskConfig, TaskExecutionContext, TaskId, TaskResult, TaskSchedule,
-    TaskScheduleConfig, TaskStatus, TriggerType,
+    TaskStatus, TriggerType,
 };
 
 /// Task executor trait - implemented by different task types
@@ -31,8 +31,8 @@ pub struct TaskScheduler {
     state: Arc<RwLock<SchedulerStateInner>>,
     /// Configuration
     config: ProactiveConfig,
-    /// Task executors
-    executors: std::collections::HashMap<String, Box<dyn TaskExecutor>>,
+    /// Task executors (protected by RwLock for thread-safety)
+    executors: Arc<RwLock<std::collections::HashMap<String, Box<dyn TaskExecutor>>>>,
     /// Shutdown signal sender
     shutdown_tx: Option<mpsc::Sender<()>>,
 }
@@ -43,7 +43,7 @@ impl TaskScheduler {
         Self {
             state: Arc::new(RwLock::new(SchedulerStateInner::new())),
             config,
-            executors: std::collections::HashMap::new(),
+            executors: Arc::new(RwLock::new(std::collections::HashMap::new())),
             shutdown_tx: None,
         }
     }
@@ -54,10 +54,10 @@ impl TaskScheduler {
     }
 
     /// Register a task executor
-    pub fn register_executor<E: TaskExecutor + 'static>(&mut self, executor: E) {
+    pub async fn register_executor<E: TaskExecutor + 'static>(&self, executor: E) {
         let task_type = executor.task_type().to_string();
         info!("Registering executor for task type: {}", task_type);
-        self.executors.insert(task_type, Box::new(executor));
+        self.executors.write().await.insert(task_type, Box::new(executor));
     }
 
     /// Get scheduler state
@@ -96,7 +96,7 @@ impl TaskScheduler {
 
         // Validate task type has executor
         let task_type_str = task_type.to_string();
-        if !self.executors.contains_key(&task_type_str) {
+        if !self.executors.read().await.contains_key(&task_type_str) {
             warn!(
                 "No executor registered for task type: {}",
                 task_type_str
@@ -167,13 +167,18 @@ impl TaskScheduler {
         override_config: Option<TaskConfig>,
     ) -> Result<TaskResult> {
         let task_type_str = task.task_type.to_string();
-        let executor = self
-            .executors
-            .get(&task_type_str)
-            .ok_or_else(|| ProactiveError::TaskExecution(format!(
-                "No executor for task type: {}",
-                task_type_str
-            )))?;
+
+        // Take the executor from the registry (removes it temporarily)
+        let executor: Box<dyn TaskExecutor> = {
+            let mut executors = self.executors.write().await;
+            match executors.remove(&task_type_str) {
+                Some(exec) => exec,
+                None => return Err(ProactiveError::TaskExecution(format!(
+                    "No executor for task type: {}",
+                    task_type_str
+                ))),
+            }
+        };
 
         // Update task status to running
         {
@@ -191,8 +196,14 @@ impl TaskScheduler {
             dry_run: false,
         };
 
-        // Execute task
+        // Execute task (using mutable reference since we own the Box)
         let result = executor.execute(&context).await;
+
+        // Put the executor back in the registry
+        {
+            let mut executors = self.executors.write().await;
+            executors.insert(task_type_str, executor);
+        }
 
         // Update task status and result
         let task_id = task.id.clone();
@@ -218,14 +229,7 @@ impl TaskScheduler {
             }
         };
 
-        // Update stats
-        let mut stats_update = None;
-        if let Some(err) = error_msg {
-            stats_update = Some((false, err));
-        } else {
-            stats_update = Some((true, String::new()));
-        }
-
+        // Update task and stats in state
         {
             let mut state = self.state.write().await;
             if let Some(task) = state.get_task_mut(&task_id) {
@@ -233,20 +237,18 @@ impl TaskScheduler {
                 task.last_result = last_result;
                 task.updated_at = Utc::now();
             }
-            // Update stats after releasing task borrow
-            if let Some((success, err_msg)) = stats_update {
-                if success {
-                    state.stats.record_completion(duration_ms);
-                } else {
-                    state.stats.record_failure(err_msg);
-                }
+            // Update stats
+            if let Some(err_msg) = error_msg {
+                state.stats.record_failure(err_msg);
+            } else {
+                state.stats.record_completion(duration_ms);
             }
         }
 
         result
     }
 
-    /// Start the scheduler
+    /// Start the scheduler - runs tasks on their schedules
     pub async fn start(&mut self) -> Result<()> {
         info!("Starting task scheduler...");
 
@@ -268,14 +270,102 @@ impl TaskScheduler {
 
         info!("Task scheduler started successfully");
 
-        // Wait for shutdown signal
-        tokio::select! {
-            _ = rx.recv() => {
-                info!("Shutdown signal received");
+        // Main scheduler loop - tick every 30 seconds
+        let mut tick_interval = interval(Duration::from_secs(30));
+
+        loop {
+            tokio::select! {
+                _ = rx.recv() => {
+                    info!("Shutdown signal received, stopping scheduler");
+                    break;
+                }
+                _ = tick_interval.tick() => {
+                    // Check and execute due tasks
+                    self.check_and_execute_tasks().await;
+                }
             }
         }
 
+        // Set state to stopped
+        {
+            let mut state = self.state.write().await;
+            state.set_state(SchedulerState::Stopped);
+        }
+
+        info!("Task scheduler stopped");
         Ok(())
+    }
+
+    /// Check for tasks that are due to run and execute them
+    async fn check_and_execute_tasks(&self) {
+        let tasks = self.list_tasks().await;
+
+        for task in tasks {
+            // Skip disabled tasks
+            if !task.enabled {
+                continue;
+            }
+
+            // Check if task should run
+            if self.should_run_task(&task).await {
+                info!("Executing task: {} (ID: {})", task.task_type.display_name(), task.id);
+
+                // Execute in background without blocking the scheduler
+                let scheduler = Arc::new(self.clone_inner());
+                let task_id = task.id.clone();
+                let task_type = task.task_type.clone();
+
+                tokio::spawn(async move {
+                    if let Err(e) = scheduler.run_task_now(&task_id).await {
+                        error!("Task {} failed: {}", task_type.display_name(), e);
+                    }
+                });
+            }
+        }
+    }
+
+    /// Check if a task should run based on its schedule
+    async fn should_run_task(&self, task: &ScheduledTask) -> bool {
+        let now = Utc::now();
+
+        // Check last result to determine if task should run
+        if let Some(ref last_result) = task.last_result {
+            match task.task_type {
+                ProactiveTask::AutoCategorize => {
+                    // Event-driven, skip interval check
+                    return false;
+                }
+                _ => {
+                    // For interval-based tasks, check if enough time has passed
+                    let default_interval = task.task_type.default_interval_minutes()
+                        .unwrap_or(5);
+
+                    // If task is currently running, don't start another
+                    if last_result.status == TaskStatus::Running {
+                        return false;
+                    }
+
+                    // Check if enough time has passed since last completion
+                    let time_since_completion = now - last_result.completed_at;
+                    let interval_duration = chrono::TimeDelta::minutes(default_interval as i64);
+
+                    return time_since_completion > interval_duration;
+                }
+            }
+        }
+
+        // No previous result - task has never run
+        true
+    }
+
+    /// Clone the scheduler for use in spawned tasks
+    fn clone_inner(&self) -> Self {
+        Self {
+            state: Arc::clone(&self.state),
+            config: self.config.clone(),
+            executors: self.executors.clone(),
+            shutdown_tx: None,
+        }
     }
 
     /// Stop the scheduler

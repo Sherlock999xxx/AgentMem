@@ -3,9 +3,8 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use uuid::Uuid;
 
-use super::task::{ProactiveTask, ScheduledTask, TaskId, TaskStatus};
+use super::task::{ScheduledTask, TaskId, TaskStatus};
 
 /// State of the task scheduler
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
@@ -142,6 +141,7 @@ impl SchedulerStateInner {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::ProactiveTask;
 
     #[test]
     fn test_scheduler_state() {

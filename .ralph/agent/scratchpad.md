@@ -36,6 +36,35 @@ Phase 3: Execute cleanup systematically with verification
 - **Committed**: cd44974
 - **Learning**: Only one .bak file found in project, indicating clean version control practices
 
+### Task 3: Clean up root-level log files ✅
+- **Action**: Moved backend.log and frontend.log to logs/archived/
+- **Result**: Root directory clean, logs properly archived
+- **Verified**: Confirmed no .log files in project root
+- **Committed**: c703ad4
+- **Learning**: Project has proper logging structure in logs/, development logs should be archived not kept in root
+
 ### Remaining Tasks
-- task-1772341980-c45f: Clean up root-level log files (priority 3)
 - task-1772341981-7b4b: Archive old log files (priority 4)
+
+### Task 4: Archive old log files 🔄
+- **Analysis**: 
+  - logs/ contains dated logs from Nov 2025 - Jan 2026 (17 files)
+  - logs/ contains test/debug logs from Nov 2025 (11 server-*.log files)
+  - logs/archived/ already exists with older logs
+  - Current date: 2026-03-01, so files from 2025 are 3+ months old
+- **Plan**: 
+  - Move all dated logs from 2025 to logs/archived/
+  - Move test/debug server-*.log files to logs/archived/
+  - Keep recent logs (2026-01-07) and the symlink in logs/
+  - This will clean up logs/ while preserving history in archived/
+- **Execution**: Moving files now...
+- **Action**: 
+  - Moved 15 dated logs from 2025 (Nov-Dec) to logs/archived/
+  - Moved 11 test/debug server-*.log files to logs/archived/
+  - Kept symlink and 2026-01-07 log in logs/
+- **Result**: 
+  - logs/ now clean with only current/active logs
+  - archived/ now contains 63 files (was 41)
+  - All old logs preserved in archived/ directory
+- **Verified**: Confirmed logs/ has only symlink and 2026-01-07 log
+- **Learning**: Log files are gitignored, so no commit needed for file moves. This cleanup improves logs/ organization by separating active from historical logs.

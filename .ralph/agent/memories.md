@@ -2,6 +2,10 @@
 
 ## Patterns
 
+### mem-1772349435-8f74
+> AgentMem 阶段2完成: Category类别层级系统实现完成 (agent-mem-category crate ~2,100行代码)。核心特性: (1)Category数据模型支持path/name/parent_id/children_ids/summary/embedding/item_count, (2)CategoryPath支持层级路径解析和验证(/偏好/沟通/风格), (3)CategoryTreeNode支持树形结构可视化, (4)CategoryManager trait定义完整CRUD操作, (5)InMemoryCategoryManager实现HashMap存储。技术亮点: 自动父类别创建、多租户支持(user_id+agent_id)、38个单元测试全部通过。下一步: 阶段3 Extraction提取管道框架。
+<!-- tags: agentmem, category, implementation | created: 2026-03-01 -->
+
 ### mem-1772346713-06b6
 > AgentMem vs memU 差距: (1)无资源抽象层-直接插入MemoryItem无来源追踪, (2)无层级类别-只能按类型过滤不能按主题浏览, (3)搜索无类别上下文-只能搜索记忆不能搜索类别, (4)无充足度检查-无早期退出机制, (5)无主动代理-无24/7后台整理。
 <!-- tags: agentmem, memU, comparison, gap-analysis | created: 2026-03-01 -->
@@ -43,6 +47,10 @@
 <!-- tags: cleanup, version-control | created: 2026-03-01 -->
 
 ## Decisions
+
+### mem-1772348202-3d8c
+> PROMPT.md 创建完成: 整合了所有 AgentMem 改造分析（todo3.md 1331行, TODO_CN.md 360行, todo2.md 670行）为简洁的中文开发指南（1177行）。包含9个主要章节: 1)改造目标与愿景, 2)为什么需要改造(memU vs AgentMem对比), 3)技术架构设计(4个新crates详细设计), 4)六阶段实施路线图(14-19周,每周拆解到具体任务), 5)成功指标与风险缓解(7大风险识别), 6)关键决策与理由(6个架构决策), 7)参考文档, 8)下一步行动, 9)联系信息。核心策略: 保留85%代码(高性能引擎、8个专业代理、5种搜索引擎、30+存储后端、20+LLM提供商), 新增4个crates(~5K LOC): agent-mem-resource(资源抽象)、agent-mem-category(类别系统)、agent-mem-extraction(提取管道)、agent-mem-proactive(主动代理), 重构15%代码(MemoryType→Category, 类型分发→类别路由, 5阶段检索→7阶段检索)。采用双API兼容策略确保零破坏性变更。
+<!-- tags: agentmem, reform, planning, chinese, architecture, prompt-md | created: 2026-03-01 -->
 
 ### mem-1772346712-34a3
 > AgentMem 改造分析完成: 创建 todo3.md (1331行中文详细版), 772个Rust文件分析完成, 101K LOC核心引擎, 改造计划6阶段14-19周。核心策略: 保留85%, 新增4个crates(~5K LOC), 重构15%。双API兼容, 渐进交付。

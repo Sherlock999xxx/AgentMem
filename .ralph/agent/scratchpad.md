@@ -45,3 +45,9 @@
 - 8 个 specialized agents 仍以 memory-type 分工为主（`core/episodic/semantic/procedural/working/resource/knowledge/contextual`），并未统一挂接 `agent-mem-resource` 或 `agent-mem-category`。其中 `semantic/procedural` 只能通过既有 `tree_path` 做局部层级表达，这和真正的 Category/Resource 闭环还不是一回事。
 - 外部平台对比方向已收集完毕：Mem0 已强调 memory layer + graph memory；Zep 强调 temporal knowledge graph；Letta 已推出 MemGPT/Memory Blocks/Archival Memory 和 MemFS（git-backed filesystem for agent memory）；LangMem 已形成热路径工具 + 后台 reflection manager 的产品化形态。相较之下，AgentMem 的方向正确，但“新 crate 已存在、主链路未穿透”是当前最主要结论。
 - 本轮计划采取最小可提交改动：不冒进伪造“已完成 SDK 迁移”的代码实现，而是把当前代码证据、与外部平台差距、后续分阶段改造计划完整写入 `mem111.md`，把它扩展为集成收口评估文档，作为后续真正拆分 agents/server/SDK 迁移任务的依据。
+
+## 2026-03-18（本轮：task-1773806393-53f8）
+- 已完成 `mem111.md` 补强：新增“代码证据驱动的集成差距矩阵”，把 Rust 顶层 API、core manager、retrieval/router、server/client DTO、Python/JavaScript/Go/仓颉 SDK 的具体缺口集中落表。
+- 已将 SDK 迁移路线图从“顺序建议”扩展为 D0-D3 四个波次：先冻结跨语言合同，再以 Python/JavaScript 做 Beta 探路，Go 做协议收口，仓颉做最终对齐。
+- 已补充统一验收标准：共享 contract fixtures、四套 SDK 一致的任务状态/错误码语义、迁移 dry-run 报告与资源挂载到主动任务的完整示例链路。
+- 风险补记：创建 scratchpad 时误覆盖旧内容，已立即恢复并改为追加记录；后续若再操作 `.ralph/agent/scratchpad.md`，必须先读取现有内容再追加。

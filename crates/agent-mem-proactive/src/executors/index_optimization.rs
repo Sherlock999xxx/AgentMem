@@ -7,9 +7,7 @@ use chrono::Utc;
 use tracing::info;
 
 use crate::error::{ProactiveError, Result};
-use crate::models::{
-    ProactiveTask, TaskExecutionContext, TaskResult, TaskStatus,
-};
+use crate::models::{ProactiveTask, TaskExecutionContext, TaskResult, TaskStatus};
 use crate::scheduler::TaskExecutor;
 
 /// Index optimization executor
@@ -105,8 +103,7 @@ impl TaskExecutor for IndexOptimizationExecutor {
         if context.dry_run {
             let started_at = Utc::now();
             let task_id = format!("index-optimization-dry-{}", started_at.timestamp());
-            let mut result =
-                TaskResult::new(task_id, ProactiveTask::IndexOptimization, started_at);
+            let mut result = TaskResult::new(task_id, ProactiveTask::IndexOptimization, started_at);
             result.completed(0, 0);
             return Ok(result);
         }
@@ -168,9 +165,6 @@ mod tests {
     #[test]
     fn test_index_optimization_task_type() {
         let executor = IndexOptimizationExecutor::new();
-        assert_eq!(
-            executor.task_type(),
-            ProactiveTask::IndexOptimization
-        );
+        assert_eq!(executor.task_type(), ProactiveTask::IndexOptimization);
     }
 }

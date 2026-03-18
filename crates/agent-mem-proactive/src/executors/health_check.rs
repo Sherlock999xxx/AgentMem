@@ -7,9 +7,7 @@ use chrono::Utc;
 use tracing::{info, warn};
 
 use crate::error::{ProactiveError, Result};
-use crate::models::{
-    ProactiveTask, TaskExecutionContext, TaskResult, TaskStatus,
-};
+use crate::models::{ProactiveTask, TaskExecutionContext, TaskResult, TaskStatus};
 use crate::scheduler::TaskExecutor;
 
 /// Health check executor
@@ -39,11 +37,7 @@ impl HealthCheckExecutor {
     }
 
     /// Create with custom configuration
-    pub fn with_config(
-        check_database: bool,
-        check_indexes: bool,
-        check_task_queue: bool,
-    ) -> Self {
+    pub fn with_config(check_database: bool, check_indexes: bool, check_task_queue: bool) -> Self {
         Self {
             check_database,
             check_indexes,
@@ -108,11 +102,7 @@ impl HealthCheckExecutor {
             }
         }
 
-        let mut result = TaskResult::new(
-            task_id,
-            ProactiveTask::HealthCheck,
-            started_at,
-        );
+        let mut result = TaskResult::new(task_id, ProactiveTask::HealthCheck, started_at);
 
         if issues.is_empty() {
             result.completed(items_checked, items_healthy);

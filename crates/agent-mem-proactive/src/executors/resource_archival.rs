@@ -7,9 +7,7 @@ use chrono::Utc;
 use tracing::info;
 
 use crate::error::{ProactiveError, Result};
-use crate::models::{
-    ProactiveTask, TaskExecutionContext, TaskResult, TaskStatus,
-};
+use crate::models::{ProactiveTask, TaskExecutionContext, TaskResult, TaskStatus};
 use crate::scheduler::TaskExecutor;
 
 /// Resource archival executor
@@ -128,8 +126,7 @@ impl TaskExecutor for ResourceArchivalExecutor {
         if context.dry_run {
             let started_at = Utc::now();
             let task_id = format!("resource-archival-dry-{}", started_at.timestamp());
-            let mut result =
-                TaskResult::new(task_id, ProactiveTask::ResourceArchival, started_at);
+            let mut result = TaskResult::new(task_id, ProactiveTask::ResourceArchival, started_at);
             result.completed(0, 0);
             return Ok(result);
         }

@@ -2,6 +2,14 @@
 
 ## Patterns
 
+### mem-1773804355-b9e7
+> pattern: when multiple cargo runs contend during Ralph loops, switch verification to a fresh per-task --target-dir instead of waiting on the shared artifact lock
+<!-- tags: cargo, testing, ralph | created: 2026-03-18 -->
+
+### mem-1773803537-5f5b
+> pattern: when concurrent Ralph loops contend for the workspace target directory, run cargo verification with an isolated --target-dir to avoid artifact-lock stalls
+<!-- tags: cargo, testing, ralph | created: 2026-03-18 -->
+
 ### mem-1772349435-8f74
 > AgentMem 阶段2完成: Category类别层级系统实现完成 (agent-mem-category crate ~2,100行代码)。核心特性: (1)Category数据模型支持path/name/parent_id/children_ids/summary/embedding/item_count, (2)CategoryPath支持层级路径解析和验证(/偏好/沟通/风格), (3)CategoryTreeNode支持树形结构可视化, (4)CategoryManager trait定义完整CRUD操作, (5)InMemoryCategoryManager实现HashMap存储。技术亮点: 自动父类别创建、多租户支持(user_id+agent_id)、38个单元测试全部通过。下一步: 阶段3 Extraction提取管道框架。
 <!-- tags: agentmem, category, implementation | created: 2026-03-01 -->
@@ -66,7 +74,71 @@
 
 ## Fixes
 
+### mem-1773806393-5075
+> failure: cmd=/Users/louloulin/.cargo/bin/ralph tools task ensure "Update mem111 with integration gap assessment and SDK migration roadmap" --key analysis:mem111-integration-roadmap -p 2 -d ..., exit=2, error=unrecognized subcommand ensure, next=use ralph tools task add when ensure is unavailable in the current CLI
+<!-- tags: tooling, error-handling, ralph | created: 2026-03-18 -->
+
+### mem-1773806042-a4b0
+> failure: cmd=/Users/louloulin/.cargo/bin/ralph tools task start task-1772345012-d328, exit=2, error=unrecognized subcommand start, next=use supported task lifecycle commands only and rely on task state files/ready list for progression
+<!-- tags: tooling, error-handling, ralph | created: 2026-03-18 -->
+
+### mem-1773805925-bcb0
+> fix: after '/Users/louloulin/.cargo/bin/ralph tools task close <id>' reports success, '/Users/louloulin/.cargo/bin/ralph tools task show <id>' may still print stale status; verify the real state via '/Users/louloulin/.cargo/bin/ralph tools task list' or '.ralph/agent/tasks.jsonl' instead
+<!-- tags: ralph, tooling, error-handling | created: 2026-03-18 -->
+
+### mem-1773805590-5f91
+> failure: cmd=cargo test -p agent-mem-proactive --target-dir /tmp/agentmem-proactive-target-0b4b, exit=101, error=agent-mem-core failed to compile at crates/agent-mem-core/src/storage/coordinator.rs:197 due type annotations needed for Option<_>, next=avoid the unrelated core crate dependency for proactive executors or fix the coordinator inference bug in a separate task
+<!-- tags: cargo, testing, agentmem, error-handling | created: 2026-03-18 -->
+
+### mem-1773804560-b2ac
+> failure: cmd=/Users/louloulin/.cargo/bin/ralph tools task start task-1772351699-0b4b, exit=2, error=unrecognized subcommand start, next=inspect task CLI help and use supported task lifecycle commands only
+<!-- tags: tooling, error-handling, ralph | created: 2026-03-18 -->
+
+### mem-1773803834-29ae
+> failure: cmd=/Users/louloulin/.cargo/bin/ralph tools task start task-1772351685-e302, exit=2, error=unrecognized subcommand start, next=inspect task CLI help and use supported task lifecycle commands only
+<!-- tags: tooling, error-handling, ralph | created: 2026-03-18 -->
+
+### mem-1773803445-976f
+> failure: cmd=cargo test -p agent-mem-proactive, exit=blocked, error=artifact directory lock held by stale cargo pid 12029 from an earlier run, next=terminate the stale cargo process and rerun the active verification
+<!-- tags: tooling, error-handling, cargo, testing | created: 2026-03-18 -->
+
+### mem-1773803445-8fb7
+> failure: cmd=/Users/louloulin/.cargo/bin/ralph tools interact progress ..., exit=1, error=No bot token configured, next=skip interact progress unless RALPH_TELEGRAM_BOT_TOKEN is configured
+<!-- tags: tooling, error-handling, ralph, robot | created: 2026-03-18 -->
+
+### mem-1773803347-3751
+> failure: cmd=cargo fmt -p agent-mem-proactive, exit=1, error=rustfmt config parse failed due duplicate use_try_shorthand key, next=run rustfmt with a temporary clean config-path until workspace rustfmt.toml is fixed
+<!-- tags: tooling, error-handling, rustfmt | created: 2026-03-18 -->
+
+### mem-1773803317-3a28
+> failure: cmd=sed -n '1,220p' .ralph/agent/decisions.md, exit=1, error=.ralph/agent/decisions.md missing, next=create the decision journal only when a <=80 confidence architectural decision must be recorded
+<!-- tags: tooling, error-handling, ralph | created: 2026-03-18 -->
+
+### mem-1773802441-b5fc
+> failure: cmd=/Users/louloulin/.cargo/bin/ralph tools task start task-1772351678-b1f8, exit=2, error=unrecognized subcommand start, next=inspect task CLI help and use supported task lifecycle commands only
+<!-- tags: tooling, error-handling, ralph | created: 2026-03-18 -->
+
+### mem-1773802413-9c24
+> failure: cmd=sed -n '1,220p' .ralph/agent/scratchpad.md, exit=1, error=.ralph/agent/scratchpad.md missing, next=recreate scratchpad and append current loop notes
+<!-- tags: tooling, error-handling, ralph | created: 2026-03-18 -->
+
 ## Context
+
+### mem-1773806361-0c4b
+> context: AgentMem workspace now has resource/category/extraction/proactive crates, but public Rust/client/server/SDK surfaces remain MemoryType-first; the main remaining gap is platform-level file-centric model and migration API exposure
+<!-- tags: agentmem, migration, sdk, integration | created: 2026-03-18 -->
+
+### mem-1773805894-8178
+> context: agent-mem-proactive executors now integrate via SemanticMemoryStore and CategoryManager with injectable handles, covering auto-categorize tree_path writeback, semantic dedupe deletion, and category summary refresh while keeping no-op fallback when backends are absent
+<!-- tags: agentmem, proactive, category, integration | created: 2026-03-18 -->
+
+### mem-1773804455-1c31
+> context: TaskScheduler 现已消费结构化 TaskSchedule，支持 interval/cron next_run、event queue trigger、batch_window 门控以及运行中后台任务取消；ProactiveAgent 同步暴露 trigger_task/cancel_task 门面
+<!-- tags: agentmem, proactive, scheduler | created: 2026-03-18 -->
+
+### mem-1773803686-48eb
+> context: agent-mem-proactive now boots through a ProactiveAgent facade that registers built-in executors, loads config-driven schedules, and falls back to six default proactive tasks for initialization
+<!-- tags: agentmem, proactive, architecture | created: 2026-03-18 -->
 
 ### mem-1772346401-cf41
 > AgentMem 文件核心改造分析完成: 创建了 todo3.md (中文代码深度分析版 ~500行)。基于对 772 个 Rust 文件的探索,制定了详细的复用和重构计划: 保留 85% 代码 (101K LOC 核心引擎, 8个专业代理, 5种搜索引擎, 30+ 存储后端, 20+ LLM 集成, 多语言 SDK), 重构 15% 代码 (MemoryType → Category, 类型分发 → 类别路由, 5阶段检索 → 7阶段检索), 新增 4 个 crate (~5K LOC): agent-mem-resource (资源抽象), agent-mem-category (类别系统), agent-mem-extraction (提取管道), agent-mem-proactive (主动代理)。制定了 6 阶段实施路线图 (14-19周), 每阶段拆解到天级别的任务清单。采用双 API 兼容性策略, 确保零破坏性变更。

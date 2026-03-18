@@ -57,3 +57,9 @@
 - 运行时仍残留 `task-1772345012-d328` 这一旧的阶段总任务，但其描述是“集成 8 个 agents + 迁移全部 SDK”的实施收口项，和当前分析型 objective 不再匹配，也不满足 Ralph 单任务 1-2 轮可验证的原子粒度。
 - 本轮再次验证 `$RALPH_BIN tools task start` 依旧不存在，报错 `unrecognized subcommand 'start'`；已补记 fix memory `mem-1773815198-3d58`，后续在当前 CLI 中继续只使用 `show/close/fail/list/ready`。
 - 收口策略：不伪造“集成已完成”，而是将该旧总任务按 superseded/非原子任务处理为终态；后续若进入真正的集成实现目标，应基于 `mem111.md` 的阶段拆分重新创建独立实施任务，而不是重新打开这个 umbrella task。
+
+## 2026-03-18（本轮：task-1773816908-ab25）
+- `.ralph/agent/scratchpad.md` 在工作树中缺失，但 `HEAD` 中仍有完整内容；本轮已按“先恢复再追加”的方式重建，避免丢失前序 proactive 与 mem111 收口结论。
+- 已重新抽样核对 `crates/agent-mem/src/lib.rs`、`crates/agent-mem-core/src/agents/mod.rs`、`crates/agent-mem-core/src/manager.rs`、`crates/agent-mem-core/src/retrieval/router.rs`、`crates/agent-mem-client/src/models.rs`、`crates/agent-mem-server/src/models.rs` 及 Python/JavaScript/Go/仓颉 SDK 类型层，确认 `mem111.md` 中“legacy-first 公共表面未切换、MemoryType 仍是主轴”的判断仍与代码一致。
+- 已复核 Mem0、Zep、Letta、LangMem 的官方资料，四者当前共同趋势仍是把记忆能力包装成统一产品 surface、后台整理能力和可操作工作区，而不是继续堆叠更多内部 memory type。这个结论与 `mem111.md` 当前建议一致，因此本轮只做轻量补注，不改核心判断。
+- 当前 objective 已具备结束条件：中文总评、代码证据、外部平台检索、后续阶段化计划均已在 `mem111.md` 内成文；后续工作应切换到新的实施 objective，而不是继续在本分析目标下追加伪实现。

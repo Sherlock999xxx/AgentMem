@@ -74,6 +74,14 @@
 
 ## Fixes
 
+### mem-1773816923-fe15
+> failure: cmd=/Users/louloulin/.cargo/bin/ralph tools task start task-1773816908-ab25, exit=2, error=unrecognized subcommand start, next=use supported show/close/fail lifecycle and treat newly added task as active in the current Ralph CLI
+<!-- tags: tooling, error-handling, ralph | created: 2026-03-18 -->
+
+### mem-1773816879-9321
+> failure: cmd=sed -n '1,240p' .ralph/agent/scratchpad.md, exit=1, error=.ralph/agent/scratchpad.md missing, next=recreate scratchpad and append current loop notes
+<!-- tags: tooling, error-handling, ralph | created: 2026-03-18 -->
+
 ### mem-1773815198-3d58
 > failure: cmd=/Users/louloulin/.cargo/bin/ralph tools task start task-1772345012-d328, exit=2, error=unrecognized subcommand start, next=use supported show/close/fail lifecycle and avoid start in the current Ralph CLI
 <!-- tags: tooling, error-handling, ralph | created: 2026-03-18 -->

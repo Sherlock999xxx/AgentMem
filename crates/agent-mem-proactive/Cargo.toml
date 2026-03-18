@@ -33,9 +33,9 @@ tokio-cron-scheduler = "0.12"
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
-# Optional: integration with other crates
-# agent-mem-category = { path = "../agent-mem-category", optional = true }
-# agent-mem-resource = { path = "../agent-mem-resource", optional = true }
+# Existing AgentMem integrations
+agent-mem-category = { path = "../agent-mem-category" }
+agent-mem-traits = { path = "../agent-mem-traits" }
 
 [dev-dependencies]
 tokio-test = "0.4"

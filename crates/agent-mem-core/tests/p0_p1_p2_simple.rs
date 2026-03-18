@@ -26,10 +26,16 @@ fn test_p0_time_decay_model() {
 
     // 测试衰减计算
     let score_now = model.decay_score(0.0);
-    assert!((score_now - 1.0).abs() < 0.01, "Current memory should have score ~1.0");
+    assert!(
+        (score_now - 1.0).abs() < 0.01,
+        "Current memory should have score ~1.0"
+    );
 
     let score_old = model.decay_score(10.0);
-    assert!(score_old < score_now, "Older memory should have lower score");
+    assert!(
+        score_old < score_now,
+        "Older memory should have lower score"
+    );
     assert!(score_old > 0.0, "Score should be positive");
 }
 
@@ -57,13 +63,7 @@ fn test_p1_memory_v4_attributes() {
     use agent_mem_core::Memory;
     use agent_mem_traits::AttributeKey;
 
-    let memory = Memory::new(
-        "test_agent",
-        None,
-        "test",
-        "Test content",
-        0.5,
-    );
+    let memory = Memory::new("test_agent", None, "test", "Test content", 0.5);
 
     // 验证可以访问属性
     let attrs = memory.attributes();
@@ -104,18 +104,12 @@ fn test_p2_multilevel_cache_config() {
 // 集成测试: P0-P2 功能协同
 #[test]
 fn test_p0_p1_p2_integration() {
-    use agent_mem_core::Memory;
     use agent_mem_core::llm_optimizer::ContextCompressorConfig;
+    use agent_mem_core::Memory;
     use agent_mem_traits::scheduler::ScheduleConfig;
 
     // P1: 创建记忆
-    let memory = Memory::new(
-        "test_agent",
-        None,
-        "test",
-        "Integration test",
-        0.8,
-    );
+    let memory = Memory::new("test_agent", None, "test", "Integration test", 0.8);
 
     assert!(!memory.content().is_empty());
 

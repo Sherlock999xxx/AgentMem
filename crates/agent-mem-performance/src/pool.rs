@@ -112,7 +112,7 @@ impl ObjectPool {
     }
 
     /// Get an object from the pool or create a new one
-    /// 
+    ///
     /// This implementation properly reuses objects from the pool when available,
     /// providing significant performance improvements over always creating new objects.
     pub fn get<T: Poolable + Default>(&self) -> Result<T> {
@@ -126,7 +126,7 @@ impl ObjectPool {
     }
 
     /// Return an object to the pool for reuse
-    /// 
+    ///
     /// This implementation properly returns objects to the pool for reuse,
     /// significantly improving performance by reducing allocations.
     pub fn return_object<T: Poolable>(&self, object: T) {
@@ -135,7 +135,7 @@ impl ObjectPool {
         if current > 0 {
             self.borrowed_count.fetch_sub(1, Ordering::Relaxed);
         }
-        
+
         // For StringBuffer, return to pool if under max size
         // This is a simplified implementation - production would use type erasure
         let current_size = self.pool.len();

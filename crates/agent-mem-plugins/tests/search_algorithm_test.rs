@@ -169,7 +169,8 @@ fn test_fuzzy_search_similarity() {
 
 #[test]
 fn test_search_result_ranking() {
-    let mut results = [SearchResult {
+    let mut results = [
+        SearchResult {
             memory_id: "1".to_string(),
             score: 5.0,
             matched_terms: vec!["rust".to_string()],
@@ -183,7 +184,8 @@ fn test_search_result_ranking() {
             memory_id: "3".to_string(),
             score: 3.0,
             matched_terms: vec!["programming".to_string()],
-        }];
+        },
+    ];
 
     // Sort by score (descending)
     results.sort_by(|a, b| b.score.partial_cmp(&a.score).unwrap());

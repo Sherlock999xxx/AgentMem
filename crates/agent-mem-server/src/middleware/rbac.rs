@@ -3,11 +3,7 @@
 use crate::auth::UserContext;
 use crate::error::{ServerError, ServerResult};
 use crate::rbac::{Action, AuditLogEntry, RbacChecker, Resource};
-use axum::{
-    extract::Request,
-    middleware::Next,
-    response::Response,
-};
+use axum::{extract::Request, middleware::Next, response::Response};
 
 /// 权限验证中间件配置
 #[derive(Clone)]
@@ -202,7 +198,9 @@ pub async fn no_read_only(
             );
             audit_log.log();
 
-            Err(ServerError::forbidden("Read-only users cannot perform this action"))
+            Err(ServerError::forbidden(
+                "Read-only users cannot perform this action",
+            ))
         } else {
             Ok(next.run(req).await)
         }

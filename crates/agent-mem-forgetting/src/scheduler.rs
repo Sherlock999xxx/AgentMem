@@ -33,8 +33,8 @@
 
 use crate::curve::{EbbinghausCurve, ForgettingCurve};
 use crate::protection::{MemoryProtection, ProtectionLevel};
-use agent_mem_traits::abstractions::Memory;
 use agent_mem_event_bus::{EventBus, EventType};
+use agent_mem_traits::abstractions::Memory;
 use agent_mem_traits::{AgentMemError, Result};
 use chrono::{DateTime, Duration, Utc};
 use serde::{Deserialize, Serialize};
@@ -67,8 +67,8 @@ impl Default for ForgettingConfig {
     fn default() -> Self {
         Self {
             check_interval_seconds: 3600, // 1 hour
-            forgetting_threshold: 0.1,   // 10% retention
-            default_strength: 7.0,       // 7 days
+            forgetting_threshold: 0.1,    // 10% retention
+            default_strength: 7.0,        // 7 days
             enable_events: true,
             max_memories_per_check: 1000,
         }
@@ -84,7 +84,10 @@ impl ForgettingConfig {
 
     /// Set forgetting threshold
     pub fn with_threshold(mut self, threshold: f64) -> Self {
-        assert!(threshold > 0.0 && threshold < 1.0, "Threshold must be in (0, 1)");
+        assert!(
+            threshold > 0.0 && threshold < 1.0,
+            "Threshold must be in (0, 1)"
+        );
         self.forgetting_threshold = threshold;
         self
     }
@@ -195,7 +198,9 @@ impl ForgettingScheduler {
     pub async fn start(&self) -> Result<()> {
         let mut running = self.running.write().await;
         if *running {
-            return Err(AgentMemError::MemoryError("Scheduler already running".to_string()));
+            return Err(AgentMemError::MemoryError(
+                "Scheduler already running".to_string(),
+            ));
         }
 
         *running = true;
@@ -226,7 +231,8 @@ impl ForgettingScheduler {
                 let mut stats_lock = stats.write().await;
                 stats_lock.total_checks += 1;
                 stats_lock.last_check_at = Some(Utc::now());
-                stats_lock.next_check_at = Some(Utc::now() + Duration::seconds(interval.as_secs() as i64));
+                stats_lock.next_check_at =
+                    Some(Utc::now() + Duration::seconds(interval.as_secs() as i64));
                 drop(stats_lock);
 
                 // Note: In real implementation, this would query from storage
@@ -247,7 +253,9 @@ impl ForgettingScheduler {
     pub async fn stop(&self) -> Result<()> {
         let mut running = self.running.write().await;
         if !*running {
-            return Err(AgentMemError::MemoryError("Scheduler not running".to_string()));
+            return Err(AgentMemError::MemoryError(
+                "Scheduler not running".to_string(),
+            ));
         }
 
         *running = false;
@@ -366,7 +374,9 @@ impl ForgettingScheduler {
         }
 
         let protection_level = self.protection.get_protection(memory_id).await;
-        let base_time = self.curve.time_to_threshold(self.config.forgetting_threshold);
+        let base_time = self
+            .curve
+            .time_to_threshold(self.config.forgetting_threshold);
         let protected_time = base_time * protection_level.multiplier();
 
         Some(created_at + Duration::days(protected_time as i64))
@@ -382,7 +392,10 @@ mod tests {
     #[test]
     fn test_config_default() {
         let config = ForgettingConfig::default();
-        assert_eq!(config.check_interval_seconds, DEFAULT_CHECK_INTERVAL_SECONDS);
+        assert_eq!(
+            config.check_interval_seconds,
+            DEFAULT_CHECK_INTERVAL_SECONDS
+        );
         assert_eq!(config.forgetting_threshold, DEFAULT_FORGETTING_THRESHOLD);
         assert_eq!(config.default_strength, 7.0);
     }
@@ -457,9 +470,7 @@ mod tests {
         let scheduler = ForgettingScheduler::new(config).await.unwrap();
 
         let created_at = Utc::now();
-        let estimate = scheduler
-            .estimate_forgetting("mem-1", created_at)
-            .await;
+        let estimate = scheduler.estimate_forgetting("mem-1", created_at).await;
 
         assert!(estimate.is_some());
 
@@ -480,9 +491,7 @@ mod tests {
             .await;
 
         let created_at = Utc::now();
-        let estimate = scheduler
-            .estimate_forgetting("mem-1", created_at)
-            .await;
+        let estimate = scheduler.estimate_forgetting("mem-1", created_at).await;
 
         assert!(estimate.is_none());
     }

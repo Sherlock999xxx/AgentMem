@@ -80,11 +80,10 @@ impl AuditLogManager {
             .open(&log_file)
             .await?;
 
-        let json_line = serde_json::to_string(&log)
-            .unwrap_or_else(|e| {
-                warn!("Failed to serialize audit log: {}", e);
-                format!(r#"{{"error":"serialization_failed","message":"{}"}}"#, e)
-            });
+        let json_line = serde_json::to_string(&log).unwrap_or_else(|e| {
+            warn!("Failed to serialize audit log: {}", e);
+            format!(r#"{{"error":"serialization_failed","message":"{}"}}"#, e)
+        });
         file.write_all(format!("{}\n", json_line).as_bytes())
             .await?;
         file.flush().await?;
@@ -119,11 +118,10 @@ impl AuditLogManager {
             .open(&log_file)
             .await?;
 
-        let json_line = serde_json::to_string(&event)
-            .unwrap_or_else(|e| {
-                warn!("Failed to serialize security event: {}", e);
-                format!(r#"{{"error":"serialization_failed","message":"{}"}}"#, e)
-            });
+        let json_line = serde_json::to_string(&event).unwrap_or_else(|e| {
+            warn!("Failed to serialize security event: {}", e);
+            format!(r#"{{"error":"serialization_failed","message":"{}"}}"#, e)
+        });
         file.write_all(format!("{}\n", json_line).as_bytes())
             .await?;
         file.flush().await?;
@@ -191,7 +189,7 @@ fn get_or_generate_trace_id(request: &Request) -> String {
             }
         }
     }
-    
+
     // 如果不存在，生成新的trace_id
     uuid::Uuid::new_v4().to_string()
 }
@@ -227,9 +225,8 @@ pub async fn audit_logging_middleware(request: Request, next: Next) -> Response 
     // 🆕 Phase 4.2: 在响应头中添加trace_id
     response.headers_mut().insert(
         axum::http::HeaderName::from_static("x-trace-id"),
-        axum::http::HeaderValue::from_str(&trace_id).unwrap_or_else(|_| {
-            axum::http::HeaderValue::from_static("unknown")
-        }),
+        axum::http::HeaderValue::from_str(&trace_id)
+            .unwrap_or_else(|_| axum::http::HeaderValue::from_static("unknown")),
     );
 
     // Calculate duration

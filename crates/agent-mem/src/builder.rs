@@ -438,20 +438,22 @@ impl MemoryBuilder {
     /// # Ok(())
     /// # }
     /// ```
-    pub fn enable_embedding_queue(
-        mut self,
-        batch_size: usize,
-        batch_interval_ms: u64,
-    ) -> Self {
+    pub fn enable_embedding_queue(mut self, batch_size: usize, batch_interval_ms: u64) -> Self {
         self.config.enable_embedding_queue = Some(true);
         self.config.embedding_batch_size = Some(batch_size);
         self.config.embedding_batch_interval_ms = Some(batch_interval_ms);
         // 性能优化提示
         if batch_size < 32 {
-            tracing::warn!("批处理大小 {} 可能太小，推荐使用 64-128 用于高并发场景", batch_size);
+            tracing::warn!(
+                "批处理大小 {} 可能太小，推荐使用 64-128 用于高并发场景",
+                batch_size
+            );
         }
         if batch_interval_ms < 10 {
-            tracing::warn!("批处理间隔 {}ms 可能太短，推荐使用 20-50ms 用于高并发场景", batch_interval_ms);
+            tracing::warn!(
+                "批处理间隔 {}ms 可能太短，推荐使用 20-50ms 用于高并发场景",
+                batch_interval_ms
+            );
         }
         self
     }
@@ -748,12 +750,8 @@ fn detect_llm_from_env() -> Option<(String, String)> {
 
     // 检测华为 MaaS
     if std::env::var("HUAWEI_MAAS_API_KEY").is_ok() {
-        return Some((
-            "huawei_maas".to_string(),
-            "deepseek-v3.2-exp".to_string(),
-        ));
+        return Some(("huawei_maas".to_string(), "deepseek-v3.2-exp".to_string()));
     }
 
     None
 }
-

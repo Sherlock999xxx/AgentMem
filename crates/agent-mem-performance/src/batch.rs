@@ -151,7 +151,7 @@ impl BatchProcessor {
     {
         Err(AgentMemError::memory_error(
             "Batch processor submit is temporarily disabled due to type safety issues. \
-             See TODO in batch.rs for redesign approach."
+             See TODO in batch.rs for redesign approach.",
         ))
 
         /* Original implementation (commented out due to type safety issues):

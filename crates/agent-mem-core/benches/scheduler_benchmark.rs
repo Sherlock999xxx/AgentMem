@@ -69,10 +69,8 @@ fn create_candidate_memories(count: usize) -> Vec<agent_mem_traits::MemoryV4> {
 /// 基准测试: 调度器选择性能（不同候选数量）
 fn bench_scheduler_selection_by_candidate_count(c: &mut Criterion) {
     let rt = tokio::runtime::Runtime::new().unwrap();
-    let scheduler = DefaultMemoryScheduler::new(
-        ScheduleConfig::balanced(),
-        ExponentialDecayModel::default(),
-    );
+    let scheduler =
+        DefaultMemoryScheduler::new(ScheduleConfig::balanced(), ExponentialDecayModel::default());
 
     let candidate_counts = vec![10, 50, 100, 200, 500];
 
@@ -112,10 +110,8 @@ fn bench_scheduler_selection_by_candidate_count(c: &mut Criterion) {
 /// 基准测试: 调度器选择性能（不同 top-k 值）
 fn bench_scheduler_selection_by_top_k(c: &mut Criterion) {
     let rt = tokio::runtime::Runtime::new().unwrap();
-    let scheduler = DefaultMemoryScheduler::new(
-        ScheduleConfig::balanced(),
-        ExponentialDecayModel::default(),
-    );
+    let scheduler =
+        DefaultMemoryScheduler::new(ScheduleConfig::balanced(), ExponentialDecayModel::default());
 
     let memories = create_candidate_memories(100);
     let query = "test query for benchmarking";
@@ -125,26 +121,22 @@ fn bench_scheduler_selection_by_top_k(c: &mut Criterion) {
     let mut group = c.benchmark_group("scheduler_top_k");
 
     for top_k in top_k_values {
-        group.bench_with_input(
-            BenchmarkId::new("top_k", top_k),
-            &top_k,
-            |b, &_top_k| {
-                b.to_async(tokio::runtime::Runtime::new().unwrap())
-                    .iter(|| {
-                        let selected = rt.block_on(async {
-                            scheduler
-                                .select_memories(
-                                    black_box(query),
-                                    black_box(memories.clone()),
-                                    black_box(top_k),
-                                )
-                                .await
-                                .unwrap()
-                        });
-                        black_box(selected)
+        group.bench_with_input(BenchmarkId::new("top_k", top_k), &top_k, |b, &_top_k| {
+            b.to_async(tokio::runtime::Runtime::new().unwrap())
+                .iter(|| {
+                    let selected = rt.block_on(async {
+                        scheduler
+                            .select_memories(
+                                black_box(query),
+                                black_box(memories.clone()),
+                                black_box(top_k),
+                            )
+                            .await
+                            .unwrap()
                     });
-            },
-        );
+                    black_box(selected)
+                });
+        });
     }
 
     group.finish();
@@ -167,28 +159,25 @@ fn bench_scheduler_strategies(c: &mut Criterion) {
     let mut group = c.benchmark_group("scheduler_strategies");
 
     for (name, config) in strategies {
-        let scheduler = DefaultMemoryScheduler::new(config.clone(), ExponentialDecayModel::default());
+        let scheduler =
+            DefaultMemoryScheduler::new(config.clone(), ExponentialDecayModel::default());
 
-        group.bench_with_input(
-            BenchmarkId::from_parameter(name),
-            &name,
-            |b, &_name| {
-                b.to_async(tokio::runtime::Runtime::new().unwrap())
-                    .iter(|| {
-                        let selected = rt.block_on(async {
-                            scheduler
-                                .select_memories(
-                                    black_box(query),
-                                    black_box(memories.clone()),
-                                    black_box(10),
-                                )
-                                .await
-                                .unwrap()
-                        });
-                        black_box(selected)
+        group.bench_with_input(BenchmarkId::from_parameter(name), &name, |b, &_name| {
+            b.to_async(tokio::runtime::Runtime::new().unwrap())
+                .iter(|| {
+                    let selected = rt.block_on(async {
+                        scheduler
+                            .select_memories(
+                                black_box(query),
+                                black_box(memories.clone()),
+                                black_box(10),
+                            )
+                            .await
+                            .unwrap()
                     });
-            },
-        );
+                    black_box(selected)
+                });
+        });
     }
 
     group.finish();
@@ -196,10 +185,8 @@ fn bench_scheduler_strategies(c: &mut Criterion) {
 
 /// 基准测试: 调度分数计算性能
 fn bench_scheduler_scoring(c: &mut Criterion) {
-    let scheduler = DefaultMemoryScheduler::new(
-        ScheduleConfig::balanced(),
-        ExponentialDecayModel::default(),
-    );
+    let scheduler =
+        DefaultMemoryScheduler::new(ScheduleConfig::balanced(), ExponentialDecayModel::default());
 
     let memory = create_test_memory(0, 0.8, 1.0);
     let context = agent_mem_traits::ScheduleContext::new(0.7);
@@ -249,10 +236,8 @@ fn bench_time_decay(c: &mut Criterion) {
 /// 对比测试: 有 scheduler vs. 无 scheduler（模拟）
 fn bench_with_vs_without_scheduler(c: &mut Criterion) {
     let rt = tokio::runtime::Runtime::new().unwrap();
-    let scheduler = DefaultMemoryScheduler::new(
-        ScheduleConfig::balanced(),
-        ExponentialDecayModel::default(),
-    );
+    let scheduler =
+        DefaultMemoryScheduler::new(ScheduleConfig::balanced(), ExponentialDecayModel::default());
 
     let memories = create_candidate_memories(100);
     let query = "test query";

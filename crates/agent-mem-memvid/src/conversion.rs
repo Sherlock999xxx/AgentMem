@@ -2,8 +2,7 @@
 
 use crate::error::{MemvidError, Result};
 use agent_mem_traits::{
-    Memory, MemoryId, Content, AttributeSet, AttributeKey, AttributeValue,
-    MetadataV4
+    AttributeKey, AttributeSet, AttributeValue, Content, Memory, MemoryId, MetadataV4,
 };
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
@@ -21,7 +20,10 @@ impl MemoryConverter {
         // Create tags from attributes
         let mut tags = HashMap::new();
         tags.insert("memory_id".to_string(), memory.id.as_str().to_string());
-        tags.insert("memory_type".to_string(), Self::get_memory_type_name(&memory.attributes));
+        tags.insert(
+            "memory_type".to_string(),
+            Self::get_memory_type_name(&memory.attributes),
+        );
 
         // Add user/agent/session info
         if let Some(user_id) = memory.attributes.get(&AttributeKey::core("user_id")) {
@@ -50,7 +52,9 @@ impl MemoryConverter {
         let (attributes, metadata) = Self::deserialize_metadata(&frame.metadata)?;
 
         // Extract ID from tags
-        let memory_id = frame.tags.get("memory_id")
+        let memory_id = frame
+            .tags
+            .get("memory_id")
             .map(|id| MemoryId::from_string(id.clone()))
             .unwrap_or_else(MemoryId::new);
 
@@ -88,12 +92,18 @@ impl MemoryConverter {
         }
 
         // Add system metadata
-        map.insert("created_at".to_string(),
-            serde_json::Value::String(metadata.created_at.to_rfc3339()));
-        map.insert("updated_at".to_string(),
-            serde_json::Value::String(metadata.updated_at.to_rfc3339()));
-        map.insert("access_count".to_string(),
-            serde_json::Value::Number(serde_json::Number::from(metadata.access_count)));
+        map.insert(
+            "created_at".to_string(),
+            serde_json::Value::String(metadata.created_at.to_rfc3339()),
+        );
+        map.insert(
+            "updated_at".to_string(),
+            serde_json::Value::String(metadata.updated_at.to_rfc3339()),
+        );
+        map.insert(
+            "access_count".to_string(),
+            serde_json::Value::Number(serde_json::Number::from(metadata.access_count)),
+        );
 
         serde_json::to_string(&map)
             .map_err(|e| MemvidError::Serialization(format!("metadata: {}", e)))
@@ -126,7 +136,7 @@ impl MemoryConverter {
                     // Parse as attribute
                     if let Some(dot_pos) = key_str.find('.') {
                         let namespace = key_str[..dot_pos].to_string();
-                        let name = key_str[dot_pos+1..].to_string();
+                        let name = key_str[dot_pos + 1..].to_string();
                         let key = AttributeKey { namespace, name };
                         let attr_value = Self::json_to_attribute_value(&value)?;
                         attributes.set(key, attr_value);
@@ -143,24 +153,23 @@ impl MemoryConverter {
         match value {
             AttributeValue::String(s) => Some(serde_json::Value::String(s.clone())),
             AttributeValue::Number(n) => {
-                serde_json::Number::from_f64(*n)
-                    .map(serde_json::Value::Number)
+                serde_json::Number::from_f64(*n).map(serde_json::Value::Number)
             }
             AttributeValue::Integer(i) => {
                 Some(serde_json::Value::Number(serde_json::Number::from(*i)))
             }
             AttributeValue::Boolean(b) => Some(serde_json::Value::Bool(*b)),
-            AttributeValue::DateTime(dt) => {
-                Some(serde_json::Value::String(dt.to_rfc3339()))
-            }
+            AttributeValue::DateTime(dt) => Some(serde_json::Value::String(dt.to_rfc3339())),
             AttributeValue::List(items) => {
-                let vals: Vec<serde_json::Value> = items.iter()
+                let vals: Vec<serde_json::Value> = items
+                    .iter()
                     .filter_map(|v| Self::attribute_value_to_json(v))
                     .collect();
                 Some(serde_json::Value::Array(vals))
             }
             AttributeValue::Map(map) => {
-                let obj: serde_json::Map<String, serde_json::Value> = map.iter()
+                let obj: serde_json::Map<String, serde_json::Value> = map
+                    .iter()
                     .filter_map(|(k, v)| {
                         Self::attribute_value_to_json(v).map(|val| (k.clone(), val))
                     })
@@ -193,13 +202,15 @@ impl MemoryConverter {
                 }
             }
             serde_json::Value::Array(items) => {
-                let vals: Result<Vec<AttributeValue>> = items.iter()
+                let vals: Result<Vec<AttributeValue>> = items
+                    .iter()
                     .map(|v| Self::json_to_attribute_value(v))
                     .collect();
                 Ok(AttributeValue::List(vals?))
             }
             serde_json::Value::Object(map) => {
-                let vals: Result<HashMap<String, AttributeValue>> = map.iter()
+                let vals: Result<HashMap<String, AttributeValue>> = map
+                    .iter()
                     .map(|(k, v)| Ok((k.clone(), Self::json_to_attribute_value(v)?)))
                     .collect();
                 Ok(AttributeValue::Map(vals?))
@@ -209,7 +220,8 @@ impl MemoryConverter {
 
     /// Extract memory type name from attributes
     fn get_memory_type_name(attributes: &AttributeSet) -> String {
-        attributes.get(&AttributeKey::core("memory_type"))
+        attributes
+            .get(&AttributeKey::core("memory_type"))
             .and_then(|v| match v {
                 AttributeValue::String(s) => Some(s.clone()),
                 _ => None,
@@ -221,7 +233,10 @@ impl MemoryConverter {
     fn extract_vector(content: &Content) -> Result<Option<Vec<f32>>> {
         match content {
             Content::Vector(v) => Ok(Some(v.clone())),
-            Content::Text(_) | Content::Structured(_) | Content::Binary(_) | Content::Multimodal(_) => Ok(None),
+            Content::Text(_)
+            | Content::Structured(_)
+            | Content::Binary(_)
+            | Content::Multimodal(_) => Ok(None),
         }
     }
 }
@@ -260,8 +275,7 @@ pub struct MsgPackConverter;
 impl FrameConverter for MsgPackConverter {
     fn to_bytes(&self, frame: &FrameData) -> Result<Vec<u8>> {
         // Use JSON for now, can be optimized with MessagePack later
-        serde_json::to_vec(frame)
-            .map_err(|e| MemvidError::Serialization(format!("frame: {}", e)))
+        serde_json::to_vec(frame).map_err(|e| MemvidError::Serialization(format!("frame: {}", e)))
     }
 
     fn from_bytes(&self, bytes: &[u8]) -> Result<FrameData> {
@@ -279,8 +293,10 @@ mod tests {
         let memory = Memory {
             id: MemoryId::from_string("test-id".to_string()),
             content: Content::text("Hello, world!"),
-            attributes: AttributeSet::new()
-                .with_attribute(AttributeKey::core("user_id"), AttributeValue::String("user-123".to_string())),
+            attributes: AttributeSet::new().with_attribute(
+                AttributeKey::core("user_id"),
+                AttributeValue::String("user-123".to_string()),
+            ),
             relations: Default::default(),
             metadata: MetadataV4::default(),
         };

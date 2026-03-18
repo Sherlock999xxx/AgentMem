@@ -103,9 +103,7 @@ impl CategoryTreeNode {
         category: &Category,
         children_map: &HashMap<CategoryId, Vec<Category>>,
     ) -> CategoryTreeNode {
-        let children = children_map.get(&category.id)
-            .cloned()
-            .unwrap_or_default();
+        let children = children_map.get(&category.id).cloned().unwrap_or_default();
 
         let mut node = CategoryTreeNode::new(category.clone());
         for child in children {
@@ -117,7 +115,10 @@ impl CategoryTreeNode {
     /// Pretty print the tree
     pub fn pretty_print(&self, indent: usize) -> String {
         let indent_str = "  ".repeat(indent);
-        let mut result = format!("{}{} (items: {})\n", indent_str, self.category.name, self.category.item_count);
+        let mut result = format!(
+            "{}{} (items: {})\n",
+            indent_str, self.category.name, self.category.item_count
+        );
         for child in &self.children {
             result.push_str(&child.pretty_print(indent + 1));
         }
@@ -161,8 +162,18 @@ mod tests {
     #[test]
     fn test_tree_node_with_children() {
         let parent = create_test_category("id1", "/preferences", "preferences", None);
-        let child1 = create_test_category("id2", "/preferences/communication", "communication", Some("id1"));
-        let child2 = create_test_category("id3", "/preferences/programming", "programming", Some("id1"));
+        let child1 = create_test_category(
+            "id2",
+            "/preferences/communication",
+            "communication",
+            Some("id1"),
+        );
+        let child2 = create_test_category(
+            "id3",
+            "/preferences/programming",
+            "programming",
+            Some("id1"),
+        );
 
         let mut node = CategoryTreeNode::new(parent);
         node.add_child(CategoryTreeNode::new(child1));
@@ -178,7 +189,12 @@ mod tests {
         let root = create_test_category("id1", "/", "root", None);
         let child1 = create_test_category("id2", "/preferences", "preferences", Some("id1"));
         let child2 = create_test_category("id3", "/skills", "skills", Some("id1"));
-        let grandchild = create_test_category("id4", "/preferences/communication", "communication", Some("id2"));
+        let grandchild = create_test_category(
+            "id4",
+            "/preferences/communication",
+            "communication",
+            Some("id2"),
+        );
 
         let categories = vec![root, child1, child2, grandchild];
         let roots = CategoryTreeNode::build_tree(categories);
@@ -225,7 +241,12 @@ mod tests {
     fn test_pretty_print() {
         let root = create_test_category("id1", "/", "root", None);
         let child = create_test_category("id2", "/preferences", "preferences", Some("id1"));
-        let grandchild = create_test_category("id3", "/preferences/communication", "communication", Some("id2"));
+        let grandchild = create_test_category(
+            "id3",
+            "/preferences/communication",
+            "communication",
+            Some("id2"),
+        );
 
         let mut node = CategoryTreeNode::new(root);
         let mut child_node = CategoryTreeNode::new(child);

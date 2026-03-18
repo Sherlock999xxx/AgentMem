@@ -5,7 +5,12 @@
 use crate::auth::AuthService;
 use crate::error::{ServerError, ServerResult};
 use agent_mem_core::storage::traits::ApiKeyRepositoryTrait;
-use axum::{extract::{Request, State}, http::header, middleware::Next, response::Response};
+use axum::{
+    extract::{Request, State},
+    http::header,
+    middleware::Next,
+    response::Response,
+};
 use sha2::{Digest, Sha256};
 use std::sync::Arc;
 
@@ -184,7 +189,7 @@ pub async fn tenant_isolation_middleware(
 ///
 /// SECURITY: This middleware enforces authentication in production.
 /// In development mode (debug builds), it provides a default user for testing.
-/// 
+///
 /// IMPORTANT: Production builds MUST have valid authentication configured.
 pub async fn require_auth_middleware(
     State(config): State<crate::config::ServerConfig>,
@@ -206,7 +211,7 @@ pub async fn require_auth_middleware(
             };
             request.extensions_mut().insert(default_user);
         }
-        
+
         // Production mode: reject unauthenticated requests
         #[cfg(not(debug_assertions))]
         {
@@ -216,7 +221,7 @@ pub async fn require_auth_middleware(
                 "message": "This endpoint requires authentication. Please provide valid credentials.",
                 "code": 401
             });
-            
+
             return Response::builder()
                 .status(401)
                 .header("Content-Type", "application/json")

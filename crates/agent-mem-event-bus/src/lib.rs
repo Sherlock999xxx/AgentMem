@@ -45,11 +45,11 @@ pub mod handler;
 pub mod stream;
 
 pub use bus::EventBus;
-pub use handler::{EventHandler, EventFilter};
+pub use handler::{EventFilter, EventHandler};
 pub use stream::EventStream;
 
 // Re-exports from agent-mem-performance
-pub use agent_mem_performance::telemetry::{MemoryEvent, EventType};
+pub use agent_mem_performance::telemetry::{EventType, MemoryEvent};
 
 use agent_mem_traits::Result;
 

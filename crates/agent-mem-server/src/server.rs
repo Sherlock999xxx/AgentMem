@@ -58,7 +58,9 @@ impl MemoryServer {
         // Create repositories using factory
         let repositories = RepositoryFactory::create_repositories(&db_config)
             .await
-            .map_err(|e| ServerError::server_error(format!("Failed to create repositories: {e}")))?;
+            .map_err(|e| {
+                ServerError::server_error(format!("Failed to create repositories: {e}"))
+            })?;
 
         info!("Database repositories initialized");
 
@@ -116,7 +118,7 @@ impl MemoryServer {
             #[cfg(unix)]
             {
                 use tokio::signal::unix::{signal, SignalKind};
-                
+
                 let ctrl_c_stream = tokio::signal::ctrl_c();
                 let mut terminate_stream = match signal(SignalKind::terminate()) {
                     Ok(stream) => stream,
@@ -150,11 +152,10 @@ impl MemoryServer {
         };
 
         // Start the server with graceful shutdown
-        let server = axum::serve(listener, self.router)
-            .with_graceful_shutdown(shutdown_signal);
+        let server = axum::serve(listener, self.router).with_graceful_shutdown(shutdown_signal);
 
         info!("✅ Server is ready to accept connections");
-        
+
         server
             .await
             .map_err(|e| ServerError::server_error(e.to_string()))?;
@@ -191,7 +192,7 @@ mod tests {
     async fn test_server_creation() {
         let mut config = ServerConfig::default();
         config.enable_logging = false; // Disable logging to avoid telemetry conflicts
-        // Use :memory: format for SQLite in-memory database (each connection gets its own database)
+                                       // Use :memory: format for SQLite in-memory database (each connection gets its own database)
         config.database_url = ":memory:".to_string();
         let server = MemoryServer::new(config).await;
         if let Err(e) = &server {
@@ -205,16 +206,18 @@ mod tests {
     async fn test_server_config() {
         let mut config = ServerConfig::default();
         config.enable_logging = false; // Disable logging to avoid telemetry conflicts
-        // Use :memory: format for SQLite in-memory database (each connection gets its own database)
+                                       // Use :memory: format for SQLite in-memory database (each connection gets its own database)
         config.database_url = ":memory:".to_string();
         let server = MemoryServer::new(config.clone()).await;
         if let Err(e) = &server {
             eprintln!("Server creation failed: {:?}", e);
         }
-        let server = server.map_err(|e| {
-            eprintln!("Server creation failed: {:?}", e);
-            e
-        }).expect("Server should be created successfully");
+        let server = server
+            .map_err(|e| {
+                eprintln!("Server creation failed: {:?}", e);
+                e
+            })
+            .expect("Server should be created successfully");
         assert_eq!(server.config().port, config.port);
     }
 }

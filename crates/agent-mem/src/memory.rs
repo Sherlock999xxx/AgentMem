@@ -14,8 +14,8 @@ use agent_mem_traits::{AgentMemError, MemoryItem, Result};
 use crate::builder::MemoryBuilder;
 use crate::orchestrator::MemoryOrchestrator;
 use crate::types::{
-    AddMemoryOptions, AddResult, DeleteAllOptions, GetAllOptions, MemoryScope,
-    MemoryStats, SearchOptions,
+    AddMemoryOptions, AddResult, DeleteAllOptions, GetAllOptions, MemoryScope, MemoryStats,
+    SearchOptions,
 };
 
 /// 统一的记忆管理接口
@@ -250,7 +250,8 @@ impl Memory {
             return Err(AgentMemError::ConfigError(
                 "智能功能需要 LLM API Key。请设置以下环境变量之一: \
                  OPENAI_API_KEY, ZHIPU_API_KEY, DEEPSEEK_API_KEY, ANTHROPIC_API_KEY\n\
-                 提示: 使用 Memory::new_core() 可无需 API Key 使用核心功能。".to_string()
+                 提示: 使用 Memory::new_core() 可无需 API Key 使用核心功能。"
+                    .to_string(),
             ));
         }
 
@@ -565,7 +566,6 @@ impl Memory {
         self.get_all(options).await
     }
 
-
     /// 更新记忆（mem0 兼容）
     ///
     /// # 参数
@@ -859,7 +859,9 @@ impl Memory {
     /// # Ok(())
     /// # }
     /// ```
-    pub async fn get_cache_stats(&self) -> Result<Option<agent_mem_intelligence::caching::CacheStats>> {
+    pub async fn get_cache_stats(
+        &self,
+    ) -> Result<Option<agent_mem_intelligence::caching::CacheStats>> {
         debug!("获取嵌入缓存统计信息");
 
         let orchestrator = self.orchestrator.read().await;

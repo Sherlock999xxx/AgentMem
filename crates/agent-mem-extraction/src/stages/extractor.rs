@@ -44,20 +44,24 @@ impl ItemExtractor {
 
             // Extract preferences (sentences with "prefer", "like", "want")
             if line.contains("prefer") || line.contains("like") || line.contains("want") {
-                items.push(MemoryItem::new(line.to_string(), "preference".to_string())
-                    .with_confidence(0.8));
+                items.push(
+                    MemoryItem::new(line.to_string(), "preference".to_string())
+                        .with_confidence(0.8),
+                );
             }
 
             // Extract events (sentences with time references)
             if line.contains("yesterday") || line.contains("today") || line.contains("tomorrow") {
-                items.push(MemoryItem::new(line.to_string(), "event".to_string())
-                    .with_confidence(0.7));
+                items.push(
+                    MemoryItem::new(line.to_string(), "event".to_string()).with_confidence(0.7),
+                );
             }
 
             // Extract skills (sentences with "can", "able to", "know how")
             if line.contains("can ") || line.contains("able to") || line.contains("know how") {
-                items.push(MemoryItem::new(line.to_string(), "skill".to_string())
-                    .with_confidence(0.75));
+                items.push(
+                    MemoryItem::new(line.to_string(), "skill".to_string()).with_confidence(0.75),
+                );
             }
         }
 
@@ -109,10 +113,9 @@ impl ExtractionStage for ItemExtractor {
         debug!("ItemExtractor processing");
 
         // Get preprocessed content from context
-        let preprocessed = context.get_state("preprocessed_content")
-            .ok_or_else(|| ExtractionError::ConfigurationError(
-                "Preprocessed content not found".to_string()
-            ))?;
+        let preprocessed = context.get_state("preprocessed_content").ok_or_else(|| {
+            ExtractionError::ConfigurationError("Preprocessed content not found".to_string())
+        })?;
 
         // Extract items based on content
         let items = self.extract_from_text(preprocessed);
@@ -153,7 +156,8 @@ mod tests {
         assert!(items.len() >= 4); // At least 4 items expected
 
         // Check that we have all types (lowercase "yesterday" triggers event)
-        let types: std::collections::HashSet<_> = items.iter().map(|i| i.item_type.as_str()).collect();
+        let types: std::collections::HashSet<_> =
+            items.iter().map(|i| i.item_type.as_str()).collect();
         assert!(types.contains("preference"));
         assert!(types.contains("event"));
         assert!(types.contains("skill"));

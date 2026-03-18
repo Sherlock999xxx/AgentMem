@@ -1,8 +1,8 @@
 //! URI resolution for different protocols
 
-use crate::models::ResourceContent;
 use crate::models::MediaType;
-use crate::{Result, ResourceError, ResourceId};
+use crate::models::ResourceContent;
+use crate::{ResourceError, ResourceId, Result};
 use async_trait::async_trait;
 use regex::Regex;
 use std::path::PathBuf;
@@ -29,9 +29,9 @@ impl URI {
         let re = Regex::new(r"^([a-zA-Z][a-zA-Z0-9+.-]*)://(.+)$")
             .map_err(|e| ResourceError::InvalidUri(format!("Regex error: {}", e)))?;
 
-        let caps = re.captures(uri).ok_or_else(|| {
-            ResourceError::InvalidUri(format!("Invalid URI format: {}", uri))
-        })?;
+        let caps = re
+            .captures(uri)
+            .ok_or_else(|| ResourceError::InvalidUri(format!("Invalid URI format: {}", uri)))?;
 
         let scheme = caps[1].to_lowercase();
         let path = caps[2].to_string();
@@ -104,15 +104,10 @@ impl URIResolver for FileURIResolver {
 
         // Detect media type: try magic bytes first, then extension
         let detector = crate::detector::MediaTypeDetector::new();
-        let media_type = detector
-            .detect_from_magic_bytes(&data)
-            .unwrap_or_else(|| {
-                let extension = path
-                    .extension()
-                    .and_then(|ext| ext.to_str())
-                    .unwrap_or("");
-                detector.detect_from_extension(extension)
-            });
+        let media_type = detector.detect_from_magic_bytes(&data).unwrap_or_else(|| {
+            let extension = path.extension().and_then(|ext| ext.to_str()).unwrap_or("");
+            detector.detect_from_extension(extension)
+        });
 
         Ok(ResourceContent::new(
             ResourceId::from(uri.full.clone()),
@@ -138,7 +133,9 @@ impl HTTPURIResolver {
         let client = reqwest::Client::builder()
             .timeout(std::time::Duration::from_secs(30))
             .build()
-            .map_err(|e| ResourceError::NetworkError(format!("Failed to create HTTP client: {}", e)))?;
+            .map_err(|e| {
+                ResourceError::NetworkError(format!("Failed to create HTTP client: {}", e))
+            })?;
 
         Ok(Self { client })
     }

@@ -115,7 +115,14 @@ impl GenerateSummariesExecutor {
 
         let candidates: Vec<_> = categories
             .into_iter()
-            .filter(|category| should_process_category(category, selected_categories.as_deref(), stale_only, stale_before))
+            .filter(|category| {
+                should_process_category(
+                    category,
+                    selected_categories.as_deref(),
+                    stale_only,
+                    stale_before,
+                )
+            })
             .take(self.batch_size as usize)
             .collect();
 
@@ -210,7 +217,9 @@ fn should_process_category(
     stale_before: chrono::DateTime<Utc>,
 ) -> bool {
     if let Some(selected_categories) = selected_categories {
-        return selected_categories.iter().any(|path| path == &category.path);
+        return selected_categories
+            .iter()
+            .any(|path| path == &category.path);
     }
 
     if !stale_only {
@@ -227,7 +236,11 @@ fn parse_category_path(path: &str) -> Vec<String> {
         .collect()
 }
 
-fn build_summary(category_path: &str, items: &[SemanticMemoryItem], max_context_items: u32) -> String {
+fn build_summary(
+    category_path: &str,
+    items: &[SemanticMemoryItem],
+    max_context_items: u32,
+) -> String {
     let mut recent_items = items.to_vec();
     recent_items.sort_by(|left, right| right.updated_at.cmp(&left.updated_at));
 
@@ -313,7 +326,10 @@ mod tests {
 
         let mut manager = InMemoryCategoryManager::new();
         let scope = CategoryScope::new("user-123".to_string());
-        manager.create_category("/knowledge/rust", scope.clone()).await.unwrap();
+        manager
+            .create_category("/knowledge/rust", scope.clone())
+            .await
+            .unwrap();
 
         let shared_manager = shared_category_manager(manager);
         let executor = GenerateSummariesExecutor::new()

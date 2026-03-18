@@ -1,8 +1,10 @@
 //! Resource manager implementation
 
 use crate::detector::MediaTypeDetector;
-use crate::models::{MediaType, Resource, ResourceContent, ResourceId, ResourceMetadata, ResourceStatus};
-use crate::resolver::{CompositeURIResolver, URI, URIResolver};
+use crate::models::{
+    MediaType, Resource, ResourceContent, ResourceId, ResourceMetadata, ResourceStatus,
+};
+use crate::resolver::{CompositeURIResolver, URIResolver, URI};
 use crate::{ResourceError, Result};
 use async_trait::async_trait;
 use std::collections::HashMap;
@@ -250,7 +252,10 @@ mod tests {
         let uri = format!("file://{}", path);
 
         let manager = ResourceManager::new().unwrap();
-        let resource_id = manager.mount_resource(&uri, "user-123", None).await.unwrap();
+        let resource_id = manager
+            .mount_resource(&uri, "user-123", None)
+            .await
+            .unwrap();
 
         // Resolve content
         let content = manager.resolve_resource(&resource_id).await.unwrap();
@@ -297,7 +302,10 @@ mod tests {
         let uri = format!("file://{}", path);
 
         let manager = ResourceManager::new().unwrap();
-        let resource_id = manager.mount_resource(&uri, "user-123", None).await.unwrap();
+        let resource_id = manager
+            .mount_resource(&uri, "user-123", None)
+            .await
+            .unwrap();
 
         // Unmount
         manager.unmount_resource(&resource_id).await.unwrap();
@@ -316,7 +324,10 @@ mod tests {
         let uri = format!("file://{}", path);
 
         let manager = ResourceManager::new().unwrap();
-        let resource_id = manager.mount_resource(&uri, "user-123", None).await.unwrap();
+        let resource_id = manager
+            .mount_resource(&uri, "user-123", None)
+            .await
+            .unwrap();
 
         // Get resource and check metadata
         let resource = manager.get_resource(&resource_id).await.unwrap();

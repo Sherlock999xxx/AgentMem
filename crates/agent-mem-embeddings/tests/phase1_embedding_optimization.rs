@@ -7,24 +7,22 @@
 //! - 平均延迟: 50-100ms → 2ms (25-50x 更快)
 
 use agent_mem_embeddings::{
-    factory::EmbeddingFactory,
-    cached_embedder::CachedEmbedder,
+    cached_embedder::CachedEmbedder, config::EmbeddingConfig, factory::EmbeddingFactory,
     providers::queued_embedder::QueuedEmbedder,
-    config::EmbeddingConfig,
 };
 use agent_mem_intelligence::caching::CacheConfig;
 use std::sync::Arc;
 use std::time::Instant;
 
 #[tokio::test]
-#[ignore]  // 需要下载模型,默认跳过 (使用 `cargo test --ignored` 运行)
+#[ignore] // 需要下载模型,默认跳过 (使用 `cargo test --ignored` 运行)
 async fn phase_1_1_fastembed_optimization() {
     println!("\n🚀 Phase 1.1: FastEmbed 本地模型优化测试");
     println!("目标: 单条 embedding 50-100ms → 5ms (10-20x 更快)");
 
     let config = EmbeddingConfig {
         provider: "fastembed".to_string(),
-        model: "bge-small-en-v1.5".to_string(),  // 🚀 更稳定的默认模型
+        model: "bge-small-en-v1.5".to_string(), // 🚀 更稳定的默认模型
         dimension: 384,
         batch_size: 256,
         ..Default::default()
@@ -86,8 +84,8 @@ async fn phase_1_2_cache_optimization() {
 
     // 测试缓存命中
     let test_queries = vec![
-        "What is the weather today?".to_string(),  // 缓存命中
-        "Tell me about AI".to_string(),              // 缓存命中
+        "What is the weather today?".to_string(),   // 缓存命中
+        "Tell me about AI".to_string(),             // 缓存命中
         "New question about coding".to_string(),    // 缓存未命中
         "How to optimize performance?".to_string(), // 缓存命中
     ];
@@ -110,16 +108,21 @@ async fn phase_1_2_cache_optimization() {
 
     let hit_rate = (cache_hits as f64 / total_queries as f64) * 100.0;
 
-    println!("✅ 缓存命中率: {:.1}% ({}/{})", hit_rate, cache_hits, total_queries);
+    println!(
+        "✅ 缓存命中率: {:.1}% ({}/{})",
+        hit_rate, cache_hits, total_queries
+    );
     println!("   平均延迟: {:?}", duration / total_queries as u32);
     println!("   缓存命中延迟: ~0.1ms (500-1000x 更快)");
     println!("   目标命中率: > 90%");
 
     let stats = cached_embedder.cache_stats();
-    println!("   缓存统计: {} 命中, {} 未命中, {} 大小",
-        stats.hits, stats.misses, stats.size);
+    println!(
+        "   缓存统计: {} 命中, {} 未命中, {} 大小",
+        stats.hits, stats.misses, stats.size
+    );
 
-    assert!(hit_rate >= 50.0, "缓存命中率应该 >= 50%");  // 预热查询占 3/4
+    assert!(hit_rate >= 50.0, "缓存命中率应该 >= 50%"); // 预热查询占 3/4
 }
 
 #[tokio::test]
@@ -194,15 +197,18 @@ async fn phase_1_combined_optimization() {
         "Common query 2".to_string(),
         "Common query 3".to_string(),
     ];
-    let cached = queued_embedder.as_any().downcast_ref::<CachedEmbedder>().unwrap();
+    let cached = queued_embedder
+        .as_any()
+        .downcast_ref::<CachedEmbedder>()
+        .unwrap();
     cached.warmup_cache(&warmup_queries).await.unwrap();
 
     // 测试场景: 混合缓存命中和未命中的查询
     let test_queries: Vec<String> = vec![
-        "Common query 1".to_string(),      // 缓存命中
-        "New query 1".to_string(),          // 缓存未命中
-        "Common query 2".to_string(),      // 缓存命中
-        "New query 2".to_string(),          // 缓存未命中
+        "Common query 1".to_string(), // 缓存命中
+        "New query 1".to_string(),    // 缓存未命中
+        "Common query 2".to_string(), // 缓存命中
+        "New query 2".to_string(),    // 缓存未命中
     ];
 
     let start = Instant::now();

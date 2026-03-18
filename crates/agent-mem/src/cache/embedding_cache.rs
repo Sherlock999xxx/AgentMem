@@ -84,11 +84,7 @@ impl QueryEmbeddingCache {
     /// # Performance
     /// - Cache hit: <1ms
     /// - Cache miss: 50-200ms (first time)
-    pub async fn get_or_generate<F, Fut>(
-        &self,
-        query: &str,
-        generator: F,
-    ) -> Result<Vec<f32>>
+    pub async fn get_or_generate<F, Fut>(&self, query: &str, generator: F) -> Result<Vec<f32>>
     where
         F: FnOnce(String) -> Fut,
         Fut: std::future::Future<Output = Result<Vec<f32>>>,
@@ -197,9 +193,7 @@ mod tests {
 
         // First call should miss
         let result1 = cache
-            .get_or_generate("test query", |_| async {
-                Ok(vec![0.1, 0.2, 0.3])
-            })
+            .get_or_generate("test query", |_| async { Ok(vec![0.1, 0.2, 0.3]) })
             .await
             .unwrap();
 
@@ -219,9 +213,7 @@ mod tests {
         let cache = QueryEmbeddingCache::new(100);
 
         let result1 = cache
-            .get_or_generate("  Test  Query  ", |_| async {
-                Ok(vec![0.1, 0.2, 0.3])
-            })
+            .get_or_generate("  Test  Query  ", |_| async { Ok(vec![0.1, 0.2, 0.3]) })
             .await
             .unwrap();
 

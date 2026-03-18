@@ -2,7 +2,6 @@
 //!
 //! 测试多模态处理模块的各种功能
 
-
 #[cfg(test)]
 mod multimodal_tests {
     use super::*;

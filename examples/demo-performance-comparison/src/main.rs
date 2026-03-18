@@ -191,9 +191,11 @@ async fn test_add_performance(
     let medium_text = "A".repeat(100);
     let large_text = "B".repeat(1000);
 
-    let test_sizes = [("Small (10 bytes)", "Small text"),
+    let test_sizes = [
+        ("Small (10 bytes)", "Small text"),
         ("Medium (100 bytes)", medium_text.as_str()),
-        ("Large (1000 bytes)", large_text.as_str())];
+        ("Large (1000 bytes)", large_text.as_str()),
+    ];
 
     for (size_name, content) in test_sizes.iter() {
         tracker.start_subtest(format!("Add {size_name}"));
@@ -411,11 +413,7 @@ async fn test_scale_performance(tracker: &mut TestTracker, _config: &TestConfig)
         let mut success_count = 0;
 
         for i in 0..scale {
-            if memory
-                .add(&format!("Scale test memory {i}"))
-                .await
-                .is_ok()
-            {
+            if memory.add(&format!("Scale test memory {i}")).await.is_ok() {
                 success_count += 1;
             }
         }

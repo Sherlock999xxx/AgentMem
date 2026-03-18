@@ -23,9 +23,7 @@ pub struct DedupeMerger {
 impl DedupeMerger {
     /// Create new dedupe merger
     pub fn new() -> Self {
-        Self {
-            threshold: 0.85,
-        }
+        Self { threshold: 0.85 }
     }
 
     /// Create with custom threshold
@@ -181,9 +179,7 @@ impl ExtractionStage for DedupeMerger {
 
         info!(
             "Deduplication completed: {} -> {} items ({} removed)",
-            initial_count,
-            final_count,
-            output.metrics.items_deduped
+            initial_count, final_count, output.metrics.items_deduped
         );
 
         Ok(output)

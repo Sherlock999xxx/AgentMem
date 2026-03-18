@@ -67,13 +67,9 @@ impl TimeTravel {
     pub async fn get_version(
         &self,
         id: &MemoryId,
-        timestamp: DateTime<Utc>
+        timestamp: DateTime<Utc>,
     ) -> Result<Option<Memory>> {
-        tracing::debug!(
-            "Getting version: memory_id={}, timestamp={}",
-            id,
-            timestamp
-        );
+        tracing::debug!("Getting version: memory_id={}, timestamp={}", id, timestamp);
 
         // TODO: Integrate with memvid-core time travel API
         // For now, return current version
@@ -99,19 +95,13 @@ impl TimeTravel {
     }
 
     /// Rollback a memory to a specific version
-    pub async fn rollback(
-        &self,
-        id: &MemoryId,
-        to_timestamp: DateTime<Utc>
-    ) -> Result<Memory> {
-        tracing::debug!(
-            "Rolling back: memory_id={}, timestamp={}",
-            id,
-            to_timestamp
-        );
+    pub async fn rollback(&self, id: &MemoryId, to_timestamp: DateTime<Utc>) -> Result<Memory> {
+        tracing::debug!("Rolling back: memory_id={}, timestamp={}", id, to_timestamp);
 
         // Get the version to rollback to
-        let version = self.get_version(id, to_timestamp).await?
+        let version = self
+            .get_version(id, to_timestamp)
+            .await?
             .ok_or_else(|| crate::error::MemvidError::VersionNotFound(id.to_string()))?;
 
         // Create a new version with the old content
@@ -132,7 +122,7 @@ impl TimeTravel {
     pub async fn timeline(
         &self,
         from: DateTime<Utc>,
-        to: DateTime<Utc>
+        to: DateTime<Utc>,
     ) -> Result<Vec<VersionInfo>> {
         tracing::debug!("Getting timeline: from={}, to={}", from, to);
 
@@ -146,7 +136,7 @@ impl TimeTravel {
         &self,
         id: &MemoryId,
         version1: u64,
-        version2: u64
+        version2: u64,
     ) -> Result<MemoryDiff> {
         tracing::debug!(
             "Comparing versions: memory_id={}, v1={}, v2={}",
@@ -170,15 +160,18 @@ impl TimeTravel {
 
         let versions = self.list_versions(id).await?;
 
-        let history = versions.into_iter().map(|v| {
-            let description = Self::describe_change(&v.change);
-            HistoryEntry {
-                timestamp: v.timestamp,
-                version: v.version,
-                change: v.change,
-                description,
-            }
-        }).collect();
+        let history = versions
+            .into_iter()
+            .map(|v| {
+                let description = Self::describe_change(&v.change);
+                HistoryEntry {
+                    timestamp: v.timestamp,
+                    version: v.version,
+                    change: v.change,
+                    description,
+                }
+            })
+            .collect();
 
         Ok(history)
     }
@@ -265,8 +258,8 @@ pub struct HistoryEntry {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{MemvidStore, MemvidConfig};
-    use agent_mem_traits::{Content, AttributeSet, MetadataV4};
+    use crate::{MemvidConfig, MemvidStore};
+    use agent_mem_traits::{AttributeSet, Content, MetadataV4};
 
     #[tokio::test]
     async fn test_time_travel() {

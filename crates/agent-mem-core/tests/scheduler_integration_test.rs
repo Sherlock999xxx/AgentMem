@@ -12,17 +12,15 @@
 use agent_mem_core::scheduler::{DefaultMemoryScheduler, ExponentialDecayModel};
 use agent_mem_core::{MemoryEngine, MemoryEngineConfig};
 use agent_mem_traits::{
-    AttributeKey, AttributeValue, AttributeSet, Content, Memory, MemoryId, MemoryScheduler,
+    AttributeKey, AttributeSet, AttributeValue, Content, Memory, MemoryId, MemoryScheduler,
     Metadata, RelationGraph, ScheduleConfig,
 };
 
 #[tokio::test]
 async fn test_memory_engine_with_scheduler() {
     // 创建带调度器的 MemoryEngine
-    let scheduler = DefaultMemoryScheduler::new(
-        ScheduleConfig::balanced(),
-        ExponentialDecayModel::default(),
-    );
+    let scheduler =
+        DefaultMemoryScheduler::new(ScheduleConfig::balanced(), ExponentialDecayModel::default());
 
     let engine = MemoryEngine::new(MemoryEngineConfig::default())
         .with_scheduler(std::sync::Arc::new(scheduler));
@@ -45,10 +43,8 @@ async fn test_search_with_scheduler_fallback() {
 #[tokio::test]
 async fn test_scheduler_selector() {
     // 测试调度器的选择功能
-    let scheduler = DefaultMemoryScheduler::new(
-        ScheduleConfig::balanced(),
-        ExponentialDecayModel::default(),
-    );
+    let scheduler =
+        DefaultMemoryScheduler::new(ScheduleConfig::balanced(), ExponentialDecayModel::default());
 
     // 创建测试记忆
     let memories = vec![
@@ -78,10 +74,8 @@ async fn test_different_scheduler_configs() {
     ];
 
     for (i, config) in configs.iter().enumerate() {
-        let scheduler = DefaultMemoryScheduler::new(
-            config.clone(),
-            ExponentialDecayModel::default(),
-        );
+        let scheduler =
+            DefaultMemoryScheduler::new(config.clone(), ExponentialDecayModel::default());
 
         let memories = vec![
             create_test_memory("Test memory", 0.8, 1.0),
@@ -111,8 +105,8 @@ async fn test_scheduler_with_time_decay() {
     );
 
     let memories = vec![
-        create_test_memory("Recent memory", 0.5, 0.1),  // 新但低重要性
-        create_test_memory("Old memory", 0.9, 100.0),   // 旧但高重要性
+        create_test_memory("Recent memory", 0.5, 0.1), // 新但低重要性
+        create_test_memory("Old memory", 0.9, 100.0),  // 旧但高重要性
     ];
 
     let selected = scheduler

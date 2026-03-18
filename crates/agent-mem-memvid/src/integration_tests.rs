@@ -4,7 +4,7 @@
 //! Tests cover CRUD operations, concurrency, large-scale data, and error handling.
 
 use crate::memvid_store::RealMemvidStore;
-use agent_mem_traits::{Memory, Content, AttributeSet, MetadataV4, MemoryId};
+use agent_mem_traits::{AttributeSet, Content, Memory, MemoryId, MetadataV4};
 use std::sync::Arc;
 
 /// Helper: Create a test memory with specific content
@@ -28,7 +28,10 @@ fn generate_test_memories(count: usize, prefix: &str) -> Vec<Memory> {
     (0..count)
         .map(|i| Memory {
             id: MemoryId::from_string(format!("{}-{}", prefix, i)),
-            content: Content::text(&format!("Test memory content number {} with some searchable text", i)),
+            content: Content::text(&format!(
+                "Test memory content number {} with some searchable text",
+                i
+            )),
             attributes: AttributeSet::new(),
             relations: Default::default(),
             metadata: MetadataV4::default(),
@@ -81,7 +84,10 @@ async fn integration_full_crud_cycle() {
     let retrieved = retrieved.unwrap();
     assert_eq!(retrieved.id.as_str(), "crud-1");
     // MemVid adds metadata to the stored text, so just check it starts with expected content
-    assert!(retrieved.content.to_string().starts_with("Original content"));
+    assert!(retrieved
+        .content
+        .to_string()
+        .starts_with("Original content"));
 
     // UPDATE
     let updated_memory = Memory {
@@ -95,7 +101,11 @@ async fn integration_full_crud_cycle() {
 
     let retrieved = store.get(&memory.id).await.unwrap();
     assert!(retrieved.is_some());
-    assert!(retrieved.unwrap().content.to_string().starts_with("Updated content"));
+    assert!(retrieved
+        .unwrap()
+        .content
+        .to_string()
+        .starts_with("Updated content"));
 
     // DELETE
     store.delete(&memory.id).await.unwrap();
@@ -198,7 +208,10 @@ async fn integration_full_text_search() {
     let has_rust_match = result_uris.iter().any(|uri| {
         uri.contains("search-1") || uri.contains("search-3") || uri.contains("search-5")
     });
-    assert!(has_rust_match, "Should find at least one rust-related result");
+    assert!(
+        has_rust_match,
+        "Should find at least one rust-related result"
+    );
 
     cleanup_test_file(path);
 }
@@ -225,7 +238,9 @@ async fn integration_search_with_snippets() {
         assert!(score > 0.0);
     }
     // Text should contain the search term
-    assert!(result.text.to_lowercase().contains("fox") || result.text.to_lowercase().contains("dog"));
+    assert!(
+        result.text.to_lowercase().contains("fox") || result.text.to_lowercase().contains("dog")
+    );
 
     cleanup_test_file(path);
 }
@@ -248,7 +263,7 @@ async fn integration_large_scale_write() {
     for i in 0..count {
         let memory = create_test_memory(
             &format!("large-{}", i),
-            &format!("Memory number {} with unique content for testing", i)
+            &format!("Memory number {} with unique content for testing", i),
         );
         store.add(&memory).await.unwrap();
     }
@@ -314,7 +329,10 @@ async fn integration_large_scale_search() {
         let topic = topics[i % topics.len()];
         let memory = create_test_memory(
             &format!("search-{}", i),
-            &format!("This is about {} programming with content number {}", topic, i)
+            &format!(
+                "This is about {} programming with content number {}",
+                topic, i
+            ),
         );
         store.add(&memory).await.unwrap();
     }
@@ -402,7 +420,7 @@ async fn integration_concurrent_writes() {
             for i in 0..10 {
                 let memory = create_test_memory(
                     &format!("writer-{}-{}", writer_id, i),
-                    &format!("Content from writer {}", writer_id)
+                    &format!("Content from writer {}", writer_id),
                 );
                 let _ = store.add(&memory).await;
             }
@@ -634,7 +652,10 @@ async fn integration_mixed_workload() {
     println!("\n=== Mixed Workload Integration Test ===");
     println!("Operations: 100 (60% read, 30% write, 10% search)");
     println!("Duration: {:?}", duration);
-    println!("Average: {:.3} ms/op", duration.as_secs_f64() * 1000.0 / 100.0);
+    println!(
+        "Average: {:.3} ms/op",
+        duration.as_secs_f64() * 1000.0 / 100.0
+    );
     println!("Status: ✓ PASS");
 
     cleanup_test_file(path);
@@ -654,7 +675,7 @@ async fn integration_fuzzy_search() {
     // Add memories with similar but not identical content
     let memories = vec![
         ("fuzzy-1", "The quick brown fox jumps"),
-        ("fuzzy-2", "The qick brown fox jumps"),  // typo: "qick" instead of "quick"
+        ("fuzzy-2", "The qick brown fox jumps"), // typo: "qick" instead of "quick"
         ("fuzzy-3", "A fast brown fox running"),
         ("fuzzy-4", "The slow brown turtle walks"),
     ];
@@ -686,7 +707,7 @@ async fn integration_phrase_search() {
     // Add memories with phrases
     let memories = vec![
         ("phrase-1", "The quick brown fox jumps over the lazy dog"),
-        ("phrase-2", "quick brown fox"),  // Partial match
+        ("phrase-2", "quick brown fox"), // Partial match
         ("phrase-3", "The lazy dog sleeps"),
         ("phrase-4", "A different story entirely"),
     ];
@@ -730,7 +751,10 @@ async fn integration_multi_term_search() {
     }
 
     // Multi-term search with OR should find memories matching any term
-    let results = store.search_multi(vec!["rust", "python", "javascript"], 10).await.unwrap();
+    let results = store
+        .search_multi(vec!["rust", "python", "javascript"], 10)
+        .await
+        .unwrap();
     assert!(!results.is_empty());
 
     println!("\n=== Multi-Term Search Test ===");
@@ -752,7 +776,10 @@ async fn integration_search_performance() {
     for i in 0..100 {
         let memory = create_test_memory(
             &format!("perf-{}", i),
-            &format!("Memory number {} with unique searchable content about various topics", i)
+            &format!(
+                "Memory number {} with unique searchable content about various topics",
+                i
+            ),
         );
         store.add(&memory).await.unwrap();
     }
@@ -774,7 +801,14 @@ async fn integration_search_performance() {
     println!("Total duration: {:?}", duration);
     println!("Average latency: {:.3} ms", avg_latency_ms);
     println!("Target: <5ms");
-    println!("Status: {}", if avg_latency_ms < 5.0 { "✓ PASS" } else { "⚠ SLOW" });
+    println!(
+        "Status: {}",
+        if avg_latency_ms < 5.0 {
+            "✓ PASS"
+        } else {
+            "⚠ SLOW"
+        }
+    );
 
     cleanup_test_file(path);
 }
@@ -891,7 +925,9 @@ async fn integration_batch_update() {
     store.batch_add(&memories).await.unwrap();
 
     // Create updated versions
-    let updated_memories: Vec<Memory> = ids.iter().enumerate()
+    let updated_memories: Vec<Memory> = ids
+        .iter()
+        .enumerate()
         .map(|(i, id)| Memory {
             id: id.clone(),
             content: Content::text(&format!("Updated {}", i)),
@@ -945,7 +981,9 @@ async fn integration_batch_mixed_operations() {
 
     // Update some
     let update_ids: Vec<MemoryId> = memories1.iter().take(10).map(|m| m.id.clone()).collect();
-    let updated_memories: Vec<Memory> = update_ids.iter().enumerate()
+    let updated_memories: Vec<Memory> = update_ids
+        .iter()
+        .enumerate()
         .map(|(i, id)| Memory {
             id: id.clone(),
             content: Content::text(&format!("Updated content {}", i)),
@@ -958,7 +996,12 @@ async fn integration_batch_mixed_operations() {
     store.batch_update(&updated_memories).await.unwrap();
 
     // Delete some
-    let delete_ids: Vec<MemoryId> = memories1.iter().skip(10).take(10).map(|m| m.id.clone()).collect();
+    let delete_ids: Vec<MemoryId> = memories1
+        .iter()
+        .skip(10)
+        .take(10)
+        .map(|m| m.id.clone())
+        .collect();
     store.batch_delete(&delete_ids).await.unwrap();
 
     // Verify final state
@@ -979,8 +1022,8 @@ async fn integration_batch_mixed_operations() {
 // 向量搜索集成测试
 // ============================================================
 
-use crate::vector_search::{VectorIndex, VectorSearchConfig, EmbeddingGenerator};
 use crate::embedding::LocalEmbedding;
+use crate::vector_search::{EmbeddingGenerator, VectorIndex, VectorSearchConfig};
 
 #[tokio::test]
 async fn integration_vector_index_basic() {

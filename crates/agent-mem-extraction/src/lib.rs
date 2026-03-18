@@ -53,16 +53,19 @@
 //! ```
 
 pub mod error;
+pub mod models;
 pub mod pipeline;
 pub mod stage;
-pub mod models;
 pub mod stages;
 
 // Re-exports for convenience
 pub use error::{ExtractionError, Result};
-pub use pipeline::{ExtractionPipeline};
+pub use models::{
+    ExecutionMode, ExtractionContext, ExtractionInput, ExtractionMetrics, ExtractionOutput,
+    PipelineConfig,
+};
+pub use pipeline::ExtractionPipeline;
 pub use stage::{ExtractionStage, StagePriority};
-pub use models::{ExtractionInput, ExtractionOutput, ExtractionContext, ExtractionMetrics, PipelineConfig, ExecutionMode};
 
 /// Version information
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");

@@ -71,7 +71,9 @@ impl MediaTypeDetector {
         }
 
         // ZIP: 50 4B 03 04 (local file header) or 50 4B 05 06 (empty archive)
-        if data.starts_with(&[0x50, 0x4B, 0x03, 0x04]) || data.starts_with(&[0x50, 0x4B, 0x05, 0x06]) {
+        if data.starts_with(&[0x50, 0x4B, 0x03, 0x04])
+            || data.starts_with(&[0x50, 0x4B, 0x05, 0x06])
+        {
             return Some(MediaType::ApplicationZip);
         }
 
@@ -136,10 +138,7 @@ impl MediaTypeDetector {
             uri.replacen("file://", "", 1)
         } else if uri.starts_with("conv://") || uri.starts_with("doc://") {
             // For custom protocols, try to extract extension
-            uri.split('/')
-                .last()
-                .unwrap_or("")
-                .to_string()
+            uri.split('/').last().unwrap_or("").to_string()
         } else {
             // Assume it's already a path
             uri.to_string()
@@ -159,7 +158,10 @@ impl MediaTypeDetector {
         match std::str::from_utf8(data) {
             Ok(text) => {
                 // Check if mostly printable (at least 90% printable ASCII or UTF-8)
-                let printable = text.chars().filter(|c| c.is_ascii_graphic() || c.is_whitespace()).count();
+                let printable = text
+                    .chars()
+                    .filter(|c| c.is_ascii_graphic() || c.is_whitespace())
+                    .count();
                 let total = text.chars().count();
                 total > 0 && (printable as f64 / total as f64) >= 0.9
             }
@@ -182,14 +184,8 @@ mod tests {
     fn test_detect_from_extension() {
         let detector = MediaTypeDetector::new();
 
-        assert_eq!(
-            detector.detect_from_extension("txt"),
-            MediaType::TextPlain
-        );
-        assert_eq!(
-            detector.detect_from_extension("png"),
-            MediaType::ImagePng
-        );
+        assert_eq!(detector.detect_from_extension("txt"), MediaType::TextPlain);
+        assert_eq!(detector.detect_from_extension("png"), MediaType::ImagePng);
         assert_eq!(
             detector.detect_from_extension("pdf"),
             MediaType::ApplicationPdf
@@ -226,8 +222,14 @@ mod tests {
     fn test_extract_extension() {
         let detector = MediaTypeDetector::new();
 
-        assert_eq!(detector.extract_extension("file:///path/to/document.pdf"), "pdf");
-        assert_eq!(detector.extract_extension("https://example.com/image.png"), "png");
+        assert_eq!(
+            detector.extract_extension("file:///path/to/document.pdf"),
+            "pdf"
+        );
+        assert_eq!(
+            detector.extract_extension("https://example.com/image.png"),
+            "png"
+        );
         assert_eq!(detector.extract_extension("conv://chat-123"), "");
     }
 

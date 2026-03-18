@@ -236,9 +236,7 @@ impl LanceDBStore {
 
         // Determine optimal index strategy
         if count < 1_000 {
-            info!(
-                "< 1K vectors: No index needed (brute-force search is efficient)"
-            );
+            info!("< 1K vectors: No index needed (brute-force search is efficient)");
             Ok(())
         } else if count < 10_000 {
             info!("1K-10K vectors: Creating basic IVF index");
@@ -811,15 +809,12 @@ impl VectorStore for LanceDBStore {
                     .collect::<Vec<_>>()
                     .join(" OR ");
 
-                table
-                    .delete(&condition)
-                    .await
-                    .map_err(|e| {
-                        AgentMemError::StorageError(format!(
-                            "Batch delete failed at chunk {}: {e}",
-                            total_deleted / BATCH_SIZE
-                        ))
-                    })?;
+                table.delete(&condition).await.map_err(|e| {
+                    AgentMemError::StorageError(format!(
+                        "Batch delete failed at chunk {}: {e}",
+                        total_deleted / BATCH_SIZE
+                    ))
+                })?;
 
                 total_deleted += chunk.len();
                 debug!("Deleted chunk: {} / {} vectors", total_deleted, ids.len());

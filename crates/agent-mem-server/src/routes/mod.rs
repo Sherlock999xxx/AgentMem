@@ -9,26 +9,26 @@ pub mod docs;
 #[cfg(feature = "postgres")]
 pub mod graph;
 pub mod health;
+pub mod logs; // 🆕 Phase 4.2: 日志聚合功能
 pub mod mcp;
 pub mod memory; // ✅ 统一API实现：基于agent-mem Memory API
 pub mod messages;
 pub mod metrics;
 pub mod organizations;
+pub mod performance; // 🆕 Phase 4.2: 性能分析功能
 pub mod plugins; // 🆕 Plugin management API
+pub mod predictor;
 pub mod stats;
 pub mod tools;
 pub mod users;
-pub mod working_memory; // ✅ Working Memory API：基于 WorkingMemoryStore trait
-pub mod logs; // 🆕 Phase 4.2: 日志聚合功能
-pub mod performance; // 🆕 Phase 4.2: 性能分析功能
-pub mod predictor; // 🆕 Phase 2.3: 记忆预测功能
+pub mod working_memory; // ✅ Working Memory API：基于 WorkingMemoryStore trait // 🆕 Phase 2.3: 记忆预测功能
 
 use crate::config::ServerConfig;
 use crate::error::{ServerError, ServerResult};
 use crate::middleware::rbac::rbac_middleware;
 use crate::middleware::{
-    audit_logging_middleware, circuit_breaker_middleware, require_auth_middleware,
-    metrics_middleware, quota_middleware, CircuitBreakerManager, QuotaManager,
+    audit_logging_middleware, circuit_breaker_middleware, metrics_middleware, quota_middleware,
+    require_auth_middleware, CircuitBreakerManager, QuotaManager,
 };
 use crate::rbac::RbacChecker;
 use tracing::info;
@@ -58,7 +58,8 @@ fn create_cors_layer(config: &ServerConfig) -> CorsLayer {
         return CorsLayer::new();
     }
 
-    let origins: Vec<&str> = config.cors_allowed_origins
+    let origins: Vec<&str> = config
+        .cors_allowed_origins
         .split(',')
         .map(|s| s.trim())
         .collect();
@@ -67,7 +68,8 @@ fn create_cors_layer(config: &ServerConfig) -> CorsLayer {
         return create_cors_layer(&config);
     }
 
-    let methods: Vec<Method> = config.cors_allowed_methods
+    let methods: Vec<Method> = config
+        .cors_allowed_methods
         .split(',')
         .map(|s| s.trim())
         .filter_map(|m| match m {
@@ -82,7 +84,8 @@ fn create_cors_layer(config: &ServerConfig) -> CorsLayer {
         })
         .collect();
 
-    let headers: Vec<HeaderName> = config.cors_allowed_headers
+    let headers: Vec<HeaderName> = config
+        .cors_allowed_headers
         .split(',')
         .map(|s| s.trim())
         .filter_map(|h| HeaderName::from_bytes(h.as_bytes()).ok())
@@ -95,7 +98,11 @@ fn create_cors_layer(config: &ServerConfig) -> CorsLayer {
     cors = cors.max_age(std::time::Duration::from_secs(config.cors_max_age));
 
     for origin in origins {
-        cors = cors.allow_origin(origin.parse::<HeaderValue>().unwrap_or(HeaderValue::from_static("*")));
+        cors = cors.allow_origin(
+            origin
+                .parse::<HeaderValue>()
+                .unwrap_or(HeaderValue::from_static("*")),
+        );
     }
 
     cors
@@ -161,10 +168,7 @@ pub async fn create_router(
             "/api/v1/memories/search/stats",
             get(memory::get_search_statistics),
         )
-        .route(
-            "/api/v1/memories/cache/warmup",
-            post(memory::warmup_cache),
-        )
+        .route("/api/v1/memories/cache/warmup", post(memory::warmup_cache))
         .route(
             "/api/v1/memories/performance/benchmark",
             post(memory::performance_benchmark),
@@ -177,14 +181,8 @@ pub async fn create_router(
             "/api/v1/memories/cleanup",
             post(memory::cleanup_memories_endpoint),
         )
-        .route(
-            "/api/v1/memories/export",
-            get(memory::export_memories),
-        )
-        .route(
-            "/api/v1/memories/import",
-            post(memory::import_memories),
-        )
+        .route("/api/v1/memories/export", get(memory::export_memories))
+        .route("/api/v1/memories/import", post(memory::import_memories))
         .route(
             "/api/v1/memories/deduplicate",
             post(memory::deduplicate_memories),
@@ -231,9 +229,15 @@ pub async fn create_router(
         // 🆕 Phase 4.2: 请求追踪路由
         .route("/api/v1/traces/:trace_id", get(logs::get_trace))
         // 🆕 Phase 4.2: 性能分析路由
-        .route("/api/v1/performance/analysis", get(performance::get_performance_analysis))
+        .route(
+            "/api/v1/performance/analysis",
+            get(performance::get_performance_analysis),
+        )
         // 🆕 Phase 2.3: 记忆预测路由
-        .route("/api/v1/memories/predict", post(predictor::predict_memories));
+        .route(
+            "/api/v1/memories/predict",
+            post(predictor::predict_memories),
+        );
 
     // Add all routes (now database-agnostic via Repository Traits)
     app = app

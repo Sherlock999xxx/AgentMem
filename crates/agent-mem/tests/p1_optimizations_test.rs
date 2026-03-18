@@ -16,8 +16,8 @@ mod p1_optimizations_tests {
     use agent_mem_traits::{Embedder, Result as TraitResult};
     use async_trait::async_trait;
     use futures::stream;
-    use std::sync::Arc;
     use std::pin::Pin;
+    use std::sync::Arc;
 
     // Mock implementations for testing
     struct MockLLMProvider;
@@ -47,9 +47,7 @@ mod p1_optimizations_tests {
         async fn generate_stream(
             &self,
             _messages: &[Message],
-        ) -> TraitResult<
-            Pin<Box<dyn futures::Stream<Item = TraitResult<String>> + Send>>,
-        > {
+        ) -> TraitResult<Pin<Box<dyn futures::Stream<Item = TraitResult<String>> + Send>>> {
             use futures::stream;
             let items = vec![Ok("Mock stream response".to_string())];
             Ok(Box::pin(stream::iter(items)))

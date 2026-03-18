@@ -232,21 +232,20 @@ impl AutoConsolidationTrigger {
 
                     if enable_events {
                         if let Some(ref bus) = event_bus {
-                            let event = agent_mem_event_bus::MemoryEvent::new(
-                                EventType::MemoryUpdated,
-                            )
-                            .with_metadata(
-                                "action".to_string(),
-                                serde_json::json!("auto_consolidation"),
-                            )
-                            .with_metadata(
-                                "memory_count".to_string(),
-                                serde_json::json!(memory_count),
-                            )
-                            .with_metadata(
-                                "duration_ms".to_string(),
-                                serde_json::json!(duration),
-                            );
+                            let event =
+                                agent_mem_event_bus::MemoryEvent::new(EventType::MemoryUpdated)
+                                    .with_metadata(
+                                        "action".to_string(),
+                                        serde_json::json!("auto_consolidation"),
+                                    )
+                                    .with_metadata(
+                                        "memory_count".to_string(),
+                                        serde_json::json!(memory_count),
+                                    )
+                                    .with_metadata(
+                                        "duration_ms".to_string(),
+                                        serde_json::json!(duration),
+                                    );
 
                             let _ = bus.publish(event).await;
                         }
@@ -331,7 +330,10 @@ impl AutoConsolidationTrigger {
         if self.config.enable_events {
             if let Some(ref bus) = self.event_bus {
                 let event = agent_mem_event_bus::MemoryEvent::new(EventType::MemoryUpdated)
-                    .with_metadata("action".to_string(), serde_json::json!("manual_consolidation"))
+                    .with_metadata(
+                        "action".to_string(),
+                        serde_json::json!("manual_consolidation"),
+                    )
                     .with_metadata("memory_count".to_string(), serde_json::json!(memory_count))
                     .with_metadata("duration_ms".to_string(), serde_json::json!(duration));
 

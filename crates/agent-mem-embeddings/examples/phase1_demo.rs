@@ -6,9 +6,7 @@
 //! ```
 
 use agent_mem_embeddings::{
-    factory::EmbeddingFactory,
-    cached_embedder::CachedEmbedder,
-    config::EmbeddingConfig,
+    cached_embedder::CachedEmbedder, config::EmbeddingConfig, factory::EmbeddingFactory,
 };
 use agent_mem_intelligence::caching::CacheConfig;
 use std::time::Instant;
@@ -26,7 +24,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let config = EmbeddingConfig {
         provider: "fastembed".to_string(),
-        model: "bge-small-en-v1.5".to_string(),  // 🚀 更稳定的默认模型
+        model: "bge-small-en-v1.5".to_string(), // 🚀 更稳定的默认模型
         dimension: 384,
         batch_size: 256,
         ..Default::default()
@@ -67,8 +65,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // 测试缓存命中率
     let test_queries = vec![
-        "What is the weather today?".to_string(),  // 缓存命中
-        "Tell me about AI".to_string(),              // 缓存命中
+        "What is the weather today?".to_string(),   // 缓存命中
+        "Tell me about AI".to_string(),             // 缓存命中
         "New question about coding".to_string(),    // 缓存未命中
         "How to optimize performance?".to_string(), // 缓存命中
     ];
@@ -90,12 +88,17 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let hit_rate = (cache_hits as f64 / total_queries as f64) * 100.0;
 
-    println!("✅ 缓存命中率: {:.1}% ({}/{})", hit_rate, cache_hits, total_queries);
+    println!(
+        "✅ 缓存命中率: {:.1}% ({}/{})",
+        hit_rate, cache_hits, total_queries
+    );
     println!("   平均延迟: {:?}", duration / total_queries as u32);
 
     let stats = cached_embedder.cache_stats();
-    println!("   缓存统计: {} 命中, {} 未命中, {} 大小",
-        stats.hits, stats.misses, stats.size);
+    println!(
+        "   缓存统计: {} 命中, {} 未命中, {} 大小",
+        stats.hits, stats.misses, stats.size
+    );
 
     // Phase 1.3: 批量 Embedding 优化验证
     println!("\n📊 Phase 1.3: 批量 Embedding 优化");

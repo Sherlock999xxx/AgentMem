@@ -72,9 +72,7 @@ impl HistoryManager {
         // 这样 SQLx 会自动创建数据库文件（如果不存在）
         let options = SqliteConnectOptions::from_str(db_path)
             .map_err(|e| {
-                agent_mem_traits::AgentMemError::storage_error(format!(
-                    "解析数据库路径失败: {e}"
-                ))
+                agent_mem_traits::AgentMemError::storage_error(format!("解析数据库路径失败: {e}"))
             })?
             .create_if_missing(true);
 
@@ -259,9 +257,7 @@ impl HistoryManager {
     /// * `limit` - 限制返回数量
     pub async fn get_all_history(&self, limit: Option<usize>) -> Result<Vec<HistoryEntry>> {
         let query_str = if let Some(limit) = limit {
-            format!(
-                "SELECT * FROM history ORDER BY created_at DESC LIMIT {limit}"
-            )
+            format!("SELECT * FROM history ORDER BY created_at DESC LIMIT {limit}")
         } else {
             "SELECT * FROM history ORDER BY created_at DESC".to_string()
         };
@@ -270,9 +266,7 @@ impl HistoryManager {
             .fetch_all(self.pool.as_ref())
             .await
             .map_err(|e| {
-                agent_mem_traits::AgentMemError::storage_error(format!(
-                    "获取所有历史记录失败: {e}"
-                ))
+                agent_mem_traits::AgentMemError::storage_error(format!("获取所有历史记录失败: {e}"))
             })?;
 
         let mut entries = Vec::new();
@@ -420,7 +414,7 @@ mod tests {
             };
 
             manager.add_history(entry).await?;
-        Ok(())
+            Ok(())
         }
 
         // 获取历史记录

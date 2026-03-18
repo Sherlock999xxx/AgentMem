@@ -13,8 +13,8 @@ pub mod validation; // ✅ P1 Task: Input validation layer
 pub use api_version::api_version_compatibility_middleware;
 pub use audit::{audit_logging_middleware, log_security_event, SecurityEvent};
 pub use auth::{
-    api_key_auth_middleware, require_auth_middleware, extract_auth_user, has_role, is_admin,
-    jwt_auth_middleware, optional_auth_middleware, require_admin, require_role,
+    api_key_auth_middleware, extract_auth_user, has_role, is_admin, jwt_auth_middleware,
+    optional_auth_middleware, require_admin, require_auth_middleware, require_role,
     tenant_isolation_middleware, AuthUser,
 };
 pub use circuit_breaker::{circuit_breaker_middleware, CircuitBreakerManager};
@@ -25,7 +25,6 @@ pub use rbac::{
     no_read_only, rbac_middleware, RbacConfig,
 };
 pub use validation::{
-    validate_add_memory_request, validate_update_memory_request,
-    validate_search_request, validate_delete_request, validate_batch_add_request,
-    validation_error_response,
+    validate_add_memory_request, validate_batch_add_request, validate_delete_request,
+    validate_search_request, validate_update_memory_request, validation_error_response,
 };

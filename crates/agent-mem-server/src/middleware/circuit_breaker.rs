@@ -24,7 +24,8 @@ pub struct CircuitBreakerManager {
     #[allow(dead_code)]
     default_breaker: Arc<CircuitBreaker>,
     /// Circuit breakers for specific endpoints
-    endpoint_breakers: Arc<tokio::sync::RwLock<std::collections::HashMap<String, Arc<CircuitBreaker>>>>,
+    endpoint_breakers:
+        Arc<tokio::sync::RwLock<std::collections::HashMap<String, Arc<CircuitBreaker>>>>,
 }
 
 impl CircuitBreakerManager {
@@ -114,10 +115,7 @@ impl Default for CircuitBreakerManager {
 /// This middleware wraps requests with circuit breaker protection.
 /// When a service endpoint experiences too many failures, the circuit
 /// breaker opens and blocks requests until the service recovers.
-pub async fn circuit_breaker_middleware(
-    request: Request,
-    next: Next,
-) -> Response {
+pub async fn circuit_breaker_middleware(request: Request, next: Next) -> Response {
     // Extract endpoint path for circuit breaker identification
     let path = request.uri().path().to_string();
     let endpoint = normalize_endpoint(&path);
@@ -173,30 +171,31 @@ pub async fn circuit_breaker_middleware(
 /// Groups similar endpoints together (e.g., /api/v1/memories/:id -> /api/v1/memories/*)
 fn normalize_endpoint(path: &str) -> String {
     use regex::Regex;
-    
+
     // Remove UUIDs and IDs from path
     let uuid_pattern = Regex::new(r"/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}")
         .unwrap_or_else(|_| {
             // Fallback if regex compilation fails - use a pattern that matches nothing
             // This should never fail as "(?!)" is a valid regex pattern
-            Regex::new("(?!)").expect("Failed to create fallback regex pattern - this should never happen")
+            Regex::new("(?!)")
+                .expect("Failed to create fallback regex pattern - this should never happen")
         });
     let normalized = uuid_pattern.replace_all(path, "/*");
 
     // Replace numeric IDs with wildcard
-    let numeric_pattern = Regex::new(r"/\d+")
-        .unwrap_or_else(|_| {
-            // Fallback if regex compilation fails
-            Regex::new("(?!)").expect("Failed to create fallback regex pattern - this should never happen")
-        });
+    let numeric_pattern = Regex::new(r"/\d+").unwrap_or_else(|_| {
+        // Fallback if regex compilation fails
+        Regex::new("(?!)")
+            .expect("Failed to create fallback regex pattern - this should never happen")
+    });
     let normalized = numeric_pattern.replace_all(&normalized, "/*");
 
     // Replace path parameters with wildcard
-    let param_pattern = Regex::new(r"/:[^/]+")
-        .unwrap_or_else(|_| {
-            // Fallback if regex compilation fails
-            Regex::new("(?!)").expect("Failed to create fallback regex pattern - this should never happen")
-        });
+    let param_pattern = Regex::new(r"/:[^/]+").unwrap_or_else(|_| {
+        // Fallback if regex compilation fails
+        Regex::new("(?!)")
+            .expect("Failed to create fallback regex pattern - this should never happen")
+    });
     let normalized = param_pattern.replace_all(&normalized, "/*");
 
     normalized.to_string()

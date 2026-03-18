@@ -41,15 +41,15 @@
 //! }
 //! ```
 
-pub mod error;
-pub mod models;
 pub mod detector;
-pub mod resolver;
+pub mod error;
 pub mod manager;
+pub mod models;
+pub mod resolver;
 
 // Re-exports for convenience
-pub use error::{ResourceError, Result};
-pub use models::{Resource, ResourceId, ResourceMetadata, ResourceStatus, MediaType};
 pub use detector::MediaTypeDetector;
-pub use resolver::{URIResolver, URI};
+pub use error::{ResourceError, Result};
 pub use manager::ResourceManager;
+pub use models::{MediaType, Resource, ResourceId, ResourceMetadata, ResourceStatus};
+pub use resolver::{URIResolver, URI};

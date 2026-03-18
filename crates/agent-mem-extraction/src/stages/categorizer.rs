@@ -77,9 +77,7 @@ impl AutoCategorizer {
                     "/skills/other".to_string()
                 }
             }
-            _ => {
-                "/uncategorized".to_string()
-            }
+            _ => "/uncategorized".to_string(),
         }
     }
 
@@ -95,7 +93,11 @@ impl AutoCategorizer {
             *category_counts.entry(category).or_insert(0) += 1;
         }
 
-        info!("Categorized {} items into {} categories", item_count, category_counts.len());
+        info!(
+            "Categorized {} items into {} categories",
+            item_count,
+            category_counts.len()
+        );
 
         for (category, count) in &category_counts {
             debug!("Category '{}': {} items", category, count);
@@ -188,10 +190,7 @@ mod tests {
     fn test_categorize_skill() {
         let categorizer = AutoCategorizer::new();
 
-        let item = MemoryItem::new(
-            "User can write clean code".to_string(),
-            "skill".to_string(),
-        );
+        let item = MemoryItem::new("User can write clean code".to_string(), "skill".to_string());
 
         let category = categorizer.categorize_item(&item);
 

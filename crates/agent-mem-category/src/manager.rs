@@ -1,19 +1,15 @@
 //! CategoryManager trait for hierarchical category management
 
-use async_trait::async_trait;
 use crate::error::{CategoryError, Result};
 use crate::models::{Category, CategoryId, CategoryPath, CategoryScope, CategoryTreeNode};
+use async_trait::async_trait;
 
 /// Trait for managing hierarchical categories
 #[async_trait]
 pub trait CategoryManager: Send + Sync {
     /// Create a new category at the given path
     /// Automatically creates parent categories if they don't exist
-    async fn create_category(
-        &mut self,
-        path: &str,
-        scope: CategoryScope,
-    ) -> Result<Category>;
+    async fn create_category(&mut self, path: &str, scope: CategoryScope) -> Result<Category>;
 
     /// Get a category by ID
     async fn get_category(&self, id: &CategoryId) -> Result<Category>;
@@ -48,13 +44,23 @@ pub trait CategoryManager: Send + Sync {
     ) -> Result<Vec<Category>>;
 
     /// Get category tree rooted at a path
-    async fn get_tree(&self, path: &str, scope: &CategoryScope, depth: usize) -> Result<CategoryTreeNode>;
+    async fn get_tree(
+        &self,
+        path: &str,
+        scope: &CategoryScope,
+        depth: usize,
+    ) -> Result<CategoryTreeNode>;
 
     /// Update category summary (LLM-driven)
     async fn update_summary(&mut self, id: &CategoryId, summary: String) -> Result<()>;
 
     /// Move a category to a new parent
-    async fn move_category(&mut self, id: &CategoryId, new_parent_path: &str, scope: &CategoryScope) -> Result<()>;
+    async fn move_category(
+        &mut self,
+        id: &CategoryId,
+        new_parent_path: &str,
+        scope: &CategoryScope,
+    ) -> Result<()>;
 
     /// Increment item count in a category
     async fn increment_item_count(&mut self, id: &CategoryId) -> Result<()>;
@@ -65,14 +71,17 @@ pub trait CategoryManager: Send + Sync {
 
 /// In-memory category manager for testing and simple use cases
 pub struct InMemoryCategoryManager {
-    categories: std::sync::Arc<tokio::sync::RwLock<std::collections::HashMap<CategoryId, Category>>>,
+    categories:
+        std::sync::Arc<tokio::sync::RwLock<std::collections::HashMap<CategoryId, Category>>>,
 }
 
 impl InMemoryCategoryManager {
     /// Create a new in-memory category manager
     pub fn new() -> Self {
         Self {
-            categories: std::sync::Arc::new(tokio::sync::RwLock::new(std::collections::HashMap::new())),
+            categories: std::sync::Arc::new(tokio::sync::RwLock::new(
+                std::collections::HashMap::new(),
+            )),
         }
     }
 
@@ -80,16 +89,24 @@ impl InMemoryCategoryManager {
     async fn insert_category(&self, category: Category) -> Result<()> {
         let mut categories = self.categories.write().await;
         if categories.contains_key(&category.id) {
-            return Err(CategoryError::CategoryAlreadyExists(category.id.to_string()));
+            return Err(CategoryError::CategoryAlreadyExists(
+                category.id.to_string(),
+            ));
         }
         categories.insert(category.id.clone(), category);
         Ok(())
     }
 
     /// Update parent-child relationships
-    async fn update_parent_child(&self, parent_id: &CategoryId, child_id: CategoryId, add: bool) -> Result<()> {
+    async fn update_parent_child(
+        &self,
+        parent_id: &CategoryId,
+        child_id: CategoryId,
+        add: bool,
+    ) -> Result<()> {
         let mut categories = self.categories.write().await;
-        let parent = categories.get_mut(parent_id)
+        let parent = categories
+            .get_mut(parent_id)
             .ok_or_else(|| CategoryError::ParentNotFound(parent_id.to_string()))?;
 
         if add {
@@ -110,16 +127,14 @@ impl Default for InMemoryCategoryManager {
 
 #[async_trait]
 impl CategoryManager for InMemoryCategoryManager {
-    async fn create_category(
-        &mut self,
-        path: &str,
-        scope: CategoryScope,
-    ) -> Result<Category> {
+    async fn create_category(&mut self, path: &str, scope: CategoryScope) -> Result<Category> {
         let category_path = CategoryPath::new(path)?;
         let segments = category_path.segments();
 
         if segments.is_empty() {
-            return Err(CategoryError::InvalidPath("Cannot create root category".to_string()));
+            return Err(CategoryError::InvalidPath(
+                "Cannot create root category".to_string(),
+            ));
         }
 
         // Create parent categories first
@@ -132,7 +147,8 @@ impl CategoryManager for InMemoryCategoryManager {
                 }
                 Err(_) => {
                     // Parent doesn't exist, create it
-                    let parent = Category::new(parent_path.clone(), segments[i].clone(), scope.clone());
+                    let parent =
+                        Category::new(parent_path.clone(), segments[i].clone(), scope.clone());
                     parent_id = Some(parent.id.clone());
                     self.insert_category(parent).await?;
                 }
@@ -148,7 +164,8 @@ impl CategoryManager for InMemoryCategoryManager {
 
         // Update parent's children list
         if let Some(pid) = &parent_id {
-            self.update_parent_child(pid, category.id.clone(), true).await?;
+            self.update_parent_child(pid, category.id.clone(), true)
+                .await?;
         }
 
         Ok(category)
@@ -183,7 +200,8 @@ impl CategoryManager for InMemoryCategoryManager {
 
     async fn delete_category(&mut self, id: &CategoryId) -> Result<()> {
         let mut categories = self.categories.write().await;
-        let mut category = categories.get(id)
+        let mut category = categories
+            .get(id)
             .cloned()
             .ok_or_else(|| CategoryError::CategoryNotFound(id.to_string()))?;
 
@@ -237,7 +255,9 @@ impl CategoryManager for InMemoryCategoryManager {
                 &c.scope == scope
                     && c.status == crate::models::CategoryStatus::Active
                     && (c.name.to_lowercase().contains(&query_lower)
-                        || c.summary.as_ref().map_or(false, |s| s.to_lowercase().contains(&query_lower)))
+                        || c.summary
+                            .as_ref()
+                            .map_or(false, |s| s.to_lowercase().contains(&query_lower)))
             })
             .cloned()
             .collect();
@@ -246,15 +266,19 @@ impl CategoryManager for InMemoryCategoryManager {
         results.sort_by(|a, b| {
             let a_exact = a.name.to_lowercase() == query_lower;
             let b_exact = b.name.to_lowercase() == query_lower;
-            b_exact.cmp(&a_exact)
-                .then_with(|| a.name.cmp(&b.name))
+            b_exact.cmp(&a_exact).then_with(|| a.name.cmp(&b.name))
         });
 
         results.truncate(limit);
         Ok(results)
     }
 
-    async fn get_tree(&self, path: &str, scope: &CategoryScope, depth: usize) -> Result<CategoryTreeNode> {
+    async fn get_tree(
+        &self,
+        path: &str,
+        scope: &CategoryScope,
+        depth: usize,
+    ) -> Result<CategoryTreeNode> {
         let root_category = self.get_category_by_path(path, scope).await?;
         let mut node = CategoryTreeNode::new(root_category.clone());
 
@@ -271,13 +295,19 @@ impl CategoryManager for InMemoryCategoryManager {
 
     async fn update_summary(&mut self, id: &CategoryId, summary: String) -> Result<()> {
         let mut categories = self.categories.write().await;
-        let category = categories.get_mut(id)
+        let category = categories
+            .get_mut(id)
             .ok_or_else(|| CategoryError::CategoryNotFound(id.to_string()))?;
         category.update_summary(summary);
         Ok(())
     }
 
-    async fn move_category(&mut self, id: &CategoryId, new_parent_path: &str, scope: &CategoryScope) -> Result<()> {
+    async fn move_category(
+        &mut self,
+        id: &CategoryId,
+        new_parent_path: &str,
+        scope: &CategoryScope,
+    ) -> Result<()> {
         let mut category = self.get_category(id).await?;
         let new_parent = self.get_category_by_path(new_parent_path, scope).await?;
 
@@ -288,16 +318,22 @@ impl CategoryManager for InMemoryCategoryManager {
 
         // Remove from old parent
         if let Some(old_parent_id) = &category.parent_id {
-            self.update_parent_child(old_parent_id, category.id.clone(), false).await?;
+            self.update_parent_child(old_parent_id, category.id.clone(), false)
+                .await?;
         }
 
         // Update category
-        let new_path = format!("{}/{}", new_parent.path.trim_end_matches('/'), category.name);
+        let new_path = format!(
+            "{}/{}",
+            new_parent.path.trim_end_matches('/'),
+            category.name
+        );
         category.path = new_path;
         category.parent_id = Some(new_parent.id.clone());
 
         // Add to new parent
-        self.update_parent_child(&new_parent.id, category.id.clone(), true).await?;
+        self.update_parent_child(&new_parent.id, category.id.clone(), true)
+            .await?;
 
         // Update category
         self.update_category(category).await?;
@@ -307,7 +343,8 @@ impl CategoryManager for InMemoryCategoryManager {
 
     async fn increment_item_count(&mut self, id: &CategoryId) -> Result<()> {
         let mut categories = self.categories.write().await;
-        let category = categories.get_mut(id)
+        let category = categories
+            .get_mut(id)
             .ok_or_else(|| CategoryError::CategoryNotFound(id.to_string()))?;
         category.increment_item_count();
         Ok(())
@@ -315,7 +352,8 @@ impl CategoryManager for InMemoryCategoryManager {
 
     async fn decrement_item_count(&mut self, id: &CategoryId) -> Result<()> {
         let mut categories = self.categories.write().await;
-        let category = categories.get_mut(id)
+        let category = categories
+            .get_mut(id)
             .ok_or_else(|| CategoryError::CategoryNotFound(id.to_string()))?;
         category.decrement_item_count();
         Ok(())
@@ -331,14 +369,20 @@ mod tests {
         let mut manager = InMemoryCategoryManager::new();
         let scope = CategoryScope::new("user-123".to_string());
 
-        let category = manager.create_category("/preferences/communication", scope.clone()).await.unwrap();
+        let category = manager
+            .create_category("/preferences/communication", scope.clone())
+            .await
+            .unwrap();
 
         assert_eq!(category.path, "/preferences/communication");
         assert_eq!(category.name, "communication");
         assert!(!category.is_root());
 
         // Check that parent was created
-        let parent = manager.get_category_by_path("/preferences", &scope).await.unwrap();
+        let parent = manager
+            .get_category_by_path("/preferences", &scope)
+            .await
+            .unwrap();
         assert_eq!(parent.name, "preferences");
         assert!(parent.is_root());
     }
@@ -348,7 +392,10 @@ mod tests {
         let mut manager = InMemoryCategoryManager::new();
         let scope = CategoryScope::new("user-123".to_string());
 
-        let created = manager.create_category("/test", scope.clone()).await.unwrap();
+        let created = manager
+            .create_category("/test", scope.clone())
+            .await
+            .unwrap();
         let retrieved = manager.get_category(&created.id).await.unwrap();
 
         assert_eq!(created.id, retrieved.id);
@@ -360,9 +407,15 @@ mod tests {
         let mut manager = InMemoryCategoryManager::new();
         let scope = CategoryScope::new("user-123".to_string());
 
-        manager.create_category("/preferences/communication/style", scope.clone()).await.unwrap();
+        manager
+            .create_category("/preferences/communication/style", scope.clone())
+            .await
+            .unwrap();
 
-        let category = manager.navigate_path("/preferences/communication", &scope).await.unwrap();
+        let category = manager
+            .navigate_path("/preferences/communication", &scope)
+            .await
+            .unwrap();
         assert_eq!(category.name, "communication");
     }
 
@@ -371,9 +424,15 @@ mod tests {
         let mut manager = InMemoryCategoryManager::new();
         let scope = CategoryScope::new("user-123".to_string());
 
-        manager.create_category("/preferences/communication/style", scope.clone()).await.unwrap();
+        manager
+            .create_category("/preferences/communication/style", scope.clone())
+            .await
+            .unwrap();
 
-        let children = manager.browse_path("/preferences/communication", &scope).await.unwrap();
+        let children = manager
+            .browse_path("/preferences/communication", &scope)
+            .await
+            .unwrap();
         assert_eq!(children.len(), 1);
         assert_eq!(children[0].name, "style");
     }
@@ -383,10 +442,19 @@ mod tests {
         let mut manager = InMemoryCategoryManager::new();
         let scope = CategoryScope::new("user-123".to_string());
 
-        manager.create_category("/preferences/communication", scope.clone()).await.unwrap();
-        manager.create_category("/skills/programming", scope.clone()).await.unwrap();
+        manager
+            .create_category("/preferences/communication", scope.clone())
+            .await
+            .unwrap();
+        manager
+            .create_category("/skills/programming", scope.clone())
+            .await
+            .unwrap();
 
-        let results = manager.search_categories("communication", &scope, 10).await.unwrap();
+        let results = manager
+            .search_categories("communication", &scope, 10)
+            .await
+            .unwrap();
         assert_eq!(results.len(), 1);
         assert_eq!(results[0].name, "communication");
     }
@@ -396,9 +464,15 @@ mod tests {
         let mut manager = InMemoryCategoryManager::new();
         let scope = CategoryScope::new("user-123".to_string());
 
-        manager.create_category("/preferences/communication/style", scope.clone()).await.unwrap();
+        manager
+            .create_category("/preferences/communication/style", scope.clone())
+            .await
+            .unwrap();
 
-        let tree = manager.get_tree("/preferences/communication", &scope, 2).await.unwrap();
+        let tree = manager
+            .get_tree("/preferences/communication", &scope, 2)
+            .await
+            .unwrap();
         assert_eq!(tree.category.name, "communication");
         assert_eq!(tree.children.len(), 1);
         assert_eq!(tree.children[0].category.name, "style");
@@ -409,7 +483,10 @@ mod tests {
         let mut manager = InMemoryCategoryManager::new();
         let scope = CategoryScope::new("user-123".to_string());
 
-        let category = manager.create_category("/test", scope.clone()).await.unwrap();
+        let category = manager
+            .create_category("/test", scope.clone())
+            .await
+            .unwrap();
         assert_eq!(category.item_count, 0);
 
         manager.increment_item_count(&category.id).await.unwrap();
@@ -426,21 +503,39 @@ mod tests {
         let mut manager = InMemoryCategoryManager::new();
         let scope = CategoryScope::new("user-123".to_string());
 
-        manager.create_category("/old_parent/child", scope.clone()).await.unwrap();
-        manager.create_category("/new_parent", scope.clone()).await.unwrap();
+        manager
+            .create_category("/old_parent/child", scope.clone())
+            .await
+            .unwrap();
+        manager
+            .create_category("/new_parent", scope.clone())
+            .await
+            .unwrap();
 
-        let child = manager.get_category_by_path("/old_parent/child", &scope).await.unwrap();
-        manager.move_category(&child.id, "/new_parent", &scope).await.unwrap();
+        let child = manager
+            .get_category_by_path("/old_parent/child", &scope)
+            .await
+            .unwrap();
+        manager
+            .move_category(&child.id, "/new_parent", &scope)
+            .await
+            .unwrap();
 
         let moved = manager.get_category(&child.id).await.unwrap();
         assert_eq!(moved.path, "/new_parent/child");
 
         // Verify old parent no longer has this child
-        let old_parent = manager.get_category_by_path("/old_parent", &scope).await.unwrap();
+        let old_parent = manager
+            .get_category_by_path("/old_parent", &scope)
+            .await
+            .unwrap();
         assert!(!old_parent.children_ids.contains(&child.id));
 
         // Verify new parent has this child
-        let new_parent = manager.get_category_by_path("/new_parent", &scope).await.unwrap();
+        let new_parent = manager
+            .get_category_by_path("/new_parent", &scope)
+            .await
+            .unwrap();
         assert!(new_parent.children_ids.contains(&child.id));
     }
 }

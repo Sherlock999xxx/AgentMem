@@ -145,7 +145,8 @@ impl ExtractionStage for ResourceIngestor {
         };
 
         // Detect media type if not provided
-        let media_type = input.media_type
+        let media_type = input
+            .media_type
             .unwrap_or_else(|| self.detect_media_type(&input.uri, &content));
 
         // Store in context for next stages
@@ -153,9 +154,7 @@ impl ExtractionStage for ResourceIngestor {
 
         info!(
             "Ingested resource: {} (media_type: {}, size: {} bytes)",
-            input.uri,
-            media_type,
-            output.metrics.resource_size_bytes
+            input.uri, media_type, output.metrics.resource_size_bytes
         );
 
         Ok(output)

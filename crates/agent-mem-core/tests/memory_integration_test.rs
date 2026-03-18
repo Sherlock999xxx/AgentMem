@@ -33,9 +33,9 @@ fn test_memory_integrator_config_custom() {
         semantic_weight: 0.6,
         enable_compression: true,
         compression_threshold: 5,
-            enable_active_retrieval: false,
-            enable_context_enhancement: false,
-            enable_graph_memory: false,
+        enable_active_retrieval: false,
+        enable_context_enhancement: false,
+        enable_graph_memory: false,
     };
     assert_eq!(config.max_memories, 20);
     assert_eq!(config.relevance_threshold, 0.7);

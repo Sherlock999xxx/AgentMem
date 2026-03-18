@@ -91,7 +91,8 @@ impl BatchModule {
             });
 
             // 准备MemoryManager批量数据
-            let mut metadata_for_manager: std::collections::HashMap<String, String> = string_metadata;
+            let mut metadata_for_manager: std::collections::HashMap<String, String> =
+                string_metadata;
             metadata_for_manager.insert("_memory_id".to_string(), memory_id.clone());
             memory_manager_batch.push((
                 memory_id.clone(),
@@ -209,7 +210,10 @@ impl BatchModule {
             )));
         }
 
-        info!("✅ 批量快速添加完成: {} 个记忆（批量嵌入+批量写入）", memory_ids.len());
+        info!(
+            "✅ 批量快速添加完成: {} 个记忆（批量嵌入+批量写入）",
+            memory_ids.len()
+        );
         Ok(memory_ids)
     }
 
@@ -226,7 +230,7 @@ impl BatchModule {
         }
 
         info!("批量优化添加 {} 个记忆", contents.len());
-        
+
         // 检查 embedder 是否初始化（添加详细日志）
         if orchestrator.embedder.is_none() {
             warn!("Embedder 未初始化，无法进行批量添加");

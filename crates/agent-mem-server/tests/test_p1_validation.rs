@@ -53,7 +53,10 @@ mod validation_tests {
             &Some(10),
         );
 
-        assert_ne!(key1, key2, "Different queries should generate different cache keys");
+        assert_ne!(
+            key1, key2,
+            "Different queries should generate different cache keys"
+        );
     }
 
     #[test]
@@ -109,14 +112,7 @@ mod validation_tests {
 
     #[test]
     fn test_add_memory_empty_content() {
-        let result = validate_add_memory_request(
-            "".to_string(),
-            None,
-            None,
-            None,
-            None,
-            None,
-        );
+        let result = validate_add_memory_request("".to_string(), None, None, None, None, None);
 
         assert!(result.is_err(), "Empty content should fail validation");
         assert!(result.unwrap_err().contains("content"));
@@ -148,7 +144,10 @@ mod validation_tests {
             None,
         );
 
-        assert!(result.is_err(), "Content with script tag should fail validation");
+        assert!(
+            result.is_err(),
+            "Content with script tag should fail validation"
+        );
         assert!(result.unwrap_err().contains("html_or_script"));
     }
 
@@ -163,7 +162,10 @@ mod validation_tests {
             None,
         );
 
-        assert!(result.is_err(), "Content with iframe tag should fail validation");
+        assert!(
+            result.is_err(),
+            "Content with iframe tag should fail validation"
+        );
     }
 
     #[test]
@@ -177,7 +179,10 @@ mod validation_tests {
             None,
         );
 
-        assert!(result.is_err(), "Content with javascript: protocol should fail validation");
+        assert!(
+            result.is_err(),
+            "Content with javascript: protocol should fail validation"
+        );
     }
 
     #[test]
@@ -191,7 +196,10 @@ mod validation_tests {
             None,
         );
 
-        assert!(result.is_err(), "Content with event handler should fail validation");
+        assert!(
+            result.is_err(),
+            "Content with event handler should fail validation"
+        );
     }
 
     #[test]
@@ -219,7 +227,10 @@ mod validation_tests {
             None,
         );
 
-        assert!(result.is_err(), "Negative importance should fail validation");
+        assert!(
+            result.is_err(),
+            "Negative importance should fail validation"
+        );
     }
 
     #[test]
@@ -250,7 +261,8 @@ mod validation_tests {
     #[test]
     fn test_add_memory_metadata_too_many_entries() {
         let mut metadata = HashMap::new();
-        for i in 0..51 { // Exceeds MAX_METADATA_ENTRIES (50)
+        for i in 0..51 {
+            // Exceeds MAX_METADATA_ENTRIES (50)
             metadata.insert(format!("key{}", i), "value".to_string());
         }
 
@@ -263,7 +275,10 @@ mod validation_tests {
             None,
         );
 
-        assert!(result.is_err(), "Too many metadata entries should fail validation");
+        assert!(
+            result.is_err(),
+            "Too many metadata entries should fail validation"
+        );
         assert!(result.unwrap_err().contains("Metadata entries count"));
     }
 
@@ -281,7 +296,10 @@ mod validation_tests {
             None,
         );
 
-        assert!(result.is_err(), "Invalid metadata key characters should fail validation");
+        assert!(
+            result.is_err(),
+            "Invalid metadata key characters should fail validation"
+        );
         assert!(result.unwrap_err().contains("invalid_metadata_key"));
     }
 
@@ -299,7 +317,10 @@ mod validation_tests {
             None,
         );
 
-        assert!(result.is_err(), "Metadata key too long should fail validation");
+        assert!(
+            result.is_err(),
+            "Metadata key too long should fail validation"
+        );
         assert!(result.unwrap_err().contains("Metadata key length"));
     }
 
@@ -317,7 +338,10 @@ mod validation_tests {
             None,
         );
 
-        assert!(result.is_err(), "Metadata value too long should fail validation");
+        assert!(
+            result.is_err(),
+            "Metadata value too long should fail validation"
+        );
         assert!(result.unwrap_err().contains("Metadata value length"));
     }
 
@@ -367,7 +391,10 @@ mod validation_tests {
             None,
         );
 
-        assert!(result.is_err(), "Tag with invalid characters should fail validation");
+        assert!(
+            result.is_err(),
+            "Tag with invalid characters should fail validation"
+        );
         assert!(result.unwrap_err().contains("invalid_tag"));
     }
 
@@ -391,7 +418,11 @@ mod validation_tests {
         let result = validate_add_memory_request(
             "Valid content".to_string(),
             None,
-            Some(vec!["rust".to_string(), "programming".to_string(), "web".to_string()]),
+            Some(vec![
+                "rust".to_string(),
+                "programming".to_string(),
+                "web".to_string(),
+            ]),
             None,
             None,
             None,
@@ -425,7 +456,10 @@ mod validation_tests {
             Some("a".repeat(101)), // Exceeds max length
         );
 
-        assert!(result.is_err(), "Session ID too long should fail validation");
+        assert!(
+            result.is_err(),
+            "Session ID too long should fail validation"
+        );
     }
 
     // ==================== Update Memory Request Tests ====================
@@ -440,7 +474,10 @@ mod validation_tests {
             Some(0.8),
         );
 
-        assert!(result.is_ok(), "Valid update request should pass validation");
+        assert!(
+            result.is_ok(),
+            "Valid update request should pass validation"
+        );
     }
 
     #[test]
@@ -494,18 +531,15 @@ mod validation_tests {
             Some(0.3),
         );
 
-        assert!(result.is_ok(), "Valid search request should pass validation");
+        assert!(
+            result.is_ok(),
+            "Valid search request should pass validation"
+        );
     }
 
     #[test]
     fn test_search_empty_query() {
-        let result = validate_search_request(
-            "".to_string(),
-            10,
-            None,
-            None,
-            None,
-        );
+        let result = validate_search_request("".to_string(), 10, None, None, None);
 
         assert!(result.is_err(), "Empty query should fail validation");
     }
@@ -552,23 +586,11 @@ mod validation_tests {
     #[test]
     fn test_search_valid_limit_boundaries() {
         // Test minimum boundary
-        let result_min = validate_search_request(
-            "rust".to_string(),
-            1,
-            None,
-            None,
-            None,
-        );
+        let result_min = validate_search_request("rust".to_string(), 1, None, None, None);
         assert!(result_min.is_ok(), "Limit = 1 should be valid");
 
         // Test maximum boundary
-        let result_max = validate_search_request(
-            "rust".to_string(),
-            100,
-            None,
-            None,
-            None,
-        );
+        let result_max = validate_search_request("rust".to_string(), 100, None, None, None);
         assert!(result_max.is_ok(), "Limit = 100 should be valid");
     }
 
@@ -595,7 +617,10 @@ mod validation_tests {
             Some(1.5), // Exceeds max
         );
 
-        assert!(result_min_high.is_err(), "Min importance > 1.0 should fail validation");
+        assert!(
+            result_min_high.is_err(),
+            "Min importance > 1.0 should fail validation"
+        );
 
         let result_min_negative = validate_search_request(
             "rust".to_string(),
@@ -605,7 +630,10 @@ mod validation_tests {
             Some(-0.1), // Negative
         );
 
-        assert!(result_min_negative.is_err(), "Negative min importance should fail validation");
+        assert!(
+            result_min_negative.is_err(),
+            "Negative min importance should fail validation"
+        );
     }
 
     // ==================== Delete Memory Request Tests ====================
@@ -614,7 +642,10 @@ mod validation_tests {
     fn test_delete_valid_request() {
         let result = validate_delete_request("memory-123".to_string());
 
-        assert!(result.is_ok(), "Valid delete request should pass validation");
+        assert!(
+            result.is_ok(),
+            "Valid delete request should pass validation"
+        );
     }
 
     #[test]
@@ -653,7 +684,10 @@ mod validation_tests {
             Some("session-learning-123".to_string()),
         );
 
-        assert!(result.is_ok(), "Complex valid request should pass validation");
+        assert!(
+            result.is_ok(),
+            "Complex valid request should pass validation"
+        );
     }
 
     #[test]
@@ -665,16 +699,21 @@ mod validation_tests {
             "<script>alert('xss')</script>".to_string(),
             Some(metadata),
             Some(vec!["invalid tag!".to_string()]),
-            Some(2.5), // Invalid importance
+            Some(2.5),             // Invalid importance
             Some("a".repeat(200)), // Invalid agent_id
             None,
         );
 
-        assert!(result.is_err(), "Request with multiple errors should fail validation");
+        assert!(
+            result.is_err(),
+            "Request with multiple errors should fail validation"
+        );
         // The error should mention at least one of the issues
         let error_msg = result.unwrap_err();
         assert!(
-            error_msg.contains("script") || error_msg.contains("invalid") || error_msg.contains("range"),
+            error_msg.contains("script")
+                || error_msg.contains("invalid")
+                || error_msg.contains("range"),
             "Error should mention one of the validation failures"
         );
     }

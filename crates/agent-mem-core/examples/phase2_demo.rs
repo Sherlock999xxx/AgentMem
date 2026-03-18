@@ -5,12 +5,12 @@
 //! cargo run --package agent-mem-core --example phase2_demo
 //! ```
 
-use agent_mem_core::search::vector_search::{VectorSearchEngine, VectorSearchConfig};
-use agent_mem_traits::{VectorStore, VectorData};
+use agent_mem_core::search::vector_search::{VectorSearchConfig, VectorSearchEngine};
+use agent_mem_traits::{VectorData, VectorStore};
+use std::collections::HashMap;
 use std::sync::Arc;
 use std::time::Instant;
 use tokio::sync::RwLock;
-use std::collections::HashMap;
 
 // 简单的内存向量存储实现 (用于演示)
 struct InMemoryVectorStore {
@@ -121,20 +121,18 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("目标: 缓存命中率 40-60% → 70-90%");
 
     // 创建测试查询向量
-    let query_vector: Vec<f32> = (0..384)
-        .map(|j| (j * 17 % 100) as f32 / 100.0)
-        .collect();
+    let query_vector: Vec<f32> = (0..384).map(|j| (j * 17 % 100) as f32 / 100.0).collect();
 
     // 第一次搜索 (缓存未命中)
     let start = Instant::now();
-    let results1 = search_engine.search(
-        agent_mem_core::search::SearchQuery {
+    let results1 = search_engine
+        .search(agent_mem_core::search::SearchQuery {
             query: "test query".to_string(),
             vector: Some(query_vector.clone()),
             limit: 10,
             ..Default::default()
-        },
-    ).await?;
+        })
+        .await?;
     let duration1 = start.elapsed();
 
     println!("✅ 第一次搜索: {:?}", duration1);
@@ -142,14 +140,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // 第二次搜索 (相同查询,应该命中缓存)
     let start = Instant::now();
-    let results2 = search_engine.search(
-        agent_mem_core::search::SearchQuery {
+    let results2 = search_engine
+        .search(agent_mem_core::search::SearchQuery {
             query: "test query".to_string(),
             vector: Some(query_vector.clone()),
             limit: 10,
             ..Default::default()
-        },
-    ).await?;
+        })
+        .await?;
     let duration2 = start.elapsed();
 
     println!("✅ 第二次搜索 (缓存命中): {:?}", duration2);

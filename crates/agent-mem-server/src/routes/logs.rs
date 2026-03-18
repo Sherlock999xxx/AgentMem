@@ -6,7 +6,10 @@
 use crate::error::{ServerError, ServerResult};
 use crate::middleware::audit::AuditLog;
 use crate::models;
-use axum::{extract::{Path as AxumPath, Query}, response::Json};
+use axum::{
+    extract::{Path as AxumPath, Query},
+    response::Json,
+};
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
@@ -47,7 +50,7 @@ pub struct LogQueryParams {
 }
 
 /// 获取日志统计信息
-/// 
+///
 /// 🆕 Phase 4.2: 日志聚合 - 提供日志统计和分析
 #[utoipa::path(
     get,
@@ -67,9 +70,10 @@ pub async fn get_log_stats(
     info!("📊 获取日志统计信息");
 
     // 确定日志文件路径
-    let date = params.get("date").cloned().unwrap_or_else(|| {
-        chrono::Local::now().format("%Y-%m-%d").to_string()
-    });
+    let date = params
+        .get("date")
+        .cloned()
+        .unwrap_or_else(|| chrono::Local::now().format("%Y-%m-%d").to_string());
     let log_file = format!("logs/agentmem-server.log.{}", date);
 
     // 检查文件是否存在
@@ -135,18 +139,20 @@ pub async fn get_log_stats(
         last_updated: Utc::now(),
     };
 
-    info!("📊 日志统计: 总行数={}, 错误={}, 警告={}, 信息={}, 调试={}",
+    info!(
+        "📊 日志统计: 总行数={}, 错误={}, 警告={}, 信息={}, 调试={}",
         response.total_lines,
         response.error_count,
         response.warning_count,
         response.info_count,
-        response.debug_count);
+        response.debug_count
+    );
 
     Ok(Json(models::ApiResponse::success(response)))
 }
 
 /// 查询日志内容
-/// 
+///
 /// 🆕 Phase 4.2: 日志聚合 - 提供日志查询功能
 #[utoipa::path(
     get,
@@ -168,9 +174,9 @@ pub async fn query_logs(
     info!("🔍 查询日志内容");
 
     // 确定日志文件路径
-    let date = params.date.unwrap_or_else(|| {
-        chrono::Local::now().format("%Y-%m-%d").to_string()
-    });
+    let date = params
+        .date
+        .unwrap_or_else(|| chrono::Local::now().format("%Y-%m-%d").to_string());
     let log_file = format!("logs/agentmem-server.log.{}", date);
 
     // 检查文件是否存在
@@ -274,7 +280,7 @@ pub struct TraceRequest {
 }
 
 /// 🆕 Phase 4.2: 查询请求追踪信息
-/// 
+///
 /// 基于audit日志查询特定trace_id的所有请求
 #[utoipa::path(
     get,
@@ -297,22 +303,27 @@ pub async fn get_trace(
     // 确定audit日志文件路径（查询最近7天的日志）
     let mut all_requests = Vec::new();
     let today = chrono::Local::now().date_naive();
-    
+
     // 查询最近7天的audit日志
     for day_offset in 0..7 {
         let date = today - chrono::Days::new(day_offset);
         let log_file = format!("logs/audit/audit-{}.jsonl", date.format("%Y-%m-%d"));
-        
+
         if !Path::new(&log_file).exists() {
             continue;
         }
-        
+
         // 读取audit日志文件
         if let Ok(content) = fs::read_to_string(&log_file).await {
             for line in content.lines() {
                 if let Ok(audit_log) = serde_json::from_str::<AuditLog>(line) {
                     // 匹配trace_id
-                    if audit_log.trace_id.as_ref().map(|t| t == &trace_id).unwrap_or(false) {
+                    if audit_log
+                        .trace_id
+                        .as_ref()
+                        .map(|t| t == &trace_id)
+                        .unwrap_or(false)
+                    {
                         all_requests.push(TraceRequest {
                             timestamp: audit_log.timestamp,
                             method: audit_log.method,
@@ -327,18 +338,21 @@ pub async fn get_trace(
             }
         }
     }
-    
+
     // 按时间排序
     all_requests.sort_by_key(|r| r.timestamp);
-    
+
     if all_requests.is_empty() {
-        return Err(ServerError::not_found(format!("Trace {} not found", trace_id)));
+        return Err(ServerError::not_found(format!(
+            "Trace {} not found",
+            trace_id
+        )));
     }
-    
+
     // 计算总耗时和错误状态
     let total_duration_ms = all_requests.iter().map(|r| r.duration_ms).sum();
     let has_errors = all_requests.iter().any(|r| r.status_code >= 400);
-    
+
     let response = TraceResponse {
         trace_id,
         requests: all_requests.clone(),
@@ -347,10 +361,12 @@ pub async fn get_trace(
         has_errors,
         timestamp: Utc::now(),
     };
-    
-    info!("✅ 追踪查询完成: trace_id={}, 请求数={}, 总耗时={}ms", 
-        response.trace_id, response.total_requests, response.total_duration_ms);
-    
+
+    info!(
+        "✅ 追踪查询完成: trace_id={}, 请求数={}, 总耗时={}ms",
+        response.trace_id, response.total_requests, response.total_duration_ms
+    );
+
     Ok(Json(models::ApiResponse::success(response)))
 }
 
@@ -509,4 +525,3 @@ mod tests {
         assert_eq!(response_with_errors.requests[1].status_code, 404);
     }
 }
-

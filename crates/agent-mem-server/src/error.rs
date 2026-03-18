@@ -259,23 +259,33 @@ impl IntoResponse for ServerError {
                 (StatusCode::INTERNAL_SERVER_ERROR, "MEMORY_ERROR", message)
             }
             ServerError::NotFound { message, .. } => (StatusCode::NOT_FOUND, "NOT_FOUND", message),
-            ServerError::BadRequest { message, .. } => (StatusCode::BAD_REQUEST, "BAD_REQUEST", message),
-            ServerError::Unauthorized { message, .. } => (StatusCode::UNAUTHORIZED, "UNAUTHORIZED", message),
+            ServerError::BadRequest { message, .. } => {
+                (StatusCode::BAD_REQUEST, "BAD_REQUEST", message)
+            }
+            ServerError::Unauthorized { message, .. } => {
+                (StatusCode::UNAUTHORIZED, "UNAUTHORIZED", message)
+            }
             ServerError::Forbidden { message, .. } => (StatusCode::FORBIDDEN, "FORBIDDEN", message),
             ServerError::QuotaExceeded { message, .. } => {
                 (StatusCode::TOO_MANY_REQUESTS, "QUOTA_EXCEEDED", message)
             }
-            ServerError::ValidationError { message, .. } => (StatusCode::BAD_REQUEST, "VALIDATION_ERROR", message),
-            ServerError::BindError { message, .. } => (StatusCode::INTERNAL_SERVER_ERROR, "BIND_ERROR", message),
+            ServerError::ValidationError { message, .. } => {
+                (StatusCode::BAD_REQUEST, "VALIDATION_ERROR", message)
+            }
+            ServerError::BindError { message, .. } => {
+                (StatusCode::INTERNAL_SERVER_ERROR, "BIND_ERROR", message)
+            }
             ServerError::ServerError { message, .. } => {
                 (StatusCode::INTERNAL_SERVER_ERROR, "SERVER_ERROR", message)
             }
             ServerError::ConfigError { message, .. } => {
                 (StatusCode::INTERNAL_SERVER_ERROR, "CONFIG_ERROR", message)
             }
-            ServerError::TelemetryError { message, .. } => {
-                (StatusCode::INTERNAL_SERVER_ERROR, "TELEMETRY_ERROR", message)
-            }
+            ServerError::TelemetryError { message, .. } => (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "TELEMETRY_ERROR",
+                message,
+            ),
             ServerError::Internal { message, .. } => {
                 (StatusCode::INTERNAL_SERVER_ERROR, "INTERNAL_ERROR", message)
             }

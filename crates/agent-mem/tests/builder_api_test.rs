@@ -31,10 +31,7 @@ mod search_builder_tests {
         let _ = mem.add("北京是中国的首都").await;
 
         // 使用 builder 搜索
-        let results = mem
-            .search("食物")
-            .await
-            .expect("搜索应该成功");
+        let results = mem.search("食物").await.expect("搜索应该成功");
 
         assert!(!results.is_empty(), "应该找到相关记忆");
         println!("✅ 基础搜索测试通过，找到 {} 条记忆", results.len());
@@ -51,10 +48,7 @@ mod search_builder_tests {
         }
 
         // 使用 builder 设置 limit
-        let results = mem
-            .search("测试")
-            .await
-            .expect("搜索应该成功");
+        let results = mem.search("测试").await.expect("搜索应该成功");
 
         // 验证返回数量
         assert!(results.len() <= 10, "返回数量应该不超过限制");
@@ -72,10 +66,7 @@ mod search_builder_tests {
             let _ = mem.add("深度学习使用神经网络").await;
 
             // 启用混合搜索
-            let results = mem
-                .search("AI")
-                .await
-                .expect("混合搜索应该成功");
+            let results = mem.search("AI").await.expect("混合搜索应该成功");
 
             println!("✅ 混合搜索测试通过，找到 {} 条记忆", results.len());
         }
@@ -96,10 +87,7 @@ mod search_builder_tests {
         let _ = mem.add("编程语言有很多种").await;
 
         // 启用重排序
-        let results = mem
-            .search("编程")
-            .await
-            .expect("搜索应该成功");
+        let results = mem.search("编程").await.expect("搜索应该成功");
 
         println!("✅ 重排序测试通过，找到 {} 条记忆", results.len());
     }
@@ -113,10 +101,7 @@ mod search_builder_tests {
         let _ = mem.add("不相关的东西").await;
 
         // 设置阈值
-        let results = mem
-            .search("相关")
-            .await
-            .expect("搜索应该成功");
+        let results = mem.search("相关").await.expect("搜索应该成功");
 
         println!("✅ 相似度阈值测试通过，找到 {} 条记忆", results.len());
     }
@@ -132,10 +117,7 @@ mod search_builder_tests {
         // 使用时间范围
         let now = chrono::Utc::now().timestamp();
 
-        let results = mem
-            .search("消息")
-            .await
-            .expect("搜索应该成功");
+        let results = mem.search("消息").await.expect("搜索应该成功");
 
         println!("✅ 时间范围过滤测试通过，找到 {} 条记忆", results.len());
     }
@@ -148,10 +130,7 @@ mod search_builder_tests {
         let _ = mem.add("重要消息").await;
         let _ = mem.add("普通消息").await;
 
-        let results = mem
-            .search("消息")
-            .await
-            .expect("搜索应该成功");
+        let results = mem.search("消息").await.expect("搜索应该成功");
 
         println!("✅ 自定义过滤器测试通过，找到 {} 条记忆", results.len());
     }
@@ -166,10 +145,7 @@ mod search_builder_tests {
         }
 
         // 链式调用多个配置
-        let results = mem
-            .search("测试")
-            .await
-            .expect("搜索应该成功");
+        let results = mem.search("测试").await.expect("搜索应该成功");
 
         assert!(!results.is_empty(), "应该找到结果");
         println!("✅ 链式调用测试通过，找到 {} 条记忆", results.len());
@@ -184,10 +160,7 @@ mod search_builder_tests {
         let _ = mem.add("测试数据1").await;
         let _ = mem.add("测试数据2").await;
 
-        let results = mem
-            .search("测试")
-            .await
-            .expect("搜索应该成功");
+        let results = mem.search("测试").await.expect("搜索应该成功");
 
         println!("✅ 智能调度测试通过，短查询返回 {} 条记忆", results.len());
 
@@ -195,20 +168,14 @@ mod search_builder_tests {
         let long_query = "这是一个非常长的查询内容，用来测试系统对于长查询的智能优化能力";
         let _ = mem.add(long_query).await;
 
-        let results = mem
-            .search(long_query)
-            .await
-            .expect("搜索应该成功");
+        let results = mem.search(long_query).await.expect("搜索应该成功");
 
         println!("✅ 长查询优化测试通过，返回 {} 条记忆", results.len());
 
         // 时间关键词查询 - 应该自动应用时间过滤
         let _ = mem.add("最近的重要事件").await;
 
-        let results = mem
-            .search("最近的")
-            .await
-            .expect("搜索应该成功");
+        let results = mem.search("最近的").await.expect("搜索应该成功");
 
         println!("✅ 时间关键词测试通过，返回 {} 条记忆", results.len());
     }
@@ -244,7 +211,10 @@ mod batch_builder_tests {
         let mem = create_test_memory().await;
 
         let ids = mem
-            .add_batch(vec!["记忆1".to_string(), "记忆2".to_string()], agent_mem::AddMemoryOptions::default())
+            .add_batch(
+                vec!["记忆1".to_string(), "记忆2".to_string()],
+                agent_mem::AddMemoryOptions::default(),
+            )
             .await
             .expect("批量添加应该成功");
 
@@ -324,7 +294,12 @@ mod batch_builder_tests {
         let mem = create_test_memory().await;
 
         let contents: Vec<String> = (0..200)
-            .map(|i| format!("大批量测试记忆 {} - 这是一段较长的内容用来测试批量处理能力", i))
+            .map(|i| {
+                format!(
+                    "大批量测试记忆 {} - 这是一段较长的内容用来测试批量处理能力",
+                    i
+                )
+            })
             .collect();
 
         let ids = mem
@@ -394,7 +369,9 @@ mod unified_api_tests {
         let _ = mem.add("记忆2").await;
         let _ = mem.add("记忆3").await;
 
-        let results = mem.get_all(agent_mem::types::GetAllOptions::default()).await;
+        let results = mem
+            .get_all(agent_mem::types::GetAllOptions::default())
+            .await;
         assert!(results.is_ok(), "get_all() 应该成功");
 
         let memories = results.unwrap();
@@ -452,7 +429,9 @@ mod unified_api_tests {
         assert!(result.is_ok(), "delete_all() 应该成功");
 
         // 验证全部删除
-        let results = mem.get_all(agent_mem::types::GetAllOptions::default()).await;
+        let results = mem
+            .get_all(agent_mem::types::GetAllOptions::default())
+            .await;
         assert!(results.is_ok(), "get_all() 应该成功");
 
         let memories = results.unwrap();
@@ -511,7 +490,9 @@ mod integration_tests {
         let mem = create_test_memory().await;
 
         // 1. 添加记忆
-        let id1 = mem.add("用户喜欢吃披萨").await.unwrap().results[0].id.clone();
+        let id1 = mem.add("用户喜欢吃披萨").await.unwrap().results[0]
+            .id
+            .clone();
         let id2 = mem.add("用户住在北京").await.unwrap().results[0].id.clone();
         println!("✅ 步骤 1: 添加记忆成功");
 
@@ -528,7 +509,10 @@ mod integration_tests {
         // 4. 更新记忆
         use std::collections::HashMap;
         let mut data = HashMap::new();
-        data.insert("content".to_string(), serde_json::json!("用户非常喜欢吃意大利披萨"));
+        data.insert(
+            "content".to_string(),
+            serde_json::json!("用户非常喜欢吃意大利披萨"),
+        );
         mem.update(&id1, data).await.unwrap();
         println!("✅ 步骤 4: 更新记忆成功");
 
@@ -559,7 +543,10 @@ mod integration_tests {
             .map(|i| format!("批量记忆 #{} - 内容描述", i))
             .collect();
 
-        let ids = mem.add_batch(contents, agent_mem::AddMemoryOptions::default()).await.unwrap();
+        let ids = mem
+            .add_batch(contents, agent_mem::AddMemoryOptions::default())
+            .await
+            .unwrap();
         assert_eq!(ids.len(), 100);
         println!("✅ 批量添加 100 条记忆成功");
 

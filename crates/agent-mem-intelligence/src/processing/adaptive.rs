@@ -532,7 +532,7 @@ mod tests {
         assert!(archived.is_some());
         if let Some(AttributeValue::Boolean(val)) = archived {
             assert_eq!(*val, true);
-        Ok(())
+            Ok(())
         }
         assert!(memory.importance().unwrap_or(0.0) < 0.5); // Should be reduced
     }
@@ -552,7 +552,7 @@ mod tests {
         assert!(compressed.is_some());
         if let Some(AttributeValue::Boolean(val)) = compressed {
             assert_eq!(*val, true);
-        Ok(())
+            Ok(())
         }
     }
 

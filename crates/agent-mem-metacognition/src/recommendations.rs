@@ -28,7 +28,7 @@
 //! }
 //! ```
 
-use crate::metacognition::{MetacognitionReport, MemoryHealthMetrics};
+use crate::metacognition::{MemoryHealthMetrics, MetacognitionReport};
 use agent_mem_traits::Result;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
@@ -39,19 +39,19 @@ use tracing::info;
 pub enum RecommendationType {
     /// Consolidation recommended
     Consolidation,
-    
+
     /// Memory cleanup recommended
     Cleanup,
-    
+
     /// Performance optimization
     Performance,
-    
+
     /// Storage optimization
     Storage,
-    
+
     /// Index optimization
     Indexing,
-    
+
     /// General advice
     General,
 }
@@ -70,22 +70,22 @@ pub enum RecommendationPriority {
 pub struct Recommendation {
     /// Recommendation type
     pub recommendation_type: RecommendationType,
-    
+
     /// Priority level
     pub priority: RecommendationPriority,
-    
+
     /// Human-readable description
     pub description: String,
-    
+
     /// Expected impact (0-100)
     pub expected_impact: u8,
-    
+
     /// Estimated effort (low/medium/high)
     pub effort: String,
-    
+
     /// Actionable steps
     pub steps: Vec<String>,
-    
+
     /// Generated timestamp
     pub generated_at: DateTime<Utc>,
 }
@@ -300,7 +300,10 @@ impl RecommendationEngine {
             recommendations.push(Recommendation::new(
                 RecommendationType::Consolidation,
                 RecommendationPriority::High,
-                format!("Consolidation needed (urgency: {:.1}%)", health.consolidation_urgency),
+                format!(
+                    "Consolidation needed (urgency: {:.1}%)",
+                    health.consolidation_urgency
+                ),
             ));
         }
 
@@ -308,7 +311,10 @@ impl RecommendationEngine {
             recommendations.push(Recommendation::new(
                 RecommendationType::Cleanup,
                 RecommendationPriority::Medium,
-                format!("Health score below optimal ({:.1}/100)", health.health_score),
+                format!(
+                    "Health score below optimal ({:.1}/100)",
+                    health.health_score
+                ),
             ));
         }
 
@@ -325,7 +331,10 @@ impl Default for RecommendationEngine {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::metacognition::{MemoryHealthMetrics, MemoryUsageStats, PerformanceMetrics, MetacognitionReport, MergeStatisticsSummary};
+    use crate::metacognition::{
+        MemoryHealthMetrics, MemoryUsageStats, MergeStatisticsSummary, MetacognitionReport,
+        PerformanceMetrics,
+    };
 
     #[tokio::test]
     async fn test_recommendation_creation() {

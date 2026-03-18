@@ -69,9 +69,7 @@ async fn test_batch_performance(
     let items: Vec<_> = (0..batch_size)
         .map(|i| {
             (
-                format!(
-                    "批量测试记忆 #{i} - 这是一条测试数据，用于验证批量添加性能"
-                ),
+                format!("批量测试记忆 #{i} - 这是一条测试数据，用于验证批量添加性能"),
                 "test-agent".to_string(),
                 Some("test-user".to_string()),
                 Some(MemoryType::Episodic),

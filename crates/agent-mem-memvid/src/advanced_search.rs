@@ -5,7 +5,7 @@
 //! - HNSW for vector similarity search (when "vec" feature is enabled)
 
 use crate::error::{MemvidError, Result};
-use memvid_core::{Memvid, SearchRequest, SearchHit, SearchResponse};
+use memvid_core::{Memvid, SearchHit, SearchRequest, SearchResponse};
 
 /// Advanced search options
 #[derive(Debug, Clone)]
@@ -116,13 +116,16 @@ pub struct AdvancedSearch {
 impl AdvancedSearch {
     /// Create a new advanced search instance
     pub fn new(path: impl Into<String>) -> Self {
-        Self {
-            _path: path.into(),
-        }
+        Self { _path: path.into() }
     }
 
     /// Full-text search with options
-    pub fn search(&self, mem: &mut Memvid, query: &str, options: &SearchOptions) -> Result<Vec<SearchResult>> {
+    pub fn search(
+        &self,
+        mem: &mut Memvid,
+        query: &str,
+        options: &SearchOptions,
+    ) -> Result<Vec<SearchResult>> {
         let query = options.build_query(query);
 
         let request = SearchRequest {
@@ -137,31 +140,40 @@ impl AdvancedSearch {
             as_of_ts: None,
         };
 
-        let response: SearchResponse = mem.search(request)
+        let response: SearchResponse = mem
+            .search(request)
             .map_err(|e| MemvidError::Memvid(format!("Search failed: {}", e)))?;
 
         // Convert to our SearchResult format
-        let results: Vec<SearchResult> = response.hits.into_iter().map(|hit| {
-            // Extract memory ID from URI
-            let memory_id = hit.uri.strip_prefix("mv2://memory/")
-                .map(|s| s.to_string());
+        let results: Vec<SearchResult> = response
+            .hits
+            .into_iter()
+            .map(|hit| {
+                // Extract memory ID from URI
+                let memory_id = hit.uri.strip_prefix("mv2://memory/").map(|s| s.to_string());
 
-            let score = hit.score.unwrap_or(0.0);
-            let snippet = hit.text.clone();
+                let score = hit.score.unwrap_or(0.0);
+                let snippet = hit.text.clone();
 
-            SearchResult {
-                hit,
-                memory_id,
-                score,
-                snippet,
-            }
-        }).collect();
+                SearchResult {
+                    hit,
+                    memory_id,
+                    score,
+                    snippet,
+                }
+            })
+            .collect();
 
         Ok(results)
     }
 
     /// Simple full-text search
-    pub fn search_simple(&self, mem: &mut Memvid, query: &str, top_k: usize) -> Result<Vec<SearchHit>> {
+    pub fn search_simple(
+        &self,
+        mem: &mut Memvid,
+        query: &str,
+        top_k: usize,
+    ) -> Result<Vec<SearchHit>> {
         let request = SearchRequest {
             query: query.to_string(),
             top_k,
@@ -174,14 +186,20 @@ impl AdvancedSearch {
             as_of_ts: None,
         };
 
-        let response = mem.search(request)
+        let response = mem
+            .search(request)
             .map_err(|e| MemvidError::Memvid(format!("Search failed: {}", e)))?;
 
         Ok(response.hits)
     }
 
     /// Fuzzy search for approximate matching
-    pub fn search_fuzzy(&self, mem: &mut Memvid, query: &str, top_k: usize) -> Result<Vec<SearchHit>> {
+    pub fn search_fuzzy(
+        &self,
+        mem: &mut Memvid,
+        query: &str,
+        top_k: usize,
+    ) -> Result<Vec<SearchHit>> {
         // Add fuzzy operator
         let fuzzy_query = format!("{}~", query);
 
@@ -197,14 +215,20 @@ impl AdvancedSearch {
             as_of_ts: None,
         };
 
-        let response = mem.search(request)
+        let response = mem
+            .search(request)
             .map_err(|e| MemvidError::Memvid(format!("Fuzzy search failed: {}", e)))?;
 
         Ok(response.hits)
     }
 
     /// Phrase search for exact matching
-    pub fn search_phrase(&self, mem: &mut Memvid, phrase: &str, top_k: usize) -> Result<Vec<SearchHit>> {
+    pub fn search_phrase(
+        &self,
+        mem: &mut Memvid,
+        phrase: &str,
+        top_k: usize,
+    ) -> Result<Vec<SearchHit>> {
         // Wrap in quotes for exact phrase matching
         let phrase_query = format!("\"{}\"", phrase);
 
@@ -220,14 +244,20 @@ impl AdvancedSearch {
             as_of_ts: None,
         };
 
-        let response = mem.search(request)
+        let response = mem
+            .search(request)
             .map_err(|e| MemvidError::Memvid(format!("Phrase search failed: {}", e)))?;
 
         Ok(response.hits)
     }
 
     /// Multi-field search (search across content, tags, and metadata)
-    pub fn search_multi(&self, mem: &mut Memvid, queries: Vec<&str>, top_k: usize) -> Result<Vec<SearchHit>> {
+    pub fn search_multi(
+        &self,
+        mem: &mut Memvid,
+        queries: Vec<&str>,
+        top_k: usize,
+    ) -> Result<Vec<SearchHit>> {
         // Combine queries with OR
         let combined_query = queries.join(" OR ");
 
@@ -243,7 +273,8 @@ impl AdvancedSearch {
             as_of_ts: None,
         };
 
-        let response = mem.search(request)
+        let response = mem
+            .search(request)
             .map_err(|e| MemvidError::Memvid(format!("Multi-field search failed: {}", e)))?;
 
         Ok(response.hits)

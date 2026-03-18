@@ -1,8 +1,8 @@
 # Loop Summary
 
-**Status:** Completed successfully
-**Iterations:** 1
-**Duration:** 19m 41s
+**Status:** Failed: stale loop detected
+**Iterations:** 17
+**Duration:** 27m 10s
 
 ## Tasks
 
@@ -14,4 +14,4 @@ _No events recorded._
 
 ## Final Commit
 
-8f900e7: feat: implement scheduler execution loop for ProactiveAgent
+8f7b056: chore: record terminal objective verification

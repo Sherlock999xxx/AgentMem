@@ -88,7 +88,7 @@ static SEARCH_STATS: std::sync::OnceLock<Arc<RwLock<SearchStatistics>>> =
 
 /// 获取搜索统计
 pub fn get_search_stats() -> Arc<RwLock<SearchStatistics>> {
-    SEARCH_STATS.get_or_init(|| {
-        Arc::new(RwLock::new(SearchStatistics::new()))
-    }).clone()
+    SEARCH_STATS
+        .get_or_init(|| Arc::new(RwLock::new(SearchStatistics::new())))
+        .clone()
 }

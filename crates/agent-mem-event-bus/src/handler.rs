@@ -1,7 +1,7 @@
 //! Event handler trait and implementations
 
 use super::Result;
-use agent_mem_performance::telemetry::{MemoryEvent, EventType};
+use agent_mem_performance::telemetry::{EventType, MemoryEvent};
 use async_trait::async_trait;
 
 /// Event handler trait for processing events
@@ -241,10 +241,7 @@ mod tests {
 
     #[test]
     fn test_event_filter_types() {
-        let filter = EventFilter::Types(vec![
-            EventType::MemoryCreated,
-            EventType::MemoryUpdated,
-        ]);
+        let filter = EventFilter::Types(vec![EventType::MemoryCreated, EventType::MemoryUpdated]);
 
         let event1 = MemoryEvent::new(EventType::MemoryCreated);
         assert!(filter.matches(&event1));
@@ -259,7 +256,10 @@ mod tests {
     #[test]
     fn test_event_filter_custom() {
         let filter = EventFilter::Custom(Box::new(|event| {
-            matches!(event.event_type, EventType::MemoryCreated | EventType::MemoryUpdated)
+            matches!(
+                event.event_type,
+                EventType::MemoryCreated | EventType::MemoryUpdated
+            )
         }));
 
         let event1 = MemoryEvent::new(EventType::MemoryCreated);

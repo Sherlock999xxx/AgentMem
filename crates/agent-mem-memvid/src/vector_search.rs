@@ -2,11 +2,11 @@
 //!
 //! 提供基于嵌入向量的语义搜索能力，使用 MemVid 的 HNSW 索引。
 
-use crate::embedding::{EmbeddingVector, cosine_similarity};
+use crate::embedding::{cosine_similarity, EmbeddingVector};
 use crate::error::{MemvidError, Result};
+use std::collections::HashMap;
 use std::sync::Arc;
 use tokio::sync::RwLock;
-use std::collections::HashMap;
 
 /// 向量搜索配置
 #[derive(Debug, Clone)]
@@ -73,11 +73,14 @@ impl AsyncEmbeddingGenerator {
         let text = text.to_string();
 
         // 在 blocking 线程池中执行同步操作
-        tokio::task::spawn_blocking(move || {
-            generator.embed_sync(&text)
-        })
-        .await
-        .map_err(|e| MemvidError::Io(std::io::Error::new(std::io::ErrorKind::Other, format!("Task join error: {}", e))))?
+        tokio::task::spawn_blocking(move || generator.embed_sync(&text))
+            .await
+            .map_err(|e| {
+                MemvidError::Io(std::io::Error::new(
+                    std::io::ErrorKind::Other,
+                    format!("Task join error: {}", e),
+                ))
+            })?
     }
 
     /// 获取向量维度
@@ -133,7 +136,11 @@ impl VectorIndex {
     }
 
     /// 查找最相似的向量
-    pub async fn search(&self, query: &str, config: &VectorSearchConfig) -> Result<Vec<VectorSearchResult>> {
+    pub async fn search(
+        &self,
+        query: &str,
+        config: &VectorSearchConfig,
+    ) -> Result<Vec<VectorSearchResult>> {
         let query_vector = self.generator.embed(query).await?;
 
         let embeddings = self.embeddings.read().await;
@@ -221,21 +228,22 @@ impl HybridSearcher {
 
         // 处理向量搜索结果
         for result in vector_results {
-            let entry = combined.entry(result.memory_id.clone()).or_insert_with(|| {
-                HybridSearchResult {
-                    memory_id: result.memory_id,
-                    text_score: 0.0,
-                    vector_score: result.similarity,
-                    combined_score: 0.0,
-                }
-            });
+            let entry =
+                combined
+                    .entry(result.memory_id.clone())
+                    .or_insert_with(|| HybridSearchResult {
+                        memory_id: result.memory_id,
+                        text_score: 0.0,
+                        vector_score: result.similarity,
+                        combined_score: 0.0,
+                    });
             entry.vector_score = result.similarity;
         }
 
         // 计算综合分数
         for result in combined.values_mut() {
-            result.combined_score = self.text_weight * result.text_score
-                + self.vector_weight * result.vector_score;
+            result.combined_score =
+                self.text_weight * result.text_score + self.vector_weight * result.vector_score;
         }
 
         // 排序并返回 top_k

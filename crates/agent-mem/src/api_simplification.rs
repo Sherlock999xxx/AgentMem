@@ -154,7 +154,8 @@ impl ErrorEnhancer {
                 let suggestions = vec![
                     "检查数据库连接是否正常".to_string(),
                     "确认存储路径有写入权限".to_string(),
-                    "尝试使用内存存储进行测试: Memory::builder().with_storage(\"memory://\")".to_string(),
+                    "尝试使用内存存储进行测试: Memory::builder().with_storage(\"memory://\")"
+                        .to_string(),
                 ];
                 (user_msg, suggestions)
             }
@@ -246,7 +247,9 @@ impl SmartDefaults {
     }
 
     /// 应用智能默认值到MemoryBuilder
-    pub async fn apply_to_builder(builder: crate::builder::MemoryBuilder) -> Result<crate::builder::MemoryBuilder> {
+    pub async fn apply_to_builder(
+        builder: crate::builder::MemoryBuilder,
+    ) -> Result<crate::builder::MemoryBuilder> {
         let defaults = Self::detect().await;
         let mut builder = builder;
 

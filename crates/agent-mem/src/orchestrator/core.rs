@@ -61,13 +61,13 @@ impl Default for OrchestratorConfig {
             vector_store_url: None,
             enable_intelligent_features: true,
             enable_embedding_queue: Some(true), // 默认启用队列优化
-            embedding_batch_size: Some(64), // 优化：增加批处理大小（32 → 64）
+            embedding_batch_size: Some(64),     // 优化：增加批处理大小（32 → 64）
             embedding_batch_interval_ms: Some(20), // 优化：增加批处理间隔（10ms → 20ms）
-            enable_embedder_cache: Some(true), // P0 优化：默认启用嵌入缓存（2-5x 性能提升）
-            embedder_cache_size: Some(1000), // 默认缓存 1000 个嵌入
+            enable_embedder_cache: Some(true),  // P0 优化：默认启用嵌入缓存（2-5x 性能提升）
+            embedder_cache_size: Some(1000),    // 默认缓存 1000 个嵌入
             embedder_cache_ttl_secs: Some(3600), // 默认 TTL 1 小时
-            enable_vector_cache: Some(true), // Phase 2.5 优化：默认启用向量缓存
-            vector_cache_size: Some(10000), // 默认缓存 10000 个向量
+            enable_vector_cache: Some(true),    // Phase 2.5 优化：默认启用向量缓存
+            vector_cache_size: Some(10000),     // 默认缓存 10000 个向量
             vector_cache_ttl_seconds: Some(3600), // 默认 TTL 1 小时
         }
     }
@@ -258,8 +258,10 @@ impl MemoryOrchestrator {
             async {
                 if config.enable_intelligent_features {
                     info!("📦 [并行 1/4] 创建 Intelligence 组件...");
-                    super::initialization::InitializationModule::create_intelligence_components(&config)
-                        .await
+                    super::initialization::InitializationModule::create_intelligence_components(
+                        &config,
+                    )
+                    .await
                 } else {
                     info!("⚠️  [并行 1/4] 智能功能已禁用");
                     Ok(IntelligenceComponents {
@@ -283,12 +285,16 @@ impl MemoryOrchestrator {
             // Task 3: 多模态处理组件（如果配置）
             async {
                 info!("📦 [并行 3/4] 创建多模态处理组件...");
-                super::initialization::InitializationModule::create_multimodal_components(&config).await
+                super::initialization::InitializationModule::create_multimodal_components(&config)
+                    .await
             },
             // Task 4: 聚类和推理组件
             async {
                 info!("📦 [并行 4/4] 创建聚类和推理组件...");
-                super::initialization::InitializationModule::create_clustering_reasoning_components(&config).await
+                super::initialization::InitializationModule::create_clustering_reasoning_components(
+                    &config,
+                )
+                .await
             },
         )
         .map_err(|e| {
@@ -774,7 +780,6 @@ impl MemoryOrchestrator {
         agent_id: String,
         user_id: Option<String>,
     ) -> Result<Vec<MemoryItem>> {
-        
         let mut all_memories = Vec::new();
 
         // 使用 MemoryManager 获取所有记忆
@@ -902,7 +907,7 @@ impl MemoryOrchestrator {
     #[allow(dead_code)]
     pub(crate) async fn get_performance_stats(&self) -> Result<crate::memory::PerformanceStats> {
         // 实现性能统计逻辑
-        
+
         let cache_hit_rate = 0.0;
         let avg_add_latency_ms = 0.0;
         let avg_search_latency_ms = 0.0;
@@ -936,7 +941,10 @@ impl MemoryOrchestrator {
 
     /// 获取历史记录 - 内部方法
     #[allow(dead_code)]
-    pub(crate) async fn get_history(&self, memory_id: &str) -> Result<Vec<crate::history::HistoryEntry>> {
+    pub(crate) async fn get_history(
+        &self,
+        memory_id: &str,
+    ) -> Result<Vec<crate::history::HistoryEntry>> {
         if let Some(history_manager) = &self.history_manager {
             history_manager.get_history(memory_id).await
         } else {
@@ -970,7 +978,12 @@ impl MemoryOrchestrator {
                 None,
             )
             .await
-            .and_then(|r| Ok(r.results.first().map(|e| e.id.clone()).unwrap_or_else(|| uuid::Uuid::new_v4().to_string())))
+            .and_then(|r| {
+                Ok(r.results
+                    .first()
+                    .map(|e| e.id.clone())
+                    .unwrap_or_else(|| uuid::Uuid::new_v4().to_string()))
+            })
         } else {
             // 降级到快速添加
             self.add_memory_fast(
@@ -1029,7 +1042,12 @@ impl MemoryOrchestrator {
                 metadata,
             )
             .await
-            .and_then(|r| Ok(r.results.first().map(|e| e.id.clone()).unwrap_or_else(|| uuid::Uuid::new_v4().to_string())))
+            .and_then(|r| {
+                Ok(r.results
+                    .first()
+                    .map(|e| e.id.clone())
+                    .unwrap_or_else(|| uuid::Uuid::new_v4().to_string()))
+            })
         } else {
             // 降级到快速添加
             self.add_memory_fast(
@@ -1086,11 +1104,7 @@ impl MemoryOrchestrator {
     /// ```rust
     /// let id = orchestrator.add_image(image_data, Some("A beautiful sunset")).await?;
     /// ```
-    pub async fn add_image(
-        &self,
-        image: Vec<u8>,
-        caption: Option<&str>,
-    ) -> Result<String> {
+    pub async fn add_image(&self, image: Vec<u8>, caption: Option<&str>) -> Result<String> {
         let mut metadata = std::collections::HashMap::new();
         if let Some(caption_text) = caption {
             metadata.insert("caption".to_string(), caption_text.to_string());
@@ -1100,10 +1114,19 @@ impl MemoryOrchestrator {
             image,
             "default".to_string(),
             "default".to_string(),
-            if metadata.is_empty() { None } else { Some(metadata) },
+            if metadata.is_empty() {
+                None
+            } else {
+                Some(metadata)
+            },
         )
         .await
-        .and_then(|r| Ok(r.results.first().map(|e| e.id.clone()).unwrap_or_else(|| uuid::Uuid::new_v4().to_string())))
+        .and_then(|r| {
+            Ok(r.results
+                .first()
+                .map(|e| e.id.clone())
+                .unwrap_or_else(|| uuid::Uuid::new_v4().to_string()))
+        })
     }
 
     /// 添加音频记忆
@@ -1113,11 +1136,7 @@ impl MemoryOrchestrator {
     /// ```rust
     /// let id = orchestrator.add_audio(audio_data, Some("Transcript text")).await?;
     /// ```
-    pub async fn add_audio(
-        &self,
-        audio: Vec<u8>,
-        transcript: Option<&str>,
-    ) -> Result<String> {
+    pub async fn add_audio(&self, audio: Vec<u8>, transcript: Option<&str>) -> Result<String> {
         let mut metadata = std::collections::HashMap::new();
         if let Some(transcript_text) = transcript {
             metadata.insert("transcript".to_string(), transcript_text.to_string());
@@ -1127,10 +1146,19 @@ impl MemoryOrchestrator {
             audio,
             "default".to_string(),
             "default".to_string(),
-            if metadata.is_empty() { None } else { Some(metadata) },
+            if metadata.is_empty() {
+                None
+            } else {
+                Some(metadata)
+            },
         )
         .await
-        .and_then(|r| Ok(r.results.first().map(|e| e.id.clone()).unwrap_or_else(|| uuid::Uuid::new_v4().to_string())))
+        .and_then(|r| {
+            Ok(r.results
+                .first()
+                .map(|e| e.id.clone())
+                .unwrap_or_else(|| uuid::Uuid::new_v4().to_string()))
+        })
     }
 
     /// 添加视频记忆
@@ -1140,11 +1168,7 @@ impl MemoryOrchestrator {
     /// ```rust
     /// let id = orchestrator.add_video(video_data, Some("Video description")).await?;
     /// ```
-    pub async fn add_video(
-        &self,
-        video: Vec<u8>,
-        description: Option<&str>,
-    ) -> Result<String> {
+    pub async fn add_video(&self, video: Vec<u8>, description: Option<&str>) -> Result<String> {
         let mut metadata = std::collections::HashMap::new();
         if let Some(desc) = description {
             metadata.insert("description".to_string(), desc.to_string());
@@ -1154,10 +1178,19 @@ impl MemoryOrchestrator {
             video,
             "default".to_string(),
             "default".to_string(),
-            if metadata.is_empty() { None } else { Some(metadata) },
+            if metadata.is_empty() {
+                None
+            } else {
+                Some(metadata)
+            },
         )
         .await
-        .and_then(|r| Ok(r.results.first().map(|e| e.id.clone()).unwrap_or_else(|| uuid::Uuid::new_v4().to_string())))
+        .and_then(|r| {
+            Ok(r.results
+                .first()
+                .map(|e| e.id.clone())
+                .unwrap_or_else(|| uuid::Uuid::new_v4().to_string()))
+        })
     }
 
     // ========== ✅ 新 API - 统一的查询 ==========
@@ -1181,8 +1214,13 @@ impl MemoryOrchestrator {
     /// let memories = orchestrator.get_all().await?;
     /// ```
     pub async fn get_all(&self) -> Result<Vec<MemoryItem>> {
-        self.get_all_memories_v2("default".to_string(), Some("default".to_string()), None, None)
-            .await
+        self.get_all_memories_v2(
+            "default".to_string(),
+            Some("default".to_string()),
+            None,
+            None,
+        )
+        .await
     }
 
     // ========== ✅ 新 API - 统一的更新 ==========
@@ -1297,17 +1335,17 @@ impl MemoryOrchestrator {
 
         // 应用重排序
         if enable_rerank {
-            results = self
-                .context_aware_rerank(results, query, "default")
-                .await?;
+            results = self.context_aware_rerank(results, query, "default").await?;
         }
 
         // 应用时间范围过滤
         if let Some((start_ts, end_ts)) = time_range {
             use chrono::{DateTime, Utc};
             use std::time::UNIX_EPOCH;
-            let start_time = DateTime::<Utc>::from(UNIX_EPOCH + std::time::Duration::from_secs(start_ts as u64));
-            let end_time = DateTime::<Utc>::from(UNIX_EPOCH + std::time::Duration::from_secs(end_ts as u64));
+            let start_time =
+                DateTime::<Utc>::from(UNIX_EPOCH + std::time::Duration::from_secs(start_ts as u64));
+            let end_time =
+                DateTime::<Utc>::from(UNIX_EPOCH + std::time::Duration::from_secs(end_ts as u64));
 
             let before_count = results.len();
             results = results
@@ -1602,9 +1640,9 @@ impl<'a> SearchBuilder<'a> {
 
             // 2. 时间敏感性检测：自动应用时间范围过滤
             let time_keywords = ["今天", "yesterday", "recent", "最近", "latest"];
-            let has_time_keyword = time_keywords.iter().any(|keyword| {
-                builder.query.to_lowercase().contains(keyword)
-            });
+            let has_time_keyword = time_keywords
+                .iter()
+                .any(|keyword| builder.query.to_lowercase().contains(keyword));
 
             if has_time_keyword && builder.time_range.is_none() {
                 // 默认搜索最近 7 天的记忆
@@ -1623,20 +1661,26 @@ impl<'a> SearchBuilder<'a> {
         let mut results = if builder.enable_hybrid {
             #[cfg(feature = "postgres")]
             {
-                builder.orchestrator
+                builder
+                    .orchestrator
                     .search_memories_hybrid(
                         builder.query.clone(),
                         user_id.to_string(),
                         builder.limit,
                         builder.threshold,
-                        if builder.filters.is_empty() { None } else { Some(builder.filters) },
+                        if builder.filters.is_empty() {
+                            None
+                        } else {
+                            Some(builder.filters)
+                        },
                     )
                     .await?
             }
 
             #[cfg(not(feature = "postgres"))]
             {
-                builder.orchestrator
+                builder
+                    .orchestrator
                     .search_memories(
                         builder.query.clone(),
                         user_id.to_string(),
@@ -1647,7 +1691,8 @@ impl<'a> SearchBuilder<'a> {
                     .await?
             }
         } else {
-            builder.orchestrator
+            builder
+                .orchestrator
                 .search_memories(
                     builder.query.clone(),
                     user_id.to_string(),
@@ -1806,7 +1851,7 @@ impl<'a> BatchBuilder<'a> {
     ///     .await?;
     /// ```
     pub fn concurrency(mut self, n: usize) -> Self {
-        self.concurrency = n.max(1);  // 确保至少为 1
+        self.concurrency = n.max(1); // 确保至少为 1
         self
     }
 
@@ -1874,7 +1919,9 @@ impl<'a> BatchBuilder<'a> {
                                 agent_id.clone(),
                                 user_id.clone(),
                                 memory_type,
-                                None as Option<std::collections::HashMap<String, serde_json::Value>>,
+                                None as Option<
+                                    std::collections::HashMap<String, serde_json::Value>,
+                                >,
                             )
                         })
                         .collect();

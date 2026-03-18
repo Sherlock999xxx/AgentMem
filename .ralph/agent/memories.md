@@ -74,6 +74,86 @@
 
 ## Fixes
 
+### mem-1773832320-ca16
+> failure: cmd=cargo test -p agent-mem-client models::tests --target-dir /tmp/agentmem-client-contract-target, exit=101, error=file-centric fixture roundtrip failed because f32 confidence fields serialized as 0.9800000190734863/0.9200000166893005 instead of 0.98/0.92, next=promote public extracted-entity and extracted-relation confidence fields to f64 so the frozen wire fixtures remain stable
+<!-- tags: cargo, testing, client, contracts, serde | created: 2026-03-18 -->
+
+### mem-1773832200-4094
+> failure: cmd=cargo test -p agent-mem-server models::tests --lib --target-dir /tmp/agentmem-server-contract-target, exit=101, error=ort-sys build script failed while downloading onnxruntime for agent-mem-storage (native-tls connection closed), next=rerun server verification in an environment with cached/provided ONNX Runtime or gate that dependency for model-only tests because the current failure is unrelated to the file-centric DTO changes
+<!-- tags: cargo, testing, server, ort, contracts | created: 2026-03-18 -->
+
+### mem-1773831536-a9bf
+> failure: cmd=rustfmt --edition 2021 --config-path <tmp> crates/agent-mem-client/src/models.rs crates/agent-mem-server/src/models.rs crates/agent-mem-server/src/lib.rs, exit=1, error=server lib formatting traversed the module tree and hit unrelated trailing whitespace in crates/agent-mem-server/src/routes/memory.rs, next=format only the touched standalone model files and leave the small lib.rs re-export edit as-is
+<!-- tags: tooling, error-handling, rustfmt, server | created: 2026-03-18 -->
+
+### mem-1773831524-0af2
+> failure: cmd=rustfmt --config-path <tmp> crates/agent-mem-client/src/models.rs crates/agent-mem-server/src/models.rs crates/agent-mem-server/src/lib.rs, exit=1, error=rustfmt parsed files as Rust 2015 and rejected async fn in server lib tests, next=pass --edition 2021 when formatting touched files directly
+<!-- tags: tooling, error-handling, rustfmt, rust | created: 2026-03-18 -->
+
+### mem-1773831514-8148
+> failure: cmd=mktemp /tmp/agentmem-rustfmt-XXXX.toml, exit=1, error=mkstemp failed because the template form was invalid on this macOS environment, next=use mktemp -t agentmem-rustfmt to create temporary rustfmt config files on Darwin
+<!-- tags: tooling, error-handling, mktemp, rustfmt | created: 2026-03-18 -->
+
+### mem-1773831503-232f
+> failure: cmd=cargo fmt --all -- --config-path <tmp>, exit=1, error=workspace-wide rustfmt failed on unrelated parse errors and trailing whitespace in agent-mem-core/agent-mem-intelligence/agent-mem-server existing files, next=run rustfmt directly on the files touched in the current task with a temporary clean config instead of formatting the whole workspace
+<!-- tags: tooling, error-handling, rustfmt, contracts | created: 2026-03-18 -->
+
+### mem-1773831103-0545
+> failure: cmd=/Users/louloulin/.cargo/bin/ralph tools task start task-1773831045-7aa1, exit=2, error=unrecognized subcommand 'start', next=treat the freshly added file-centric contract task as active for this iteration and use the supported add/show/close/fail lifecycle
+<!-- tags: tooling, error-handling, ralph, contracts | created: 2026-03-18 -->
+
+### mem-1773831045-20c2
+> failure: cmd=/Users/louloulin/.cargo/bin/ralph tools task ensure "Freeze file-centric DTO contract baseline" --key contracts:file-centric-dto-spec -p 1 -d "Create a shared file-centric DTO baseline with fixtures, add matching server/client models, and verify serialization parity for resource/category/extraction/migration/proactive surfaces.", exit=2, error=unrecognized subcommand 'ensure', next=use ralph tools task add for staged file-centric contract tasks because the current CLI only supports add/list/ready/show/close/fail
+<!-- tags: tooling, error-handling, ralph, contracts | created: 2026-03-18 -->
+
+### mem-1773830964-9e5b
+> failure: cmd=sed -n '1,240p' crates/agent-mem-proactive/src/models.rs, exit=1, error=crates/agent-mem-proactive/src/models.rs missing, next=discover the actual proactive model definitions with rg --files before narrowing to concrete files
+<!-- tags: tooling, error-handling, rg, agentmem | created: 2026-03-18 -->
+
+### mem-1773828370-3093
+> failure: cmd=/Users/louloulin/.cargo/bin/ralph tools task start task-1773828344-09de, exit=2, error=unrecognized subcommand 'start', next=treat the newly added finalization task as active for this iteration and use the supported add/show/close/fail lifecycle
+<!-- tags: tooling, error-handling, ralph | created: 2026-03-18 -->
+
+### mem-1773828039-12ff
+> failure: cmd=rg -n '"status":"(open|in_progress)"' .ralph/agent/tasks.jsonl, exit=1, error=no matches because no non-terminal tasks remained, next=treat empty rg matches as confirmation of absence when checking terminal task state
+<!-- tags: tooling, error-handling, rg | created: 2026-03-18 -->
+
+### mem-1773828007-5c98
+> failure: cmd=/Users/louloulin/.cargo/bin/ralph tools task list --status open --format table, exit=0, error=reported task-1773827886-08b2 as open immediately after successful close, next=verify final runtime task state from .ralph/agent/tasks.jsonl before deciding whether to retry closure
+<!-- tags: tooling, error-handling, ralph | created: 2026-03-18 -->
+
+### mem-1773827913-6389
+> failure: cmd=/Users/louloulin/.cargo/bin/ralph tools task start task-1773827886-08b2, exit=2, error=unrecognized subcommand 'start', next=treat the newly added finalization task as active for this iteration and use the supported add/show/close/fail lifecycle
+<!-- tags: tooling, error-handling, ralph | created: 2026-03-18 -->
+
+### mem-1773827653-f4f8
+> failure: cmd=sed -n '1,240p' .ralph/agent/scratchpad.md, exit=1, error=.ralph/agent/scratchpad.md missing, next=recreate scratchpad and append current loop notes
+<!-- tags: tooling, error-handling, ralph | created: 2026-03-18 -->
+
+### mem-1773821044-f39f
+> failure: cmd=/Users/louloulin/.cargo/bin/ralph tools task start task-1773821006-49cb, exit=2, error=unrecognized subcommand 'start', next=use supported add/show/close/fail lifecycle and treat the newly added runtime task as active for this finalization replay
+<!-- tags: tooling, error-handling, ralph | created: 2026-03-18 -->
+
+### mem-1773820822-db1a
+> failure: cmd=/Users/louloulin/.cargo/bin/ralph tools task start task-1773820792-896e, exit=2, error=unrecognized subcommand 'start', next=use supported add/show/close/fail lifecycle and treat the freshly added runtime task as active for this finalization iteration
+<!-- tags: tooling, error-handling, ralph | created: 2026-03-18 -->
+
+### mem-1773820371-f166
+> failure: cmd=/Users/louloulin/.cargo/bin/ralph tools task start task-1773820347-b426, exit=2, error=unrecognized subcommand 'start', next=treat the freshly added runtime task as the active task for this iteration and use the supported add/show/close/fail lifecycle
+<!-- tags: tooling, error-handling, ralph | created: 2026-03-18 -->
+
+### mem-1773820334-4254
+> failure: cmd=/Users/louloulin/.cargo/bin/ralph tools task ensure "Replay objective.done and finalize objective" --key objective:done-finalize -p 3 -d "Verify mem111.md and plan1.1.1.md artifacts, append scratchpad, emit objective.done, and close out the objective.", exit=2, error=unrecognized subcommand 'ensure', next=use ralph tools task add for runtime finalization tasks because the current CLI only supports add/list/ready/show/close/fail
+<!-- tags: tooling, error-handling, ralph | created: 2026-03-18 -->
+
+### mem-1773819294-1a91
+> failure: cmd=rg --files -g 'plan*.md' ., exit=1, error=no files matched the glob, next=treat empty rg matches as absence of matching files rather than a tooling failure and only record when the absence matters to the task
+<!-- tags: tooling, error-handling, rg | created: 2026-03-18 -->
+
+### mem-1773819211-f26d
+> failure: cmd=sed -n '1,240p' .ralph/agent/scratchpad.md, exit=1, error=.ralph/agent/scratchpad.md missing, next=recreate scratchpad and append current loop notes
+<!-- tags: tooling, error-handling, ralph | created: 2026-03-18 -->
+
 ### mem-1773816923-fe15
 > failure: cmd=/Users/louloulin/.cargo/bin/ralph tools task start task-1773816908-ab25, exit=2, error=unrecognized subcommand start, next=use supported show/close/fail lifecycle and treat newly added task as active in the current Ralph CLI
 <!-- tags: tooling, error-handling, ralph | created: 2026-03-18 -->
@@ -147,6 +227,14 @@
 <!-- tags: tooling, error-handling, ralph | created: 2026-03-18 -->
 
 ## Context
+
+### mem-1773832507-03ee
+> context: docs/specs/file-centric-fixtures now define the canonical file-centric DTO wire examples for resource/category/extraction/migration/proactive, mirrored by agent-mem-client and agent-mem-server model types; extracted confidence fields were promoted to f64 to keep fixture roundtrips stable
+<!-- tags: agentmem, contracts, migration, sdk | created: 2026-03-18 -->
+
+### mem-1773819616-37a5
+> context: plan1.1.1.md turns mem111's integration assessment into a six-stage rollout: A public model unification, B resource/category-first agent chain, C dual-surface server/Rust API, D0-D3 SDK waves, E migration+regression, F proactive as default platform plane
+<!-- tags: agentmem, migration, planning, sdk | created: 2026-03-18 -->
 
 ### mem-1773815306-3758
 > context: task-1772345012-d328 is an umbrella implementation task superseded by the Chinese mem111 integration assessment; future implementation should be recreated as smaller stage tasks from the A-F and D0-D3 roadmap instead of reopening the original task

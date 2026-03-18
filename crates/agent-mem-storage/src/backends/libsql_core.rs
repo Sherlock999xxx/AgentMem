@@ -117,9 +117,12 @@ impl CoreMemoryStore for LibSqlCoreStore {
         let conn = self.db.connect().map_err(|e| {
             AgentMemError::storage_error(format!("Failed to connect to database: {e}"))
         })?;
-        let mut stmt = conn.prepare("SELECT * FROM core_memory WHERE user_id = ? AND key = ?")
+        let mut stmt = conn
+            .prepare("SELECT * FROM core_memory WHERE user_id = ? AND key = ?")
             .await
-            .map_err(|e| AgentMemError::storage_error(format!("Failed to prepare statement: {e}")))?;
+            .map_err(|e| {
+                AgentMemError::storage_error(format!("Failed to prepare statement: {e}"))
+            })?;
 
         let mut rows = stmt
             .query(params![user_id, key])
@@ -141,11 +144,12 @@ impl CoreMemoryStore for LibSqlCoreStore {
         let conn = self.db.connect().map_err(|e| {
             AgentMemError::storage_error(format!("Failed to connect to database: {e}"))
         })?;
-        let mut stmt = conn.prepare(
-            "SELECT * FROM core_memory WHERE user_id = ? ORDER BY category, key"
-        )
-        .await
-        .map_err(|e| AgentMemError::storage_error(format!("Failed to prepare statement: {e}")))?;
+        let mut stmt = conn
+            .prepare("SELECT * FROM core_memory WHERE user_id = ? ORDER BY category, key")
+            .await
+            .map_err(|e| {
+                AgentMemError::storage_error(format!("Failed to prepare statement: {e}"))
+            })?;
 
         let mut rows = stmt
             .query(params![user_id])
@@ -168,11 +172,12 @@ impl CoreMemoryStore for LibSqlCoreStore {
         let conn = self.db.connect().map_err(|e| {
             AgentMemError::storage_error(format!("Failed to connect to database: {e}"))
         })?;
-        let mut stmt = conn.prepare(
-            "SELECT * FROM core_memory WHERE user_id = ? AND category = ? ORDER BY key"
-        )
-        .await
-        .map_err(|e| AgentMemError::storage_error(format!("Failed to prepare statement: {e}")))?;
+        let mut stmt = conn
+            .prepare("SELECT * FROM core_memory WHERE user_id = ? AND category = ? ORDER BY key")
+            .await
+            .map_err(|e| {
+                AgentMemError::storage_error(format!("Failed to prepare statement: {e}"))
+            })?;
 
         let mut rows = stmt
             .query(params![user_id, category])

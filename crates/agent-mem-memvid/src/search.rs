@@ -2,7 +2,7 @@
 
 use crate::error::Result;
 use crate::store::MemvidStore;
-use agent_mem_traits::{Memory, MemoryId, Filters};
+use agent_mem_traits::{Filters, Memory, MemoryId};
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 
@@ -103,7 +103,12 @@ pub trait MemvidSearch: Send + Sync {
     async fn search_vector(&self, query: &str, top_k: usize) -> Result<Vec<SearchResult>>;
 
     /// Hybrid search (text + vector)
-    async fn search_hybrid(&self, query: &str, top_k: usize, alpha: f32) -> Result<Vec<SearchResult>>;
+    async fn search_hybrid(
+        &self,
+        query: &str,
+        top_k: usize,
+        alpha: f32,
+    ) -> Result<Vec<SearchResult>>;
 }
 
 #[async_trait]
@@ -151,8 +156,18 @@ impl MemvidSearch for MemvidStore {
     }
 
     /// Hybrid search combining text and vector
-    async fn search_hybrid(&self, query: &str, top_k: usize, alpha: f32) -> Result<Vec<SearchResult>> {
-        tracing::debug!("Hybrid search: query='{}', top_k={}, alpha={}", query, top_k, alpha);
+    async fn search_hybrid(
+        &self,
+        query: &str,
+        top_k: usize,
+        alpha: f32,
+    ) -> Result<Vec<SearchResult>> {
+        tracing::debug!(
+            "Hybrid search: query='{}', top_k={}, alpha={}",
+            query,
+            top_k,
+            alpha
+        );
 
         // Execute both searches in parallel
         let (text_results, vector_results) = tokio::try_join!(
@@ -164,12 +179,16 @@ impl MemvidSearch for MemvidStore {
         let mut merged = std::collections::HashMap::new();
 
         for result in text_results {
-            let entry = merged.entry(result.id.clone()).or_insert_with(|| result.clone());
+            let entry = merged
+                .entry(result.id.clone())
+                .or_insert_with(|| result.clone());
             entry.score = (1.0 - alpha) * entry.score;
         }
 
         for result in vector_results {
-            let entry = merged.entry(result.id.clone()).or_insert_with(|| result.clone());
+            let entry = merged
+                .entry(result.id.clone())
+                .or_insert_with(|| result.clone());
             entry.score += alpha * result.score;
         }
 
@@ -189,10 +208,8 @@ impl MemvidStore {
         let text = memory.content.to_string().to_lowercase();
 
         // Simple word overlap score
-        let query_words: std::collections::HashSet<&str> =
-            query_lower.split_whitespace().collect();
-        let text_words: std::collections::HashSet<&str> =
-            text.split_whitespace().collect();
+        let query_words: std::collections::HashSet<&str> = query_lower.split_whitespace().collect();
+        let text_words: std::collections::HashSet<&str> = text.split_whitespace().collect();
 
         if query_words.is_empty() {
             return 0.0;
@@ -219,7 +236,7 @@ impl MemvidStore {
             let snippet = &text[start..end];
 
             let prefix = if start > 0 { "..." } else { "" };
-            let suffix = if end < text.len() { "..." } else {""};
+            let suffix = if end < text.len() { "..." } else { "" };
 
             Some(format!("{}{}{}", prefix, snippet, suffix))
         } else {
@@ -238,7 +255,12 @@ impl MemvidStore {
     }
 
     /// Public hybrid search method
-    pub async fn search_hybrid(&self, query: &str, top_k: usize, alpha: f32) -> Result<Vec<SearchResult>> {
+    pub async fn search_hybrid(
+        &self,
+        query: &str,
+        top_k: usize,
+        alpha: f32,
+    ) -> Result<Vec<SearchResult>> {
         <Self as MemvidSearch>::search_hybrid(self, query, top_k, alpha).await
     }
 }
@@ -246,8 +268,8 @@ impl MemvidStore {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{MemvidStore, MemvidConfig};
-    use agent_mem_traits::{Content, AttributeSet, MetadataV4};
+    use crate::{MemvidConfig, MemvidStore};
+    use agent_mem_traits::{AttributeSet, Content, MetadataV4};
 
     #[tokio::test]
     async fn test_search() {

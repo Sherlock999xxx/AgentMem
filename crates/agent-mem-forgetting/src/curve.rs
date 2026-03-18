@@ -160,7 +160,10 @@ impl EbbinghausCurve {
     ///
     /// Time units when retention drops below threshold
     pub fn time_to_threshold(&self, threshold: f64) -> f64 {
-        assert!(threshold > 0.0 && threshold < 1.0, "Threshold must be in (0, 1)");
+        assert!(
+            threshold > 0.0 && threshold < 1.0,
+            "Threshold must be in (0, 1)"
+        );
         -threshold.ln() * self.strength
     }
 }

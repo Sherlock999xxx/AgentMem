@@ -10,9 +10,9 @@
 
 use crate::error::{ServerError, ServerResult};
 use crate::routes::memory::MemoryManager;
+use agent_mem_core::search::query_optimizer::{IndexStatistics, IndexType};
 use agent_mem_core::storage::factory::Repositories;
 use agent_mem_core::storage::libsql::connection::LibSqlConnectionManager;
-use agent_mem_core::search::query_optimizer::{IndexStatistics, IndexType};
 use axum::{extract::Extension, response::Json};
 use chrono::{DateTime, Duration, Utc};
 use serde::{Deserialize, Serialize};
@@ -413,7 +413,6 @@ pub async fn get_memory_growth(
     Extension(repositories): Extension<Arc<Repositories>>,
     Extension(memory_manager): Extension<Arc<MemoryManager>>,
 ) -> ServerResult<Json<MemoryGrowthResponse>> {
-    
     use libsql::{params, Builder};
 
     // ✅ Connect to database to query historical stats
@@ -500,10 +499,12 @@ pub async fn get_memory_growth(
 
     // ✅ Calculate real growth rate
     let growth_rate = if data_points.len() > 1 {
-        let first = data_points.first()
+        let first = data_points
+            .first()
             .ok_or_else(|| ServerError::internal_error("data_points is empty"))?
             .total as f64;
-        let last = data_points.last()
+        let last = data_points
+            .last()
             .ok_or_else(|| ServerError::internal_error("data_points is empty"))?
             .total as f64;
         let days = data_points.len() as f64;
@@ -585,21 +586,18 @@ pub async fn get_agent_activity_stats(
                             FROM memories 
                             WHERE agent_id = ? AND is_deleted = 0";
 
-        let mut stmt = conn
-            .prepare(memory_query)
-            .await
-            .map_err(|e| ServerError::internal_error(format!("Failed to prepare memory query: {}", e)))?;
+        let mut stmt = conn.prepare(memory_query).await.map_err(|e| {
+            ServerError::internal_error(format!("Failed to prepare memory query: {}", e))
+        })?;
 
-        let mut rows = stmt
-            .query(params![agent.id.as_str()])
-            .await
-            .map_err(|e| ServerError::internal_error(format!("Failed to execute memory query: {}", e)))?;
+        let mut rows = stmt.query(params![agent.id.as_str()]).await.map_err(|e| {
+            ServerError::internal_error(format!("Failed to execute memory query: {}", e))
+        })?;
 
-        let (total_memories, avg_importance) = if let Some(row) = rows
-            .next()
-            .await
-            .map_err(|e| ServerError::internal_error(format!("Failed to fetch memory row: {}", e)))?
-        {
+        let (total_memories, avg_importance) = if let Some(row) =
+            rows.next().await.map_err(|e| {
+                ServerError::internal_error(format!("Failed to fetch memory row: {}", e))
+            })? {
             let count: i64 = row.get(0).unwrap_or(0);
             let avg: Option<f64> = row.get(1).ok();
             (count, avg.unwrap_or(0.0))
@@ -690,15 +688,13 @@ pub async fn get_memory_quality_stats(
                        FROM memories 
                        WHERE is_deleted = 0";
 
-    let mut stmt = conn
-        .prepare(basic_query)
-        .await
-        .map_err(|e| ServerError::internal_error(format!("Failed to prepare basic query: {}", e)))?;
+    let mut stmt = conn.prepare(basic_query).await.map_err(|e| {
+        ServerError::internal_error(format!("Failed to prepare basic query: {}", e))
+    })?;
 
-    let mut rows = stmt
-        .query(params![])
-        .await
-        .map_err(|e| ServerError::internal_error(format!("Failed to execute basic query: {}", e)))?;
+    let mut rows = stmt.query(params![]).await.map_err(|e| {
+        ServerError::internal_error(format!("Failed to execute basic query: {}", e))
+    })?;
 
     let (total_memories, avg_importance) = if let Some(row) = rows
         .next()
@@ -717,21 +713,18 @@ pub async fn get_memory_quality_stats(
                               FROM memories 
                               WHERE is_deleted = 0 AND importance > 0.7";
 
-    let mut stmt2 = conn
-        .prepare(high_quality_query)
-        .await
-        .map_err(|e| ServerError::internal_error(format!("Failed to prepare quality query: {}", e)))?;
+    let mut stmt2 = conn.prepare(high_quality_query).await.map_err(|e| {
+        ServerError::internal_error(format!("Failed to prepare quality query: {}", e))
+    })?;
 
     let high_quality_ratio = if total_memories > 0 {
         let mut rows2 = stmt2.query(params![total_memories]).await.map_err(|e| {
             ServerError::internal_error(format!("Failed to execute quality query: {}", e))
         })?;
 
-        if let Some(row) = rows2
-            .next()
-            .await
-            .map_err(|e| ServerError::internal_error(format!("Failed to fetch quality row: {}", e)))?
-        {
+        if let Some(row) = rows2.next().await.map_err(|e| {
+            ServerError::internal_error(format!("Failed to fetch quality row: {}", e))
+        })? {
             row.get::<f64>(0).unwrap_or(0.0)
         } else {
             0.0
@@ -750,15 +743,13 @@ pub async fn get_memory_quality_stats(
     ];
 
     for (range, query) in dist_queries {
-        let mut stmt3 = conn
-            .prepare(query)
-            .await
-            .map_err(|e| ServerError::internal_error(format!("Failed to prepare dist query: {}", e)))?;
+        let mut stmt3 = conn.prepare(query).await.map_err(|e| {
+            ServerError::internal_error(format!("Failed to prepare dist query: {}", e))
+        })?;
 
-        let mut rows3 = stmt3
-            .query(params![])
-            .await
-            .map_err(|e| ServerError::internal_error(format!("Failed to execute dist query: {}", e)))?;
+        let mut rows3 = stmt3.query(params![]).await.map_err(|e| {
+            ServerError::internal_error(format!("Failed to execute dist query: {}", e))
+        })?;
 
         if let Some(row) = rows3
             .next()
@@ -933,7 +924,7 @@ mod tests {
     #[test]
     fn test_index_performance_stats_structure() {
         use chrono::Utc;
-        
+
         let stats = IndexPerformanceStats {
             current_index: IndexInfo {
                 index_type: "Flat".to_string(),
@@ -943,14 +934,12 @@ mod tests {
                 last_updated: Utc::now(),
             },
             recommended_index: "HNSW".to_string(),
-            recommendations: vec![
-                OptimizationRecommendation {
-                    recommendation_type: "index_type".to_string(),
-                    severity: "high".to_string(),
-                    description: "建议升级索引".to_string(),
-                    expected_improvement: Some(50.0),
-                }
-            ],
+            recommendations: vec![OptimizationRecommendation {
+                recommendation_type: "index_type".to_string(),
+                severity: "high".to_string(),
+                description: "建议升级索引".to_string(),
+                expected_improvement: Some(50.0),
+            }],
             performance_metrics: PerformanceMetrics {
                 estimated_latency_ms: 10,
                 estimated_recall: 0.95,
@@ -977,35 +966,56 @@ mod tests {
     #[test]
     fn test_performance_metrics_calculation() {
         use agent_mem_core::search::query_optimizer::IndexStatistics;
-        
+
         // 测试小数据集（Flat索引）
         let small_stats = IndexStatistics::new(1000, 1536);
         let small_metrics = calculate_performance_metrics(&small_stats);
-        assert_eq!(small_metrics.estimated_recall, 1.0, "Flat索引应该有100%召回率");
-        assert!(small_metrics.estimated_latency_ms < 100, "小数据集延迟应该很低");
+        assert_eq!(
+            small_metrics.estimated_recall, 1.0,
+            "Flat索引应该有100%召回率"
+        );
+        assert!(
+            small_metrics.estimated_latency_ms < 100,
+            "小数据集延迟应该很低"
+        );
 
         // 测试大数据集（HNSW索引）
         let large_stats = IndexStatistics::new(50_000, 1536);
         let large_metrics = calculate_performance_metrics(&large_stats);
-        assert!(large_metrics.estimated_recall >= 0.95, "HNSW索引应该有高召回率");
-        assert!(large_metrics.estimated_index_size_mb > 0.0, "应该有索引大小估算");
+        assert!(
+            large_metrics.estimated_recall >= 0.95,
+            "HNSW索引应该有高召回率"
+        );
+        assert!(
+            large_metrics.estimated_index_size_mb > 0.0,
+            "应该有索引大小估算"
+        );
     }
 
     /// 🆕 Phase 3.1: 测试预期性能提升计算
     #[test]
     fn test_expected_improvement_calculation() {
         use agent_mem_core::search::query_optimizer::IndexType;
-        
+
         // 测试从Flat升级到HNSW（大数据集）
-        let improvement1 = calculate_expected_improvement(&IndexType::Flat, &IndexType::HNSW, 50_000);
-        assert!(improvement1 >= 60.0, "大数据集从Flat升级到HNSW应该有显著提升");
+        let improvement1 =
+            calculate_expected_improvement(&IndexType::Flat, &IndexType::HNSW, 50_000);
+        assert!(
+            improvement1 >= 60.0,
+            "大数据集从Flat升级到HNSW应该有显著提升"
+        );
 
         // 测试从Flat升级到IVF_HNSW（超大数据集）
-        let improvement2 = calculate_expected_improvement(&IndexType::Flat, &IndexType::IVF_HNSW, 200_000);
-        assert!(improvement2 >= 80.0, "超大数据集从Flat升级到IVF_HNSW应该有更大提升");
+        let improvement2 =
+            calculate_expected_improvement(&IndexType::Flat, &IndexType::IVF_HNSW, 200_000);
+        assert!(
+            improvement2 >= 80.0,
+            "超大数据集从Flat升级到IVF_HNSW应该有更大提升"
+        );
 
         // 测试从HNSW升级到IVF_HNSW
-        let improvement3 = calculate_expected_improvement(&IndexType::HNSW, &IndexType::IVF_HNSW, 200_000);
+        let improvement3 =
+            calculate_expected_improvement(&IndexType::HNSW, &IndexType::IVF_HNSW, 200_000);
         assert!(improvement3 >= 30.0, "从HNSW升级到IVF_HNSW应该有中等提升");
     }
 }
@@ -1028,7 +1038,7 @@ pub struct DatabasePoolStats {
 }
 
 /// Get database connection pool statistics
-/// 
+///
 /// 🆕 Phase 3.2: 连接池管理 - 提供数据库连接统计信息
 #[utoipa::path(
     get,
@@ -1048,9 +1058,9 @@ pub async fn get_database_pool_stats() -> ServerResult<Json<DatabasePoolStats>> 
         .replace("file:", "");
 
     // 创建连接管理器
-    let manager = LibSqlConnectionManager::new(&db_path)
-        .await
-        .map_err(|e| ServerError::internal_error(format!("Failed to create connection manager: {}", e)))?;
+    let manager = LibSqlConnectionManager::new(&db_path).await.map_err(|e| {
+        ServerError::internal_error(format!("Failed to create connection manager: {}", e))
+    })?;
 
     // 获取数据库统计信息
     let db_stats = manager
@@ -1076,8 +1086,10 @@ pub async fn get_database_pool_stats() -> ServerResult<Json<DatabasePoolStats>> 
         pool_status,
     };
 
-    info!("📊 数据库统计: 大小={:.2}MB, 页数={}, 健康状态={}", 
-        response.size_mb, response.page_count, response.health_status);
+    info!(
+        "📊 数据库统计: 大小={:.2}MB, 页数={}, 健康状态={}",
+        response.size_mb, response.page_count, response.health_status
+    );
 
     Ok(Json(response))
 }
@@ -1137,7 +1149,7 @@ pub struct PerformanceMetrics {
 }
 
 /// 🆕 Phase 3.1: 获取索引性能监控和优化建议
-/// 
+///
 /// 基于QueryOptimizer的IndexStatistics提供索引性能监控和优化建议
 #[utoipa::path(
     get,
@@ -1159,26 +1171,26 @@ pub async fn get_index_performance_stats(
         let db_path = std::env::var("DATABASE_URL")
             .unwrap_or_else(|_| "file:./data/agentmem.db".to_string())
             .replace("file:", "");
-        
+
         let db = Builder::new_local(&db_path)
             .build()
             .await
             .map_err(|e| ServerError::internal_error(format!("Failed to open database: {}", e)))?;
-        
+
         let conn = db
             .connect()
             .map_err(|e| ServerError::internal_error(format!("Failed to connect: {}", e)))?;
-        
+
         let mut stmt = conn
             .prepare("SELECT COUNT(*) FROM memories WHERE is_deleted = 0")
             .await
             .map_err(|e| ServerError::internal_error(format!("Failed to prepare query: {}", e)))?;
-        
+
         let mut rows = stmt
             .query(params![])
             .await
             .map_err(|e| ServerError::internal_error(format!("Failed to execute query: {}", e)))?;
-        
+
         if let Some(row) = rows
             .next()
             .await
@@ -1193,7 +1205,7 @@ pub async fn get_index_performance_stats(
     // 创建IndexStatistics（基于实际数据）
     let dimension = 1536; // 默认OpenAI embedding维度
     let stats = IndexStatistics::new(total_vectors, dimension);
-    
+
     // 获取当前索引信息
     let current_index = IndexInfo {
         index_type: format!("{:?}", stats.index_type),
@@ -1205,7 +1217,7 @@ pub async fn get_index_performance_stats(
 
     // 生成优化建议
     let mut recommendations = Vec::new();
-    
+
     // 建议1: 根据数据规模推荐索引类型
     let recommended_index = stats.index_type;
     if stats.index_type != recommended_index {
@@ -1216,10 +1228,14 @@ pub async fn get_index_performance_stats(
                 "建议使用 {:?} 索引类型以优化性能。当前使用 {:?}，数据规模为 {} 条向量",
                 recommended_index, stats.index_type, total_vectors
             ),
-            expected_improvement: Some(calculate_expected_improvement(&stats.index_type, &recommended_index, total_vectors)),
+            expected_improvement: Some(calculate_expected_improvement(
+                &stats.index_type,
+                &recommended_index,
+                total_vectors,
+            )),
         });
     }
-    
+
     // 建议2: 小数据集优化
     if total_vectors < 1000 {
         recommendations.push(OptimizationRecommendation {
@@ -1239,10 +1255,11 @@ pub async fn get_index_performance_stats(
             expected_improvement: Some(50.0), // 预期50%性能提升
         });
     }
-    
+
     // 建议3: 索引重建建议（简化版：基于统计信息）
     let hours_since_update = stats.last_updated.elapsed().as_secs() / 3600;
-    if hours_since_update > 24 * 7 { // 超过7天
+    if hours_since_update > 24 * 7 {
+        // 超过7天
         recommendations.push(OptimizationRecommendation {
             recommendation_type: "index_rebuild".to_string(),
             severity: "medium".to_string(),
@@ -1268,8 +1285,10 @@ pub async fn get_index_performance_stats(
         timestamp: Utc::now(),
     };
 
-    info!("📊 索引性能监控: 向量数={}, 索引类型={:?}, 建议数={}", 
-        total_vectors, stats.index_type, recommendations_count);
+    info!(
+        "📊 索引性能监控: 向量数={}, 索引类型={:?}, 建议数={}",
+        total_vectors, stats.index_type, recommendations_count
+    );
 
     Ok(Json(response))
 }
@@ -1302,7 +1321,8 @@ fn calculate_performance_metrics(stats: &IndexStatistics) -> PerformanceMetrics 
             // HNSW：O(log n)
             let latency = ((stats.total_vectors as f64).ln() * 2.0) as u64;
             let recall = 0.95; // 95%召回
-            let index_size = (stats.total_vectors as f64 * stats.dimension as f64 * 4.0) / (1024.0 * 1024.0); // 估算索引大小
+            let index_size =
+                (stats.total_vectors as f64 * stats.dimension as f64 * 4.0) / (1024.0 * 1024.0); // 估算索引大小
             (latency, recall, index_size)
         }
         IndexType::IVF => {
@@ -1314,14 +1334,16 @@ fn calculate_performance_metrics(stats: &IndexStatistics) -> PerformanceMetrics 
             }; // 假设100个聚类
             let latency = (10 * cluster_size) as u64 / 10000;
             let recall = 0.93; // 93%召回
-            let index_size = (stats.total_vectors as f64 * stats.dimension as f64 * 2.0) / (1024.0 * 1024.0);
+            let index_size =
+                (stats.total_vectors as f64 * stats.dimension as f64 * 2.0) / (1024.0 * 1024.0);
             (latency, recall, index_size)
         }
         IndexType::IVF_HNSW => {
             // 混合：最快
             let latency = ((stats.total_vectors as f64).ln() * 1.5) as u64;
             let recall = 0.95; // 95%召回
-            let index_size = (stats.total_vectors as f64 * stats.dimension as f64 * 3.0) / (1024.0 * 1024.0);
+            let index_size =
+                (stats.total_vectors as f64 * stats.dimension as f64 * 3.0) / (1024.0 * 1024.0);
             (latency, recall, index_size)
         }
     };
@@ -1338,25 +1360,25 @@ fn calculate_performance_metrics(stats: &IndexStatistics) -> PerformanceMetrics 
 pub struct MemoryUsageStats {
     /// 总记忆数
     pub total_memories: i64,
-    
+
     /// 按访问频率分布
     pub access_frequency_distribution: HashMap<String, i64>,
-    
+
     /// 按最近访问时间分布
     pub recency_distribution: HashMap<String, i64>,
-    
+
     /// 平均访问次数
     pub avg_access_count: f64,
-    
+
     /// 最近访问的记忆数（24小时内）
     pub recently_accessed: i64,
-    
+
     /// 从未访问的记忆数
     pub never_accessed: i64,
-    
+
     /// 高访问记忆数（访问次数 > 10）
     pub high_access_memories: i64,
-    
+
     /// 时间戳
     pub timestamp: DateTime<Utc>,
 }
@@ -1375,36 +1397,34 @@ pub async fn get_memory_usage_stats(
     Extension(_repositories): Extension<Arc<Repositories>>,
 ) -> ServerResult<Json<MemoryUsageStats>> {
     info!("📊 获取记忆使用情况统计");
-    
+
     use libsql::{params, Builder};
     let db_path = std::env::var("DATABASE_URL")
         .unwrap_or_else(|_| "file:./data/agentmem.db".to_string())
         .replace("file:", "");
-    
+
     let db = Builder::new_local(&db_path)
         .build()
         .await
         .map_err(|e| ServerError::internal_error(format!("Failed to open database: {}", e)))?;
-    
+
     let conn = db
         .connect()
         .map_err(|e| ServerError::internal_error(format!("Failed to connect: {}", e)))?;
-    
+
     // 查询总记忆数和平均访问次数
     let basic_query = "SELECT COUNT(*), AVG(COALESCE(access_count, 0)) 
                        FROM memories 
                        WHERE is_deleted = 0";
-    
-    let mut stmt = conn
-        .prepare(basic_query)
-        .await
-        .map_err(|e| ServerError::internal_error(format!("Failed to prepare basic query: {}", e)))?;
-    
-    let mut rows = stmt
-        .query(params![])
-        .await
-        .map_err(|e| ServerError::internal_error(format!("Failed to execute basic query: {}", e)))?;
-    
+
+    let mut stmt = conn.prepare(basic_query).await.map_err(|e| {
+        ServerError::internal_error(format!("Failed to prepare basic query: {}", e))
+    })?;
+
+    let mut rows = stmt.query(params![]).await.map_err(|e| {
+        ServerError::internal_error(format!("Failed to execute basic query: {}", e))
+    })?;
+
     let (total_memories, avg_access_count) = if let Some(row) = rows
         .next()
         .await
@@ -1416,7 +1436,7 @@ pub async fn get_memory_usage_stats(
     } else {
         (0, 0.0)
     };
-    
+
     // 查询访问频率分布
     let mut access_frequency_distribution = HashMap::new();
     let frequency_queries = vec![
@@ -1426,35 +1446,31 @@ pub async fn get_memory_usage_stats(
         ("11-50", "SELECT COUNT(*) FROM memories WHERE is_deleted = 0 AND access_count >= 11 AND access_count <= 50"),
         ("51+", "SELECT COUNT(*) FROM memories WHERE is_deleted = 0 AND access_count > 50"),
     ];
-    
+
     for (range, query) in frequency_queries {
-        let mut stmt2 = conn
-            .prepare(query)
-            .await
-            .map_err(|e| ServerError::internal_error(format!("Failed to prepare frequency query: {}", e)))?;
-        
-        let mut rows2 = stmt2
-            .query(params![])
-            .await
-            .map_err(|e| ServerError::internal_error(format!("Failed to execute frequency query: {}", e)))?;
-        
-        if let Some(row) = rows2
-            .next()
-            .await
-            .map_err(|e| ServerError::internal_error(format!("Failed to fetch frequency row: {}", e)))?
-        {
+        let mut stmt2 = conn.prepare(query).await.map_err(|e| {
+            ServerError::internal_error(format!("Failed to prepare frequency query: {}", e))
+        })?;
+
+        let mut rows2 = stmt2.query(params![]).await.map_err(|e| {
+            ServerError::internal_error(format!("Failed to execute frequency query: {}", e))
+        })?;
+
+        if let Some(row) = rows2.next().await.map_err(|e| {
+            ServerError::internal_error(format!("Failed to fetch frequency row: {}", e))
+        })? {
             let count: i64 = row.get(0).unwrap_or(0);
             access_frequency_distribution.insert(range.to_string(), count);
         }
     }
-    
+
     // 查询最近访问时间分布
     let mut recency_distribution = HashMap::new();
     let now = Utc::now().timestamp();
     let one_day_ago = now - 86400;
     let one_week_ago = now - 604800;
     let one_month_ago = now - 2592000;
-    
+
     let recency_queries = vec![
         ("24小时内", format!("SELECT COUNT(*) FROM memories WHERE is_deleted = 0 AND last_accessed IS NOT NULL AND last_accessed >= {}", one_day_ago)),
         ("1周内", format!("SELECT COUNT(*) FROM memories WHERE is_deleted = 0 AND last_accessed IS NOT NULL AND last_accessed >= {} AND last_accessed < {}", one_week_ago, one_day_ago)),
@@ -1462,88 +1478,91 @@ pub async fn get_memory_usage_stats(
         ("1月前", format!("SELECT COUNT(*) FROM memories WHERE is_deleted = 0 AND last_accessed IS NOT NULL AND last_accessed < {}", one_month_ago)),
         ("从未访问", "SELECT COUNT(*) FROM memories WHERE is_deleted = 0 AND (last_accessed IS NULL OR last_accessed = 0)".to_string()),
     ];
-    
+
     for (range, query) in recency_queries {
-        let mut stmt3 = conn
-            .prepare(&query)
-            .await
-            .map_err(|e| ServerError::internal_error(format!("Failed to prepare recency query: {}", e)))?;
-        
-        let mut rows3 = stmt3
-            .query(params![])
-            .await
-            .map_err(|e| ServerError::internal_error(format!("Failed to execute recency query: {}", e)))?;
-        
-        if let Some(row) = rows3
-            .next()
-            .await
-            .map_err(|e| ServerError::internal_error(format!("Failed to fetch recency row: {}", e)))?
-        {
+        let mut stmt3 = conn.prepare(&query).await.map_err(|e| {
+            ServerError::internal_error(format!("Failed to prepare recency query: {}", e))
+        })?;
+
+        let mut rows3 = stmt3.query(params![]).await.map_err(|e| {
+            ServerError::internal_error(format!("Failed to execute recency query: {}", e))
+        })?;
+
+        if let Some(row) = rows3.next().await.map_err(|e| {
+            ServerError::internal_error(format!("Failed to fetch recency row: {}", e))
+        })? {
             let count: i64 = row.get(0).unwrap_or(0);
             recency_distribution.insert(range.to_string(), count);
         }
     }
-    
+
     // 查询最近访问的记忆数（24小时内）
     let recently_accessed_query = format!("SELECT COUNT(*) FROM memories WHERE is_deleted = 0 AND last_accessed IS NOT NULL AND last_accessed >= {}", one_day_ago);
-    let mut stmt4 = conn
-        .prepare(&recently_accessed_query)
-        .await
-        .map_err(|e| ServerError::internal_error(format!("Failed to prepare recently accessed query: {}", e)))?;
-    
+    let mut stmt4 = conn.prepare(&recently_accessed_query).await.map_err(|e| {
+        ServerError::internal_error(format!("Failed to prepare recently accessed query: {}", e))
+    })?;
+
     let recently_accessed = if let Some(row) = stmt4
         .query(params![])
         .await
-        .map_err(|e| ServerError::internal_error(format!("Failed to execute recently accessed query: {}", e)))?
+        .map_err(|e| {
+            ServerError::internal_error(format!("Failed to execute recently accessed query: {}", e))
+        })?
         .next()
         .await
-        .map_err(|e| ServerError::internal_error(format!("Failed to fetch recently accessed row: {}", e)))?
-    {
+        .map_err(|e| {
+            ServerError::internal_error(format!("Failed to fetch recently accessed row: {}", e))
+        })? {
         row.get::<i64>(0).unwrap_or(0)
     } else {
         0
     };
-    
+
     // 查询从未访问的记忆数
     let never_accessed_query = "SELECT COUNT(*) FROM memories WHERE is_deleted = 0 AND (access_count IS NULL OR access_count = 0)";
-    let mut stmt5 = conn
-        .prepare(never_accessed_query)
-        .await
-        .map_err(|e| ServerError::internal_error(format!("Failed to prepare never accessed query: {}", e)))?;
-    
+    let mut stmt5 = conn.prepare(never_accessed_query).await.map_err(|e| {
+        ServerError::internal_error(format!("Failed to prepare never accessed query: {}", e))
+    })?;
+
     let never_accessed = if let Some(row) = stmt5
         .query(params![])
         .await
-        .map_err(|e| ServerError::internal_error(format!("Failed to execute never accessed query: {}", e)))?
+        .map_err(|e| {
+            ServerError::internal_error(format!("Failed to execute never accessed query: {}", e))
+        })?
         .next()
         .await
-        .map_err(|e| ServerError::internal_error(format!("Failed to fetch never accessed row: {}", e)))?
-    {
+        .map_err(|e| {
+            ServerError::internal_error(format!("Failed to fetch never accessed row: {}", e))
+        })? {
         row.get::<i64>(0).unwrap_or(0)
     } else {
         0
     };
-    
+
     // 查询高访问记忆数（访问次数 > 10）
-    let high_access_query = "SELECT COUNT(*) FROM memories WHERE is_deleted = 0 AND access_count > 10";
-    let mut stmt6 = conn
-        .prepare(high_access_query)
-        .await
-        .map_err(|e| ServerError::internal_error(format!("Failed to prepare high access query: {}", e)))?;
-    
+    let high_access_query =
+        "SELECT COUNT(*) FROM memories WHERE is_deleted = 0 AND access_count > 10";
+    let mut stmt6 = conn.prepare(high_access_query).await.map_err(|e| {
+        ServerError::internal_error(format!("Failed to prepare high access query: {}", e))
+    })?;
+
     let high_access_memories = if let Some(row) = stmt6
         .query(params![])
         .await
-        .map_err(|e| ServerError::internal_error(format!("Failed to execute high access query: {}", e)))?
+        .map_err(|e| {
+            ServerError::internal_error(format!("Failed to execute high access query: {}", e))
+        })?
         .next()
         .await
-        .map_err(|e| ServerError::internal_error(format!("Failed to fetch high access row: {}", e)))?
-    {
+        .map_err(|e| {
+            ServerError::internal_error(format!("Failed to fetch high access row: {}", e))
+        })? {
         row.get::<i64>(0).unwrap_or(0)
     } else {
         0
     };
-    
+
     let stats = MemoryUsageStats {
         total_memories,
         access_frequency_distribution,
@@ -1554,8 +1573,11 @@ pub async fn get_memory_usage_stats(
         high_access_memories,
         timestamp: Utc::now(),
     };
-    
-    info!("✅ 记忆使用情况统计完成: 总记忆数={}, 平均访问次数={:.2}", total_memories, avg_access_count);
-    
+
+    info!(
+        "✅ 记忆使用情况统计完成: 总记忆数={}, 平均访问次数={:.2}",
+        total_memories, avg_access_count
+    );
+
     Ok(Json(stats))
 }

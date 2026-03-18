@@ -205,9 +205,11 @@ impl AutoCategorizeExecutor {
             }
         }
 
-        best_match
-            .map(|(_, segments)| segments)
-            .or_else(|| categories.first().map(|category| parse_category_path(category)))
+        best_match.map(|(_, segments)| segments).or_else(|| {
+            categories
+                .first()
+                .map(|category| parse_category_path(category))
+        })
     }
 
     async fn ensure_category_hierarchy(
@@ -306,7 +308,14 @@ fn heuristic_category_segments(item: &SemanticMemoryItem) -> Vec<String> {
 
     if contains_any(
         &text,
-        &["preference", "preferences", "favorite", "style", "setting", "likes"],
+        &[
+            "preference",
+            "preferences",
+            "favorite",
+            "style",
+            "setting",
+            "likes",
+        ],
     ) {
         return vec!["preferences".to_string(), leaf];
     }

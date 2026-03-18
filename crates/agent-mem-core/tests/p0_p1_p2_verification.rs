@@ -32,9 +32,7 @@ async fn verify_p0_scheduler_exists() {
     let memories = vec![memory];
 
     // 验证 scheduler 可以调用
-    let result = scheduler
-        .select_memories("test", memories, 1)
-        .await;
+    let result = scheduler.select_memories("test", memories, 1).await;
 
     assert!(result.is_ok(), "P0 Scheduler should work");
     assert!(!result.unwrap().is_empty(), "Should return memories");
@@ -69,9 +67,15 @@ fn verify_p1_memory_v4_attributes() {
     );
 
     // 验证属性可访问
-    assert!(memory.attributes.contains_key(&AttributeKey::custom("custom_field")));
-    assert!(memory.attributes.contains_key(&AttributeKey::custom("numeric")));
-    assert!(memory.attributes.contains_key(&AttributeKey::custom("boolean")));
+    assert!(memory
+        .attributes
+        .contains_key(&AttributeKey::custom("custom_field")));
+    assert!(memory
+        .attributes
+        .contains_key(&AttributeKey::custom("numeric")));
+    assert!(memory
+        .attributes
+        .contains_key(&AttributeKey::custom("boolean")));
 }
 
 /// 验证 P2: ContextCompressor 已实现
@@ -128,10 +132,8 @@ async fn verify_p0_p1_p2_integration() {
         .collect();
 
     // P0: 使用调度器
-    
-    let result = scheduler
-        .select_memories("query", memories, 3)
-        .await;
+
+    let result = scheduler.select_memories("query", memories, 3).await;
 
     assert!(result.is_ok(), "Integration should work");
 

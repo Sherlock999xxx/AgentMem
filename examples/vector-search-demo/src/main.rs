@@ -152,9 +152,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("✅ 第二次搜索（缓存）:");
     println!("   - 搜索时间: {search_time2} ms");
     println!("   - 结果数量: {}", results2.len());
-    println!(
-        "   - 时间对比: 第一次 {search_time} ms vs 第二次 {search_time2} ms"
-    );
+    println!("   - 时间对比: 第一次 {search_time} ms vs 第二次 {search_time2} ms");
 
     if search_time2 < search_time {
         println!(

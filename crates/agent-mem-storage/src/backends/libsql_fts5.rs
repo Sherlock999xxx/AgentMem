@@ -303,8 +303,7 @@ impl LibSQLFTS5Store {
                 AgentMemError::StorageError(format!("Failed to get created_at: {e}"))
             })?;
 
-            let created_at =
-                DateTime::from_timestamp(created_at_ts, 0).unwrap_or_else(Utc::now);
+            let created_at = DateTime::from_timestamp(created_at_ts, 0).unwrap_or_else(Utc::now);
 
             let metadata_json: String = row
                 .get(6)
@@ -388,8 +387,7 @@ impl LibSQLFTS5Store {
             let created_at_ts: i64 = row.get(5).map_err(|e| {
                 AgentMemError::StorageError(format!("Failed to get created_at: {e}"))
             })?;
-            let created_at =
-                DateTime::from_timestamp(created_at_ts, 0).unwrap_or_else(Utc::now);
+            let created_at = DateTime::from_timestamp(created_at_ts, 0).unwrap_or_else(Utc::now);
             let metadata_json: String = row
                 .get(6)
                 .map_err(|e| AgentMemError::StorageError(format!("Failed to get metadata: {e}")))?;

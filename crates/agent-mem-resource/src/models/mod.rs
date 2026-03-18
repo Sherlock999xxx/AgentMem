@@ -107,42 +107,40 @@ impl MediaType {
 
     /// Check if this is a text type
     pub fn is_text(&self) -> bool {
-        matches!(self,
-            MediaType::TextPlain |
-            MediaType::TextMarkdown |
-            MediaType::TextHtml |
-            MediaType::TextCsv |
-            MediaType::ApplicationJson |
-            MediaType::ApplicationXml
+        matches!(
+            self,
+            MediaType::TextPlain
+                | MediaType::TextMarkdown
+                | MediaType::TextHtml
+                | MediaType::TextCsv
+                | MediaType::ApplicationJson
+                | MediaType::ApplicationXml
         )
     }
 
     /// Check if this is an image type
     pub fn is_image(&self) -> bool {
-        matches!(self,
-            MediaType::ImagePng |
-            MediaType::ImageJpeg |
-            MediaType::ImageGif |
-            MediaType::ImageWebp |
-            MediaType::ImageSvg
+        matches!(
+            self,
+            MediaType::ImagePng
+                | MediaType::ImageJpeg
+                | MediaType::ImageGif
+                | MediaType::ImageWebp
+                | MediaType::ImageSvg
         )
     }
 
     /// Check if this is an audio type
     pub fn is_audio(&self) -> bool {
-        matches!(self,
-            MediaType::AudioMpeg |
-            MediaType::AudioWav |
-            MediaType::AudioOgg
+        matches!(
+            self,
+            MediaType::AudioMpeg | MediaType::AudioWav | MediaType::AudioOgg
         )
     }
 
     /// Check if this is a video type
     pub fn is_video(&self) -> bool {
-        matches!(self,
-            MediaType::VideoMp4 |
-            MediaType::VideoWebm
-        )
+        matches!(self, MediaType::VideoMp4 | MediaType::VideoWebm)
     }
 }
 
@@ -269,12 +267,7 @@ pub struct Resource {
 
 impl Resource {
     /// Create a new resource
-    pub fn new(
-        id: ResourceId,
-        uri: String,
-        media_type: MediaType,
-        user_id: String,
-    ) -> Self {
+    pub fn new(id: ResourceId, uri: String, media_type: MediaType, user_id: String) -> Self {
         let now = Utc::now();
         Self {
             id,
@@ -372,7 +365,10 @@ mod tests {
     fn test_media_type_parsing() {
         assert_eq!(MediaType::from_mime("text/plain"), MediaType::TextPlain);
         assert_eq!(MediaType::from_mime("image/png"), MediaType::ImagePng);
-        assert_eq!(MediaType::from_mime("unknown/type"), MediaType::Unknown("unknown/type".to_string()));
+        assert_eq!(
+            MediaType::from_mime("unknown/type"),
+            MediaType::Unknown("unknown/type".to_string())
+        );
     }
 
     #[test]

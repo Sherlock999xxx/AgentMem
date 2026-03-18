@@ -3,8 +3,8 @@
 use crate::error::{ExtractionError, Result};
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
-use std::fmt;
 use std::collections::HashMap;
+use std::fmt;
 use std::path::PathBuf;
 use uuid::Uuid;
 

@@ -18,8 +18,8 @@ use serde_json::json;
 use tracing::{error, warn};
 
 use crate::routes::memory::{
-    AddMemoryRequest, UpdateMemoryRequest, SearchMemoryRequest,
-    DeleteMemoryRequest, BatchAddMemoriesRequest,
+    AddMemoryRequest, BatchAddMemoriesRequest, DeleteMemoryRequest, SearchMemoryRequest,
+    UpdateMemoryRequest,
 };
 
 /// Validation error response
@@ -32,7 +32,11 @@ pub struct ValidationError {
 impl std::fmt::Display for ValidationError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         if let Some(ref field) = self.field {
-            write!(f, "Validation error for field '{}': {}", field, self.message)
+            write!(
+                f,
+                "Validation error for field '{}': {}",
+                field, self.message
+            )
         } else {
             write!(f, "Validation error: {}", self.message)
         }
@@ -124,9 +128,7 @@ pub fn validate_delete_request(id: String) -> Result<(), String> {
 }
 
 /// Validate batch add memories request
-pub fn validate_batch_add_request(
-    memories: Vec<AddMemoryRequest>,
-) -> Result<(), String> {
+pub fn validate_batch_add_request(memories: Vec<AddMemoryRequest>) -> Result<(), String> {
     let request = BatchAddMemoriesRequest { memories };
     request.validate_payload()
 }
@@ -162,19 +164,14 @@ mod tests {
         );
 
         assert!(result.is_err());
-        assert!(result.unwrap_err().contains("content_contains_html_or_script"));
+        assert!(result
+            .unwrap_err()
+            .contains("content_contains_html_or_script"));
     }
 
     #[test]
     fn test_validate_add_memory_too_long() {
-        let result = validate_add_memory_request(
-            "a".repeat(50_001),
-            None,
-            None,
-            None,
-            None,
-            None,
-        );
+        let result = validate_add_memory_request("a".repeat(50_001), None, None, None, None, None);
 
         assert!(result.is_err());
     }
@@ -208,13 +205,7 @@ mod tests {
 
     #[test]
     fn test_validate_search_empty_query() {
-        let result = validate_search_request(
-            "".to_string(),
-            10,
-            None,
-            None,
-            None,
-        );
+        let result = validate_search_request("".to_string(), 10, None, None, None);
 
         assert!(result.is_err());
     }

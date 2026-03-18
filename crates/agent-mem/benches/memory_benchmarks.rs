@@ -7,8 +7,8 @@
 // cargo bench --bench memory_benchmarks
 // ```
 
-use criterion::{black_box, criterion_group, criterion_main, Criterion, BenchmarkId};
 use agent_mem::Memory;
+use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criterion};
 use tokio::runtime::Runtime;
 
 /// 基础操作基准测试
@@ -17,11 +17,9 @@ fn bench_basic_operations(c: &mut Criterion) {
 
     // 测试添加记忆的性能
     c.bench_function("add_memory", |b| {
-        b.to_async(&rt).iter(|| {
-            async {
-                let memory = Memory::quick();
-                black_box(memory.add(black_box("测试记忆内容")).await)
-            }
+        b.to_async(&rt).iter(|| async {
+            let memory = Memory::quick();
+            black_box(memory.add(black_box("测试记忆内容")).await)
         })
     });
 
@@ -40,25 +38,25 @@ fn bench_basic_operations(c: &mut Criterion) {
 
     // 测试更新记忆的性能
     c.bench_function("update_memory", |b| {
-        b.to_async(&rt).iter(|| {
-            async {
-                let memory = Memory::quick();
-                let add_result = memory.add("原始内容").await.unwrap();
-                let memory_id = &add_result.results[0].id;
-                black_box(memory.update(black_box(memory_id), black_box("更新内容")).await)
-            }
+        b.to_async(&rt).iter(|| async {
+            let memory = Memory::quick();
+            let add_result = memory.add("原始内容").await.unwrap();
+            let memory_id = &add_result.results[0].id;
+            black_box(
+                memory
+                    .update(black_box(memory_id), black_box("更新内容"))
+                    .await,
+            )
         })
     });
 
     // 测试删除记忆的性能
     c.bench_function("delete_memory", |b| {
-        b.to_async(&rt).iter(|| {
-            async {
-                let memory = Memory::quick();
-                let add_result = memory.add("待删除内容").await.unwrap();
-                let memory_id = &add_result.results[0].id;
-                black_box(memory.delete(black_box(memory_id)).await)
-            }
+        b.to_async(&rt).iter(|| async {
+            let memory = Memory::quick();
+            let add_result = memory.add("待删除内容").await.unwrap();
+            let memory_id = &add_result.results[0].id;
+            black_box(memory.delete(black_box(memory_id)).await)
         })
     });
 }
@@ -71,12 +69,10 @@ fn bench_batch_operations(c: &mut Criterion) {
 
     for size in [10, 50, 100, 500, 1000].iter() {
         group.bench_with_input(BenchmarkId::from_parameter(size), size, |b, &size| {
-            b.to_async(&rt).iter(|| {
-                async {
-                    let memory = Memory::quick();
-                    for i in 0..size {
-                        black_box(memory.add(&format!("测试记忆{}", i)).await);
-                    }
+            b.to_async(&rt).iter(|| async {
+                let memory = Memory::quick();
+                for i in 0..size {
+                    black_box(memory.add(&format!("测试记忆{}", i)).await);
                 }
             })
         });
@@ -117,44 +113,36 @@ fn bench_concurrent_operations(c: &mut Criterion) {
     let rt = Runtime::new().unwrap();
 
     c.bench_function("concurrent_adds", |b| {
-        b.to_async(&rt).iter(|| {
-            async {
-                let memory = Memory::quick();
+        b.to_async(&rt).iter(|| async {
+            let memory = Memory::quick();
 
-                let handles: Vec<_> = (0..10)
-                    .map(|i| {
-                        let memory_clone = memory.clone();
-                        tokio::spawn(async move {
-                            memory_clone.add(&format!("并发记忆{}", i)).await
-                        })
-                    })
-                    .collect();
+            let handles: Vec<_> = (0..10)
+                .map(|i| {
+                    let memory_clone = memory.clone();
+                    tokio::spawn(async move { memory_clone.add(&format!("并发记忆{}", i)).await })
+                })
+                .collect();
 
-                for handle in handles {
-                    black_box(handle.await.unwrap());
-                }
+            for handle in handles {
+                black_box(handle.await.unwrap());
             }
         })
     });
 
     c.bench_function("concurrent_searches", |b| {
-        b.to_async(&rt).iter(|| {
-            async {
-                let memory = Memory::quick();
-                memory.add("测试搜索内容").await.unwrap();
+        b.to_async(&rt).iter(|| async {
+            let memory = Memory::quick();
+            memory.add("测试搜索内容").await.unwrap();
 
-                let handles: Vec<_> = (0..10)
-                    .map(|_| {
-                        let memory_clone = memory.clone();
-                        tokio::spawn(async move {
-                            memory_clone.search("测试").await
-                        })
-                    })
-                    .collect();
+            let handles: Vec<_> = (0..10)
+                .map(|_| {
+                    let memory_clone = memory.clone();
+                    tokio::spawn(async move { memory_clone.search("测试").await })
+                })
+                .collect();
 
-                for handle in handles {
-                    black_box(handle.await.unwrap());
-                }
+            for handle in handles {
+                black_box(handle.await.unwrap());
             }
         })
     });
@@ -168,18 +156,19 @@ fn bench_content_length(c: &mut Criterion) {
 
     let contents = vec![
         ("short", "简短内容"),
-        ("medium", "这是一段中等长度的内容，包含了一些描述性的文字，大约有几十个字符"),
+        (
+            "medium",
+            "这是一段中等长度的内容，包含了一些描述性的文字，大约有几十个字符",
+        ),
         ("long", &"这是一段较长的内容。".repeat(50)),
         ("very_long", &"这是一段非常长的内容。".repeat(200)),
     ];
 
     for (name, content) in contents.iter() {
         group.bench_with_input(BenchmarkId::from_parameter(name), content, |b, content| {
-            b.to_async(&rt).iter(|| {
-                async {
-                    let memory = Memory::quick();
-                    black_box(memory.add(black_box(*content)).await)
-                }
+            b.to_async(&rt).iter(|| async {
+                let memory = Memory::quick();
+                black_box(memory.add(black_box(*content)).await)
             })
         });
     }
@@ -207,16 +196,14 @@ fn bench_memory_usage(c: &mut Criterion) {
     let rt = Runtime::new().unwrap();
 
     c.bench_function("memory_usage_1000_items", |b| {
-        b.to_async(&rt).iter(|| {
-            async {
-                let memory = Memory::quick();
+        b.to_async(&rt).iter(|| async {
+            let memory = Memory::quick();
 
-                for i in 0..1000 {
-                    memory.add(&format!("记忆内容{}", i)).await.unwrap();
-                }
-
-                black_box(&memory);
+            for i in 0..1000 {
+                memory.add(&format!("记忆内容{}", i)).await.unwrap();
             }
+
+            black_box(&memory);
         })
     });
 }

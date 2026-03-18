@@ -175,11 +175,11 @@ pub struct MetacognitionService {
     config: MetacognitionConfig,
     merge_tracker: MergeTracker,
     stats: Arc<RwLock<MetacognitionStats>>,
-    
+
     /// Memory count callback
     #[allow(clippy::type_complexity)]
     memory_count_callback: Arc<RwLock<Option<Box<dyn Fn() -> usize + Send + Sync>>>>,
-    
+
     /// Memory access callback
     #[allow(clippy::type_complexity)]
     memory_access_callback: Arc<RwLock<Option<Box<dyn Fn() -> MemoryAccessData + Send + Sync>>>>,
@@ -254,13 +254,15 @@ impl MetacognitionService {
 
         // Get merge statistics
         let merge_stats = self.merge_tracker.get_statistics().await;
-        
+
         // Calculate health metrics
-        let health = self.calculate_health_metrics(total_memories, &merge_stats).await;
-        
+        let health = self
+            .calculate_health_metrics(total_memories, &merge_stats)
+            .await;
+
         // Get usage statistics
         let usage = self.get_usage_statistics().await;
-        
+
         // Calculate performance metrics (placeholder)
         let performance = PerformanceMetrics {
             avg_retrieval_time_ms: 50.0,
@@ -316,7 +318,8 @@ impl MetacognitionService {
         let dormant_ratio = 0.2; // Placeholder
         let fragmentation_score = 0.1; // Placeholder
 
-        let score: f64 = active_ratio * 60.0 + (1.0 - dormant_ratio) * 30.0 + (1.0 - fragmentation_score) * 10.0;
+        let score: f64 =
+            active_ratio * 60.0 + (1.0 - dormant_ratio) * 30.0 + (1.0 - fragmentation_score) * 10.0;
         let health_score: f64 = score.min(100.0);
 
         let consolidation_urgency = if total_memories > 500 {
@@ -381,20 +384,22 @@ mod tests {
     #[tokio::test]
     async fn test_generate_report() {
         let service = MetacognitionService::new().await.unwrap();
-        
+
         // Set callbacks
         service.set_memory_count_callback(|| 100).await;
-        service.set_memory_access_callback(|| MemoryAccessData {
-            total_accesses: 1000,
-            avg_accesses: 10.0,
-            most_accessed_id: Some("mem-1".to_string()),
-            distribution: AccessDistribution {
-                q1: 5,
-                q2: 10,
-                q3: 15,
-                max: 50,
-            },
-        }).await;
+        service
+            .set_memory_access_callback(|| MemoryAccessData {
+                total_accesses: 1000,
+                avg_accesses: 10.0,
+                most_accessed_id: Some("mem-1".to_string()),
+                distribution: AccessDistribution {
+                    q1: 5,
+                    q2: 10,
+                    q3: 15,
+                    max: 50,
+                },
+            })
+            .await;
 
         let report = service.generate_report().await.unwrap();
         assert!(report.health_score >= 0.0 && report.health_score <= 100.0);

@@ -25,18 +25,17 @@ mod utils;
 mod validators;
 
 // 重新导出以便向后兼容
-pub use cache::{get_search_cache, generate_cache_key, CachedSearchResult};
+pub use cache::{generate_cache_key, get_search_cache, CachedSearchResult};
 pub use stats::{get_search_stats, SearchStatistics};
 pub use utils::{
-    truncate_string_at_char_boundary, contains_chinese, calculate_recency_score,
-    calculate_3d_score, calculate_quality_score, get_adaptive_threshold,
-    detect_exact_query, convert_memory_to_json, calculate_access_pattern_score,
-    calculate_auto_importance, apply_hierarchical_sorting, apply_intelligent_filtering,
-    compute_prefetch_candidates,
+    apply_hierarchical_sorting, apply_intelligent_filtering, calculate_3d_score,
+    calculate_access_pattern_score, calculate_auto_importance, calculate_quality_score,
+    calculate_recency_score, compute_prefetch_candidates, contains_chinese, convert_memory_to_json,
+    detect_exact_query, get_adaptive_threshold, truncate_string_at_char_boundary,
 };
 pub use validators::{
-    AddMemoryRequest, UpdateMemoryRequest, SearchMemoryRequest,
-    DeleteMemoryRequest, BatchAddMemoriesRequest,
+    AddMemoryRequest, BatchAddMemoriesRequest, DeleteMemoryRequest, SearchMemoryRequest,
+    UpdateMemoryRequest,
 };
 
 use crate::error::{ServerError, ServerResult};
@@ -45,11 +44,11 @@ use agent_mem::{AddMemoryOptions, DeleteAllOptions, GetAllOptions, Memory, Searc
 // 内部使用 MemoryItem 用于向后兼容（已废弃，未来将迁移到 Memory V4）
 #[allow(deprecated)]
 use agent_mem_traits::MemoryItem;
+use futures::future::{self, join_all};
 use std::collections::HashMap;
 use std::sync::Arc;
 use std::time::{Duration, Instant};
 use tokio::time::timeout;
-use futures::future::{self, join_all};
 
 /// Server-side memory manager wrapper (基于Memory统一API)
 pub struct MemoryManager {
@@ -74,8 +73,8 @@ impl MemoryManager {
 
         // 🔧 修复：使用builder模式显式指定LibSQL存储，而不是默认的内存存储
         // 支持 memory:// URL 格式（用于测试，避免数据库锁定）
-        let db_path = std::env::var("DATABASE_URL")
-            .unwrap_or_else(|_| "file:./data/agentmem.db".to_string());
+        let db_path =
+            std::env::var("DATABASE_URL").unwrap_or_else(|_| "file:./data/agentmem.db".to_string());
 
         info!("📦 配置存储层");
         info!("  - 数据库类型: LibSQL (SQLite)");
@@ -277,8 +276,8 @@ impl MemoryManager {
 
         let db_memory = agent_mem_core::storage::models::DbMemory {
             id: memory_id.clone(),
-            organization_id,                // 使用Agent的organization_id或默认值
-            user_id: user_id_val.clone(),     // ✅ 修复：使用实际的 user_id 而非硬编码
+            organization_id,              // 使用Agent的organization_id或默认值
+            user_id: user_id_val.clone(), // ✅ 修复：使用实际的 user_id 而非硬编码
             agent_id: effective_agent_id.clone(),
             content,
             hash: Some(content_hash),
@@ -355,22 +354,19 @@ impl MemoryManager {
             .map_err(|e| format!("Failed to fetch row: {}", e))?
         {
             let memory_id = row.get::<String>(0).unwrap_or_default();
-            
+
             // 🆕 Phase 2.11: 自动更新访问统计和重要性
             // 更新access_count和last_accessed
             let now = chrono::Utc::now().timestamp();
             let current_access_count: i64 = row.get(8).unwrap_or(0);
             let new_access_count = current_access_count + 1;
-            
+
             // 基于访问模式自动调整importance
             let current_importance: f64 = row.get(5).unwrap_or(0.5);
             let last_accessed_ts: Option<i64> = row.get(7).ok();
-            let new_importance = calculate_auto_importance(
-                current_importance,
-                new_access_count,
-                last_accessed_ts,
-            );
-            
+            let new_importance =
+                calculate_auto_importance(current_importance, new_access_count, last_accessed_ts);
+
             // 更新数据库（异步，不阻塞返回）
             let db_path_clone = db_path.clone();
             let id_clone = memory_id.clone();
@@ -380,13 +376,19 @@ impl MemoryManager {
                         let update_query = "UPDATE memories SET access_count = ?, last_accessed = ?, importance = ?, updated_at = ? WHERE id = ?";
                         if let Ok(mut update_stmt) = update_conn.prepare(update_query).await {
                             let _ = update_stmt
-                                .execute(params![new_access_count, now, new_importance, now, id_clone])
+                                .execute(params![
+                                    new_access_count,
+                                    now,
+                                    new_importance,
+                                    now,
+                                    id_clone
+                                ])
                                 .await;
                         }
                     }
                 }
             });
-            
+
             // ✅ 修复时间戳：将 i64 秒级时间戳转换为 ISO 8601 字符串
             use chrono::{DateTime, Utc};
 
@@ -679,10 +681,10 @@ impl MemoryManager {
 /// 默认实现（异步创建）
 impl MemoryManager {
     /// 同步创建方法（已废弃，仅用于类型系统）
-    /// 
+    ///
     /// # 注意
     /// 这个方法会返回错误，实际使用应该调用 `MemoryManager::new().await`
-    /// 
+    ///
     /// # 错误处理
     /// 使用 `Result` 返回错误，而不是 `panic!`，符合生产环境要求
     pub fn new_sync() -> Result<Self, Box<dyn std::error::Error>> {
@@ -831,11 +833,7 @@ pub async fn update_memory(
 
     let updated_importance = request
         .importance
-        .unwrap_or_else(|| {
-            existing.importance()
-                .map(|v| v as f32)
-                .unwrap_or(0.5)
-        });
+        .unwrap_or_else(|| existing.importance().map(|v| v as f32).unwrap_or(0.5));
 
     // 使用builder模式构建更新后的Memory
     let mut updated = existing.clone();
@@ -887,29 +885,35 @@ pub async fn delete_memory(
     info!("Deleting memory with ID: {}", id);
 
     // 🔧 修复: 先检查记忆是否存在
-    let memory_exists = repositories.memories.find_by_id(&id).await
+    let memory_exists = repositories
+        .memories
+        .find_by_id(&id)
+        .await
         .ok()
         .flatten()
         .is_some();
-    
+
     if !memory_exists {
         warn!("记忆不存在于LibSQL: {}", id);
         return Err(ServerError::not_found(format!("Memory not found: {}", id)));
     }
-    
+
     // 🔧 修复: 先删除LibSQL（主存储），然后尝试删除向量存储
     // 如果向量存储删除失败（记忆不存在），不应该导致整个删除失败
     let libsql_result = repositories.memories.delete(&id).await;
-    
+
     match libsql_result {
         Ok(_) => {
             info!("✅ Memory deleted from LibSQL: {}", id);
-            
+
             // 尝试删除向量存储（非关键操作，失败不影响主流程）
             let vector_result = memory_manager.delete_memory(&id).await;
             match vector_result {
                 Ok(_) => {
-                    info!("✅ Memory deleted from both LibSQL and Vector Store: {}", id);
+                    info!(
+                        "✅ Memory deleted from both LibSQL and Vector Store: {}",
+                        id
+                    );
                 }
                 Err(e) => {
                     // 🔧 修复: 向量存储删除失败不应该导致整个删除失败
@@ -918,11 +922,14 @@ pub async fn delete_memory(
                     if error_msg.contains("not found") || error_msg.contains("Memory not found") {
                         warn!("⚠️  向量存储中记忆不存在（可能从未添加或已删除）: {}. 这不会影响删除操作", id);
                     } else {
-                        warn!("⚠️  向量存储删除失败（非关键）: {}. 错误: {}. 记忆已从主存储删除", id, error_msg);
+                        warn!(
+                            "⚠️  向量存储删除失败（非关键）: {}. 错误: {}. 记忆已从主存储删除",
+                            id, error_msg
+                        );
                     }
                 }
             }
-            
+
             let response = crate::models::MemoryResponse {
                 id,
                 message: "Memory deleted successfully".to_string(),
@@ -932,7 +939,8 @@ pub async fn delete_memory(
         Err(e) => {
             error!("Failed to delete memory from LibSQL: {}", e);
             Err(ServerError::memory_error(format!(
-                "Failed to delete memory: {}", e
+                "Failed to delete memory: {}",
+                e
             )))
         }
     }
@@ -962,7 +970,7 @@ async fn search_by_libsql_exact(
             info!("✅ LibSQL查询成功: 找到 {} 条记忆", memories.len());
 
             // 🔧 修复: 将 MemoryV4 转换为 MemoryItem 以便访问字段
-            
+
             let memory_items: Vec<_> = memories.into_iter().map(|m| m.to_legacy_item()).collect();
 
             // 🔧 修复: 优先返回精确匹配的商品记忆
@@ -1185,24 +1193,21 @@ pub async fn search_memories(
 
         // 尝试LibSQL精确匹配
         let limit = request.limit.unwrap_or(10);
-        match search_by_libsql_exact(&repositories, &request.query, limit * 2).await { // 获取更多结果以支持分页
+        match search_by_libsql_exact(&repositories, &request.query, limit * 2).await {
+            // 获取更多结果以支持分页
             Ok(json_results) if !json_results.is_empty() => {
                 info!("✅ LibSQL精确匹配找到 {} 条结果", json_results.len());
-                
+
                 // 🆕 Phase 2.13: 应用分页（精确查询）
                 let offset = request.offset.unwrap_or(0);
                 let total = json_results.len();
                 let paginated_results: Vec<serde_json::Value> = if offset < total {
-                    json_results
-                        .into_iter()
-                        .skip(offset)
-                        .take(limit)
-                        .collect()
+                    json_results.into_iter().skip(offset).take(limit).collect()
                 } else {
                     Vec::new()
                 };
                 let has_more = offset + limit < total;
-                
+
                 // 🆕 Phase 2.7: 更新统计（精确查询）
                 let search_latency = search_start.elapsed();
                 {
@@ -1212,7 +1217,7 @@ pub async fn search_memories(
                     stats_write.total_latency_us += search_latency.as_micros() as u64;
                     stats_write.last_updated = Instant::now();
                 }
-                
+
                 // 🆕 Phase 2.13: 返回带分页信息的响应
                 let search_response = crate::models::SearchResponse {
                     results: paginated_results,
@@ -1221,7 +1226,7 @@ pub async fn search_memories(
                     limit,
                     has_more,
                 };
-                
+
                 return Ok(Json(crate::models::ApiResponse::success(search_response)));
             }
             Ok(_) => {
@@ -1236,7 +1241,7 @@ pub async fn search_memories(
     // 🔍 Phase 2: 向量语义搜索（降级或默认）
     info!("🔍 使用向量语义搜索: {}", request.query);
     let query_clone = request.query.clone(); // Clone for later use
-    
+
     // 🆕 Phase 2.4: 查询结果缓存（简单实现）
     // 生成缓存键
     let cache_key = generate_cache_key(
@@ -1245,7 +1250,7 @@ pub async fn search_memories(
         &request.user_id,
         &request.limit,
     );
-    
+
     // 尝试从缓存获取结果
     let cache = get_search_cache();
     let cache_ttl = Duration::from_secs(
@@ -1254,14 +1259,17 @@ pub async fn search_memories(
             .and_then(|v| v.parse().ok())
             .unwrap_or(300), // 默认5分钟
     );
-    
+
     // 检查缓存（LruCache的get需要&mut，所以使用write锁）
     let cache_hit = {
         let mut cache_write = cache.write().await;
         if let Some(cached) = cache_write.get(&cache_key) {
             if !cached.is_expired() {
-                info!("💾 缓存命中: query='{}', cache_key={}", request.query, cache_key);
-                
+                info!(
+                    "💾 缓存命中: query='{}', cache_key={}",
+                    request.query, cache_key
+                );
+
                 // 🆕 Phase 2.7: 更新统计（缓存命中）
                 let search_latency = search_start.elapsed();
                 {
@@ -1272,13 +1280,14 @@ pub async fn search_memories(
                     stats_write.total_latency_us += search_latency.as_micros() as u64;
                     stats_write.last_updated = Instant::now();
                 }
-                
+
                 // 🆕 Phase 2.13: 从缓存构建SearchResponse
                 let total = cached.results.len();
                 let offset = request.offset.unwrap_or(0);
                 let limit = request.limit.unwrap_or(10);
                 let paginated_results: Vec<serde_json::Value> = if offset < total {
-                    cached.results
+                    cached
+                        .results
                         .iter()
                         .skip(offset)
                         .take(limit)
@@ -1288,7 +1297,7 @@ pub async fn search_memories(
                     Vec::new()
                 };
                 let has_more = offset + limit < total;
-                
+
                 let search_response = crate::models::SearchResponse {
                     results: paginated_results,
                     total,
@@ -1296,7 +1305,7 @@ pub async fn search_memories(
                     limit,
                     has_more,
                 };
-                
+
                 return Ok(Json(crate::models::ApiResponse::success(search_response)));
             } else {
                 // 缓存过期，删除
@@ -1307,34 +1316,37 @@ pub async fn search_memories(
             false
         }
     };
-    
+
     if !cache_hit {
         info!("💾 缓存未命中，执行搜索: query='{}'", request.query);
-        
+
         // 🆕 Phase 2.7: 更新统计（缓存未命中）
         {
             let mut stats_write = stats.write().await;
             stats_write.cache_misses += 1;
         }
     }
-    
+
     // 🔧 增强：计算自适应阈值用于后续过滤
     let adaptive_threshold = get_adaptive_threshold(&request.query);
-    info!("📊 自适应阈值: query='{}', threshold={}", request.query, adaptive_threshold);
-    
+    info!(
+        "📊 自适应阈值: query='{}', threshold={}",
+        request.query, adaptive_threshold
+    );
+
     // 🆕 Phase 2.9: 搜索超时控制
     let search_timeout_secs = std::env::var("SEARCH_TIMEOUT_SECONDS")
         .ok()
         .and_then(|v| v.parse().ok())
         .unwrap_or(30); // 默认30秒
-    
+
     let memory_manager_clone = memory_manager.clone();
     let query_clone_for_timeout = request.query.clone();
     let agent_id_clone = request.agent_id.clone();
     let user_id_clone = request.user_id.clone();
     let limit_clone = request.limit;
     let memory_type_clone = request.memory_type.clone();
-    
+
     let search_future = async move {
         memory_manager_clone
             .search_memories(
@@ -1346,7 +1358,7 @@ pub async fn search_memories(
             )
             .await
     };
-    
+
     let mut results = match timeout(Duration::from_secs(search_timeout_secs), search_future).await {
         Ok(Ok(results)) => results,
         Ok(Err(e)) => {
@@ -1354,7 +1366,10 @@ pub async fn search_memories(
             return Err(ServerError::memory_error(e.to_string()));
         }
         Err(_) => {
-            error!("Search operation timed out after {} seconds", search_timeout_secs);
+            error!(
+                "Search operation timed out after {} seconds",
+                search_timeout_secs
+            );
             return Err(ServerError::internal_error(format!(
                 "Search operation timed out after {} seconds",
                 search_timeout_secs
@@ -1380,10 +1395,10 @@ pub async fn search_memories(
                 }
             })
             .collect();
-        
+
         // 等待所有查询完成
         let check_results = future::join_all(check_futures).await;
-        
+
         // 过滤有效结果
         let mut valid = Vec::new();
         for (result, status) in check_results {
@@ -1398,14 +1413,21 @@ pub async fn search_memories(
                 }
                 Err(e) => {
                     // 查询失败，为了安全起见，跳过该记录
-                    warn!("Failed to check memory status in LibSQL: {}, skipping result", e);
+                    warn!(
+                        "Failed to check memory status in LibSQL: {}, skipping result",
+                        e
+                    );
                 }
             }
         }
         valid
     };
-    
-    info!("🔄 并行验证完成: {} → {} 条有效结果", results.len(), valid_results.len());
+
+    info!(
+        "🔄 并行验证完成: {} → {} 条有效结果",
+        results.len(),
+        valid_results.len()
+    );
     results = valid_results;
 
     // 🔧 修复: 对于精确查询，优先返回精确匹配的结果
@@ -1455,7 +1477,7 @@ pub async fn search_memories(
         .ok()
         .and_then(|v| v.parse().ok())
         .unwrap_or(0.1);
-    
+
     // 为每个结果计算三维评分和质量评分
     let mut scored_results: Vec<(MemoryItem, f64, f64, f64, f64, f64)> = sorted_results
         .into_iter()
@@ -1464,43 +1486,52 @@ pub async fn search_memories(
             let relevance = item.score.unwrap_or(0.0);
             let importance = item.importance.max(0.0).min(1.0);
             let last_accessed = item.last_accessed_at.to_string();
-            
+
             // 计算Recency评分
             let recency = calculate_recency_score(&last_accessed, recency_decay);
-            
+
             // 计算三维综合评分
-            let composite_score = calculate_3d_score(
-                relevance,
-                importance,
-                &last_accessed,
-                recency_decay,
-            );
-            
+            let composite_score =
+                calculate_3d_score(relevance, importance, &last_accessed, recency_decay);
+
             // 🆕 Phase 2.10: 计算质量评分
             let quality = calculate_quality_score(&item);
-            
+
             // 将质量评分纳入综合评分（质量权重：0.1）
             let final_score = composite_score * 0.9 + quality * 0.1;
-            
-            (item, final_score, recency, importance as f64, relevance as f64, quality)
+
+            (
+                item,
+                final_score,
+                recency,
+                importance as f64,
+                relevance as f64,
+                quality,
+            )
         })
         .collect();
-    
+
     // 按三维综合评分排序（降序）
-    scored_results.sort_by(|a, b| {
-        b.1.partial_cmp(&a.1).unwrap_or(std::cmp::Ordering::Equal)
-    });
-    
-    info!("🎯 三维检索评分完成: recency_decay={}, 结果数={}", 
-        recency_decay, scored_results.len());
+    scored_results.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap_or(std::cmp::Ordering::Equal));
+
+    info!(
+        "🎯 三维检索评分完成: recency_decay={}, 结果数={}",
+        recency_decay,
+        scored_results.len()
+    );
 
     // 🔧 修复: 过滤低相关度结果（使用自适应阈值）
     // 优先使用用户指定的阈值，否则使用自适应阈值，最后才使用默认值
     let min_score_threshold = request.threshold.unwrap_or(adaptive_threshold);
-    info!("🎯 过滤阈值: {} (用户指定: {}, 自适应: {})", 
+    info!(
+        "🎯 过滤阈值: {} (用户指定: {}, 自适应: {})",
         min_score_threshold,
-        request.threshold.map(|t| t.to_string()).unwrap_or_else(|| "未指定".to_string()),
-        adaptive_threshold);
+        request
+            .threshold
+            .map(|t| t.to_string())
+            .unwrap_or_else(|| "未指定".to_string()),
+        adaptive_threshold
+    );
 
     // 🆕 Phase 2.2: 层次检索排序（可选，基于scope字段）
     // 如果启用层次检索，先按scope层次排序，再应用其他排序逻辑
@@ -1508,36 +1539,54 @@ pub async fn search_memories(
         .ok()
         .and_then(|v| v.parse().ok())
         .unwrap_or(false);
-    
+
     if use_hierarchical {
         info!("🔍 启用层次检索排序");
         // 提取MemoryItem并应用层次排序
-        let items: Vec<MemoryItem> = scored_results.iter().map(|(item, _, _, _, _, _)| item.clone()).collect();
+        let items: Vec<MemoryItem> = scored_results
+            .iter()
+            .map(|(item, _, _, _, _, _)| item.clone())
+            .collect();
         let hierarchical_sorted = apply_hierarchical_sorting(items);
-        
+
         // 重新构建scored_results，保持层次顺序
         let mut new_scored_results = Vec::new();
-        let item_map: std::collections::HashMap<String, (MemoryItem, f64, f64, f64, f64, f64)> = scored_results
-            .into_iter()
-            .map(|(item, score, recency, importance, relevance, quality)| (item.id.clone(), (item, score, recency, importance, relevance, quality)))
-            .collect();
-        
+        let item_map: std::collections::HashMap<String, (MemoryItem, f64, f64, f64, f64, f64)> =
+            scored_results
+                .into_iter()
+                .map(|(item, score, recency, importance, relevance, quality)| {
+                    (
+                        item.id.clone(),
+                        (item, score, recency, importance, relevance, quality),
+                    )
+                })
+                .collect();
+
         for item in hierarchical_sorted {
-            if let Some((_, score, recency, importance, relevance, quality)) = item_map.get(&item.id) {
-                new_scored_results.push((item, *score, *recency, *importance, *relevance, *quality));
+            if let Some((_, score, recency, importance, relevance, quality)) =
+                item_map.get(&item.id)
+            {
+                new_scored_results.push((
+                    item,
+                    *score,
+                    *recency,
+                    *importance,
+                    *relevance,
+                    *quality,
+                ));
             }
         }
-        
+
         scored_results = new_scored_results;
         info!("✅ 层次检索排序完成: {} 条结果", scored_results.len());
     }
-    
+
     // 🆕 Phase 2.5: 搜索结果去重
     // 第一步：基于ID去重（确保同一条记忆只出现一次）
     // 第二步：基于content hash去重（确保内容重复的记忆只保留一条）
     use std::collections::HashMap;
     let original_count = scored_results.len();
-    
+
     // 第一步：基于ID去重，保留评分最高的
     let mut id_map: HashMap<String, (MemoryItem, f64, f64, f64, f64, f64)> = HashMap::new();
     for (item, final_score, recency, importance, relevance, quality) in scored_results {
@@ -1550,19 +1599,24 @@ pub async fn search_memories(
             }
             None => {
                 // 新ID，直接添加
-                id_map.insert(item.id.clone(), (item, final_score, recency, importance, relevance, quality));
+                id_map.insert(
+                    item.id.clone(),
+                    (item, final_score, recency, importance, relevance, quality),
+                );
             }
         }
     }
-    
+
     let id_dedup_count = id_map.len();
     info!("🔄 ID去重: {} → {} 条结果", original_count, id_dedup_count);
-    
+
     // 第二步：基于hash/content去重，保留评分最高的
     let mut hash_map: HashMap<String, (MemoryItem, f64, f64, f64, f64, f64)> = HashMap::new();
     for (item, final_score, recency, importance, relevance, quality) in id_map.into_values() {
         // 使用hash字段进行去重（如果hash为None或空，使用content的前100字符作为key）
-        let dedup_key = item.hash.as_ref()
+        let dedup_key = item
+            .hash
+            .as_ref()
             .filter(|h| !h.is_empty())
             .cloned()
             .unwrap_or_else(|| {
@@ -1583,7 +1637,7 @@ pub async fn search_memories(
                     item.content.clone()
                 }
             });
-        
+
         // 如果hash已存在，比较综合评分，保留评分更高的
         match hash_map.get_mut(&dedup_key) {
             Some(existing) => {
@@ -1594,46 +1648,78 @@ pub async fn search_memories(
             }
             None => {
                 // 新hash，直接添加
-                hash_map.insert(dedup_key, (item, final_score, recency, importance, relevance, quality));
+                hash_map.insert(
+                    dedup_key,
+                    (item, final_score, recency, importance, relevance, quality),
+                );
             }
         }
     }
-    
-    let deduplicated_results: Vec<(MemoryItem, f64, f64, f64, f64, f64)> = hash_map.into_values().collect();
-    info!("🔄 搜索结果去重完成: {} → {} → {} 条结果 (ID去重 → Hash去重)", 
-        original_count, id_dedup_count, deduplicated_results.len());
+
+    let deduplicated_results: Vec<(MemoryItem, f64, f64, f64, f64, f64)> =
+        hash_map.into_values().collect();
+    info!(
+        "🔄 搜索结果去重完成: {} → {} → {} 条结果 (ID去重 → Hash去重)",
+        original_count,
+        id_dedup_count,
+        deduplicated_results.len()
+    );
 
     // 🆕 Phase 2.12: 应用智能过滤（在转换为JSON之前）
     // 从请求中获取过滤参数（如果提供）
     let min_importance = request.min_importance;
     let max_age_days = request.max_age_days;
     let min_access_count = request.min_access_count;
-    
+
     // 应用智能过滤
-    let filtered_results: Vec<(MemoryItem, f64, f64, f64, f64, f64)> = if min_importance.is_some() || max_age_days.is_some() || min_access_count.is_some() {
+    let filtered_results: Vec<(MemoryItem, f64, f64, f64, f64, f64)> = if min_importance.is_some()
+        || max_age_days.is_some()
+        || min_access_count.is_some()
+    {
         let original_count = deduplicated_results.len();
-        let items: Vec<MemoryItem> = deduplicated_results.iter().map(|(item, _, _, _, _, _)| item.clone()).collect();
-        let filtered_items = apply_intelligent_filtering(items, min_importance, max_age_days, min_access_count);
-        
-        // 重新构建带评分的元组
-        let filtered_map: std::collections::HashMap<String, (MemoryItem, f64, f64, f64, f64, f64)> = deduplicated_results
+        let items: Vec<MemoryItem> = deduplicated_results
             .iter()
-            .map(|(item, final_score, recency, importance, relevance, quality)| {
-                (item.id.clone(), (item.clone(), *final_score, *recency, *importance, *relevance, *quality))
-            })
+            .map(|(item, _, _, _, _, _)| item.clone())
             .collect();
-        
+        let filtered_items =
+            apply_intelligent_filtering(items, min_importance, max_age_days, min_access_count);
+
+        // 重新构建带评分的元组
+        let filtered_map: std::collections::HashMap<String, (MemoryItem, f64, f64, f64, f64, f64)> =
+            deduplicated_results
+                .iter()
+                .map(
+                    |(item, final_score, recency, importance, relevance, quality)| {
+                        (
+                            item.id.clone(),
+                            (
+                                item.clone(),
+                                *final_score,
+                                *recency,
+                                *importance,
+                                *relevance,
+                                *quality,
+                            ),
+                        )
+                    },
+                )
+                .collect();
+
         let filtered = filtered_items
             .into_iter()
             .filter_map(|item| filtered_map.get(&item.id).cloned())
             .collect::<Vec<_>>();
-        
-        info!("🔍 智能过滤完成: {} → {} 条结果", original_count, filtered.len());
+
+        info!(
+            "🔍 智能过滤完成: {} → {} 条结果",
+            original_count,
+            filtered.len()
+        );
         filtered
     } else {
         deduplicated_results
     };
-    
+
     // 转换为JSON，同时应用阈值过滤（使用原始relevance分数进行阈值过滤）
     let json_results: Vec<serde_json::Value> = filtered_results
         .into_iter()
@@ -1641,26 +1727,28 @@ pub async fn search_memories(
             // 使用原始的relevance分数进行阈值过滤
             *relevance >= min_score_threshold as f64
         })
-        .map(|(item, final_score, recency, importance, relevance, quality)| {
-            serde_json::json!({
-                "id": item.id,
-                "agent_id": item.agent_id,
-                "user_id": item.user_id,
-                "content": item.content,
-                "memory_type": item.memory_type,
-                "importance": item.importance,
-                "created_at": item.created_at,
-                "last_accessed_at": item.last_accessed_at,
-                "access_count": item.access_count,
-                "metadata": item.metadata,
-                "hash": item.hash,
-                "score": relevance,  // 原始relevance分数（用于阈值过滤）
-                "composite_score": final_score,  // 🆕 最终综合评分（包含质量评分）
-                "recency": recency,  // 🆕 Recency评分
-                "relevance": relevance,  // 🆕 Relevance评分（与score相同）
-                "quality": quality,  // 🆕 Phase 2.10: 质量评分
-            })
-        })
+        .map(
+            |(item, final_score, recency, importance, relevance, quality)| {
+                serde_json::json!({
+                    "id": item.id,
+                    "agent_id": item.agent_id,
+                    "user_id": item.user_id,
+                    "content": item.content,
+                    "memory_type": item.memory_type,
+                    "importance": item.importance,
+                    "created_at": item.created_at,
+                    "last_accessed_at": item.last_accessed_at,
+                    "access_count": item.access_count,
+                    "metadata": item.metadata,
+                    "hash": item.hash,
+                    "score": relevance,  // 原始relevance分数（用于阈值过滤）
+                    "composite_score": final_score,  // 🆕 最终综合评分（包含质量评分）
+                    "recency": recency,  // 🆕 Recency评分
+                    "relevance": relevance,  // 🆕 Relevance评分（与score相同）
+                    "quality": quality,  // 🆕 Phase 2.10: 质量评分
+                })
+            },
+        )
         .collect();
 
     // 🆕 Phase 2.4: 保存结果到缓存（使用LRU策略）
@@ -1677,30 +1765,39 @@ pub async fn search_memories(
             cache_write.pop(&key);
         }
         // 插入新结果（LRU会自动淘汰最久未使用的条目）
-        cache_write.put(cache_key, CachedSearchResult::new(json_results.clone(), cache_ttl));
-        info!("💾 结果已缓存: query='{}', cache_size={}", query_clone, cache_write.len());
+        cache_write.put(
+            cache_key,
+            CachedSearchResult::new(json_results.clone(), cache_ttl),
+        );
+        info!(
+            "💾 结果已缓存: query='{}', cache_size={}",
+            query_clone,
+            cache_write.len()
+        );
     }
 
     // 🆕 Phase 2.13: 应用分页（在返回结果前）
     let offset = request.offset.unwrap_or(0);
     let limit = request.limit.unwrap_or(10);
     let total = json_results.len();
-    
+
     // 应用分页
     let paginated_results: Vec<serde_json::Value> = if offset < total {
-        json_results
-            .into_iter()
-            .skip(offset)
-            .take(limit)
-            .collect()
+        json_results.into_iter().skip(offset).take(limit).collect()
     } else {
         Vec::new()
     };
-    
+
     let has_more = offset + limit < total;
-    
-    info!("📄 分页结果: offset={}, limit={}, total={}, returned={}, has_more={}", 
-        offset, limit, total, paginated_results.len(), has_more);
+
+    info!(
+        "📄 分页结果: offset={}, limit={}, total={}, returned={}, has_more={}",
+        offset,
+        limit,
+        total,
+        paginated_results.len(),
+        has_more
+    );
 
     // 🆕 Phase 2.7: 更新统计（向量搜索完成）
     let search_latency = search_start.elapsed();
@@ -1727,7 +1824,7 @@ pub async fn search_memories(
 // 注意：apply_hierarchical_sorting 已迁移到 utils.rs
 
 /// 🆕 Phase 4.4: 记忆清理功能
-/// 
+///
 /// 基于访问模式和重要性清理长期未使用且重要性低的记忆
 /// - max_age_days: 最大年龄（天数，默认90天）
 /// - min_importance: 最小重要性阈值（默认0.3）
@@ -1740,28 +1837,28 @@ pub(crate) async fn cleanup_memories(
     max_access_count: Option<i64>,
     dry_run: bool,
 ) -> Result<(usize, Vec<String>), String> {
-    use libsql::{params, Builder};
     use chrono::Utc;
-    
+    use libsql::{params, Builder};
+
     let max_age = max_age_days.unwrap_or(90);
     let min_imp = min_importance.unwrap_or(0.3);
     let max_access = max_access_count.unwrap_or(5);
     let now = Utc::now().timestamp();
     let cutoff_time = now - (max_age as i64 * 86400);
-    
+
     let db_path = std::env::var("DATABASE_URL")
         .unwrap_or_else(|_| "file:./data/agentmem.db".to_string())
         .replace("file:", "");
-    
+
     let db = Builder::new_local(&db_path)
         .build()
         .await
         .map_err(|e| format!("Failed to open database: {}", e))?;
-    
+
     let conn = db
         .connect()
         .map_err(|e| format!("Failed to connect: {}", e))?;
-    
+
     // 查询符合条件的记忆（长期未使用且重要性低）
     let query = "SELECT id FROM memories 
                  WHERE is_deleted = 0 
@@ -1769,17 +1866,17 @@ pub(crate) async fn cleanup_memories(
                  AND (importance IS NULL OR importance < ?)
                  AND (access_count IS NULL OR access_count <= ?)
                  LIMIT 1000";
-    
+
     let mut stmt = conn
         .prepare(query)
         .await
         .map_err(|e| format!("Failed to prepare query: {}", e))?;
-    
+
     let mut rows = stmt
         .query(params![cutoff_time, min_imp, max_access])
         .await
         .map_err(|e| format!("Failed to execute query: {}", e))?;
-    
+
     let mut memory_ids = Vec::new();
     while let Some(row) = rows
         .next()
@@ -1789,21 +1886,26 @@ pub(crate) async fn cleanup_memories(
         let id: String = row.get(0).unwrap_or_default();
         memory_ids.push(id);
     }
-    
+
     if dry_run {
         return Ok((memory_ids.len(), memory_ids));
     }
-    
+
     // 实际删除记忆
     let mut deleted_count = 0;
     for memory_id in &memory_ids {
         if let Ok(Some(memory)) = repositories.memories.find_by_id(memory_id).await {
-            if repositories.memories.delete(&memory.id.to_string()).await.is_ok() {
+            if repositories
+                .memories
+                .delete(&memory.id.to_string())
+                .await
+                .is_ok()
+            {
                 deleted_count += 1;
             }
         }
     }
-    
+
     Ok((deleted_count, memory_ids))
 }
 
@@ -1812,7 +1914,7 @@ pub(crate) async fn cleanup_memories(
 // 注意：calculate_access_pattern_score 已迁移到 utils.rs
 
 /// 缓存预热：预取高访问频率的记忆到缓存
-/// 
+///
 /// 🆕 Phase 2.3: 简单缓存预热实现（增强版：基于访问模式分析）
 /// 基于访问频率和访问模式预取常用记忆，提升后续查询性能
 #[utoipa::path(
@@ -1836,7 +1938,7 @@ pub async fn warmup_cache(
         .get("limit")
         .and_then(|v| v.parse().ok())
         .unwrap_or(50);
-    
+
     info!("🔥 开始缓存预热: limit={}", limit);
 
     // 1. 获取高访问频率的记忆ID列表（从LibSQL）
@@ -1845,32 +1947,32 @@ pub async fn warmup_cache(
         let db_path = std::env::var("DATABASE_URL")
             .unwrap_or_else(|_| "file:./data/agentmem.db".to_string())
             .replace("file:", "");
-        
+
         let db = Builder::new_local(&db_path)
             .build()
             .await
             .map_err(|e| ServerError::internal_error(format!("Failed to open database: {}", e)))?;
-        
+
         let conn = db
             .connect()
             .map_err(|e| ServerError::internal_error(format!("Failed to connect: {}", e)))?;
-        
+
         // 🆕 Phase 2.3: 增强查询 - 获取访问模式和评分信息
         let mut stmt = conn
             .prepare(
                 "SELECT id, access_count, last_accessed FROM memories 
                  WHERE is_deleted = 0 
                  ORDER BY access_count DESC, last_accessed DESC 
-                 LIMIT ?"
+                 LIMIT ?",
             )
             .await
             .map_err(|e| ServerError::internal_error(format!("Failed to prepare query: {}", e)))?;
-        
+
         let mut rows = stmt
             .query(params![limit as i64])
             .await
             .map_err(|e| ServerError::internal_error(format!("Failed to execute query: {}", e)))?;
-        
+
         // 🆕 Phase 2.3: 使用访问模式评分排序
         let mut memory_scores: Vec<(String, f64, i64)> = Vec::new();
         while let Some(row) = rows
@@ -1878,27 +1980,32 @@ pub async fn warmup_cache(
             .await
             .map_err(|e| ServerError::internal_error(format!("Failed to fetch row: {}", e)))?
         {
-            let id: String = row.get(0)
-                .map_err(|e| ServerError::internal_error(format!("Failed to get id from row: {}", e)))?;
+            let id: String = row.get(0).map_err(|e| {
+                ServerError::internal_error(format!("Failed to get id from row: {}", e))
+            })?;
             let access_count: i64 = row.get(1).unwrap_or(0);
             let last_accessed_ts: Option<i64> = row.get(2).ok();
-            
+
             // 计算访问模式评分
             let score = calculate_access_pattern_score(access_count, last_accessed_ts);
             memory_scores.push((id, score, access_count));
         }
-        
+
         // 按访问模式评分排序（降序）
         memory_scores.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap_or(std::cmp::Ordering::Equal));
-        
+
         // 提取ID列表
         let ids: Vec<String> = memory_scores.iter().map(|(id, _, _)| id.clone()).collect();
-        
-        info!("📊 访问模式分析: 分析了 {} 个记忆，最高评分: {:.2}", 
+
+        info!(
+            "📊 访问模式分析: 分析了 {} 个记忆，最高评分: {:.2}",
             memory_scores.len(),
-            memory_scores.first().map(|(_, score, _)| *score).unwrap_or(0.0)
+            memory_scores
+                .first()
+                .map(|(_, score, _)| *score)
+                .unwrap_or(0.0)
         );
-        
+
         ids
     };
 
@@ -1907,12 +2014,12 @@ pub async fn warmup_cache(
     // 2. 并行预取这些记忆到缓存（通过搜索缓存）
     let cache = get_search_cache();
     let mut warmed_count = 0;
-    
+
     for memory_id in popular_memory_ids.iter().take(limit) {
         // 为每个记忆创建一个简单的查询来触发缓存
         // 这里我们使用记忆ID作为查询，这样会触发搜索并缓存结果
         let cache_key = generate_cache_key(memory_id, &None, &None, &Some(1));
-        
+
         // 检查是否已经在缓存中
         let mut cache_write = cache.write().await;
         if cache_write.get(&cache_key).is_none() {
@@ -2005,7 +2112,8 @@ pub async fn batch_add_memories(
     info!("Batch adding {} memories", request.memories.len());
 
     // 🆕 Phase 3.2: 并行写入优化 - 使用并行处理替代串行循环
-    let add_futures: Vec<_> = request.memories
+    let add_futures: Vec<_> = request
+        .memories
         .into_iter()
         .map(|memory_req| {
             let memory_manager_clone = memory_manager.clone();
@@ -2025,22 +2133,26 @@ pub async fn batch_add_memories(
             }
         })
         .collect();
-    
+
     // 并行执行所有添加操作
     let add_results = future::join_all(add_futures).await;
-    
+
     // 收集结果和错误
     let mut results = Vec::new();
     let mut errors = Vec::new();
-    
+
     for result in add_results {
         match result {
             Ok(id) => results.push(id),
             Err(e) => errors.push(e.to_string()),
         }
     }
-    
-    info!("✅ 并行批量添加完成: 成功 {} 个, 失败 {} 个", results.len(), errors.len());
+
+    info!(
+        "✅ 并行批量添加完成: 成功 {} 个, 失败 {} 个",
+        results.len(),
+        errors.len()
+    );
 
     let response = crate::models::BatchResponse {
         successful: results.len(),
@@ -2084,22 +2196,26 @@ pub async fn batch_delete_memories(
             }
         })
         .collect();
-    
+
     // 并行执行所有删除操作
     let delete_results = future::join_all(delete_futures).await;
-    
+
     // 收集结果和错误
     let mut successful = 0;
     let mut errors = Vec::new();
-    
+
     for result in delete_results {
         match result {
             Ok(_) => successful += 1,
             Err(e) => errors.push(e),
         }
     }
-    
-    info!("✅ 并行批量删除完成: 成功 {} 个, 失败 {} 个", successful, errors.len());
+
+    info!(
+        "✅ 并行批量删除完成: 成功 {} 个, 失败 {} 个",
+        successful,
+        errors.len()
+    );
 
     let response = crate::models::BatchResponse {
         successful,
@@ -2188,7 +2304,10 @@ pub async fn batch_search_memories(
         errors,
     };
 
-    info!("✅ 批量搜索完成: 成功 {} 个, 失败 {} 个", successful, failed);
+    info!(
+        "✅ 批量搜索完成: 成功 {} 个, 失败 {} 个",
+        successful, failed
+    );
     Ok(Json(response))
 }
 
@@ -2228,16 +2347,18 @@ pub async fn get_search_statistics(
         last_updated: chrono::Utc::now(), // 使用当前时间，因为Instant不能序列化
     };
 
-    info!("📊 搜索统计: 总数={}, 缓存命中率={:.2}%, 平均延迟={:.2}ms", 
-        response.total_searches, 
+    info!(
+        "📊 搜索统计: 总数={}, 缓存命中率={:.2}%, 平均延迟={:.2}ms",
+        response.total_searches,
         response.cache_hit_rate * 100.0,
-        response.avg_latency_ms);
+        response.avg_latency_ms
+    );
 
     Ok(Json(crate::models::ApiResponse::success(response)))
 }
 
 /// 🆕 Phase 4.8: 记忆批量更新功能
-/// 
+///
 /// 批量更新多个记忆的字段（importance、metadata等）
 #[utoipa::path(
     post,
@@ -2256,20 +2377,24 @@ pub async fn batch_update_memories(
     Json(request): Json<serde_json::Value>,
 ) -> ServerResult<Json<crate::models::ApiResponse<serde_json::Value>>> {
     info!("🔄 开始批量更新记忆");
-    
+
     // 解析请求数据
     let memory_ids = request
         .get("memory_ids")
         .and_then(|v| v.as_array())
         .ok_or_else(|| ServerError::bad_request("Invalid request: missing 'memory_ids' array"))?;
-    
+
     let updates = request
         .get("updates")
         .and_then(|v| v.as_object())
         .ok_or_else(|| ServerError::bad_request("Invalid request: missing 'updates' object"))?;
-    
-    let importance = updates.get("importance").and_then(|v| v.as_f64()).map(|f| f as f32);
-    let metadata = updates.get("metadata")
+
+    let importance = updates
+        .get("importance")
+        .and_then(|v| v.as_f64())
+        .map(|f| f as f32);
+    let metadata = updates
+        .get("metadata")
         .and_then(|v| v.as_object())
         .map(|obj| {
             let mut map = std::collections::HashMap::new();
@@ -2280,31 +2405,31 @@ pub async fn batch_update_memories(
             }
             map
         });
-    
+
     let mut successful = 0;
     let mut failed = 0;
     let mut errors = Vec::new();
     let mut updated_ids = Vec::new();
-    
+
     // 遍历所有记忆ID，批量更新
     for memory_id_value in memory_ids {
         let memory_id = memory_id_value
             .as_str()
             .ok_or_else(|| ServerError::bad_request("Invalid memory_id format"))?;
-        
+
         // 获取现有记忆
         match repositories.memories.find_by_id(memory_id).await {
             Ok(Some(memory)) => {
                 // 构建更新数据
                 let mut updated = memory.clone();
-                
+
                 if let Some(imp) = importance {
                     updated.attributes.set(
                         agent_mem_traits::AttributeKey::system("importance"),
                         agent_mem_traits::AttributeValue::Number(imp as f64),
                     );
                 }
-                
+
                 if let Some(meta) = &metadata {
                     for (k, v) in meta {
                         updated.attributes.set(
@@ -2313,7 +2438,7 @@ pub async fn batch_update_memories(
                         );
                     }
                 }
-                
+
                 // 更新记忆
                 match repositories.memories.update(&updated).await {
                     Ok(_) => {
@@ -2339,9 +2464,12 @@ pub async fn batch_update_memories(
             }
         }
     }
-    
-    info!("✅ 批量更新完成: 成功 {} 个, 失败 {} 个", successful, failed);
-    
+
+    info!(
+        "✅ 批量更新完成: 成功 {} 个, 失败 {} 个",
+        successful, failed
+    );
+
     let response = serde_json::json!({
         "updated_count": successful,
         "failed_count": failed,
@@ -2349,12 +2477,12 @@ pub async fn batch_update_memories(
         "errors": errors,
         "total": memory_ids.len(),
     });
-    
+
     Ok(Json(crate::models::ApiResponse::success(response)))
 }
 
 /// 🆕 Phase 4.7: 记忆去重功能
-/// 
+///
 /// 基于content hash检测和删除重复记忆，保留重要性最高的记忆
 #[utoipa::path(
     post,
@@ -2374,7 +2502,7 @@ pub async fn deduplicate_memories(
     axum::extract::Query(params): axum::extract::Query<HashMap<String, String>>,
 ) -> ServerResult<Json<crate::models::ApiResponse<serde_json::Value>>> {
     info!("🔍 开始记忆去重");
-    
+
     let dry_run = params
         .get("dry_run")
         .and_then(|v| v.parse().ok())
@@ -2383,42 +2511,42 @@ pub async fn deduplicate_memories(
         .get("min_importance_diff")
         .and_then(|v| v.parse().ok())
         .unwrap_or(0.1);
-    
+
     use libsql::{params, Builder};
     let db_path = std::env::var("DATABASE_URL")
         .unwrap_or_else(|_| "file:./data/agentmem.db".to_string())
         .replace("file:", "");
-    
+
     let db = Builder::new_local(&db_path)
         .build()
         .await
         .map_err(|e| ServerError::internal_error(format!("Failed to open database: {}", e)))?;
-    
+
     let conn = db
         .connect()
         .map_err(|e| ServerError::internal_error(format!("Failed to connect: {}", e)))?;
-    
+
     // 查询所有记忆，按hash分组
     let query = "SELECT id, hash, content, importance, agent_id, user_id 
                  FROM memories 
                  WHERE is_deleted = 0 
                  AND hash IS NOT NULL 
                  AND hash != ''";
-    
+
     let mut stmt = conn
         .prepare(query)
         .await
         .map_err(|e| ServerError::internal_error(format!("Failed to prepare query: {}", e)))?;
-    
+
     let mut rows = stmt
         .query(params![])
         .await
         .map_err(|e| ServerError::internal_error(format!("Failed to execute query: {}", e)))?;
-    
+
     // 按hash分组记忆
     use std::collections::HashMap;
     let mut hash_groups: HashMap<String, Vec<(String, f64, String, String)>> = HashMap::new();
-    
+
     while let Some(row) = rows
         .next()
         .await
@@ -2429,38 +2557,40 @@ pub async fn deduplicate_memories(
         let importance: f64 = row.get(3).unwrap_or(0.5);
         let agent_id: String = row.get(4).unwrap_or_default();
         let user_id: String = row.get(5).unwrap_or_default();
-        
+
         hash_groups
             .entry(hash)
             .or_insert_with(Vec::new)
             .push((id, importance, agent_id, user_id));
     }
-    
+
     // 找出重复的记忆（hash相同的组，且组内有多条记录）
     let mut duplicate_groups = Vec::new();
     let mut total_duplicates = 0;
-    
+
     for (hash, memories) in &hash_groups {
         if memories.len() > 1 {
             // 按importance排序，保留最高的
             let mut sorted = memories.clone();
             sorted.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap_or(std::cmp::Ordering::Equal));
-            
+
             let keep_id = &sorted[0].0;
             let keep_importance = sorted[0].1;
             let duplicates: Vec<String> = sorted[1..]
                 .iter()
-                .filter(|(_, imp, _, _)| (keep_importance - imp).abs() >= min_importance_diff as f64)
+                .filter(|(_, imp, _, _)| {
+                    (keep_importance - imp).abs() >= min_importance_diff as f64
+                })
                 .map(|(id, _, _, _)| id.clone())
                 .collect();
-            
+
             if !duplicates.is_empty() {
                 duplicate_groups.push((hash.clone(), keep_id.clone(), duplicates.clone()));
                 total_duplicates += duplicates.len();
             }
         }
     }
-    
+
     if dry_run {
         let response = serde_json::json!({
             "duplicate_groups": duplicate_groups.len(),
@@ -2469,28 +2599,37 @@ pub async fn deduplicate_memories(
             "dry_run": true,
             "message": format!("预览模式: 找到 {} 组重复记忆，共 {} 条重复", duplicate_groups.len(), total_duplicates)
         });
-        
-        info!("✅ 去重预览完成: {} 组重复, {} 条重复记忆", duplicate_groups.len(), total_duplicates);
+
+        info!(
+            "✅ 去重预览完成: {} 组重复, {} 条重复记忆",
+            duplicate_groups.len(),
+            total_duplicates
+        );
         return Ok(Json(crate::models::ApiResponse::success(response)));
     }
-    
+
     // 实际删除重复记忆
     let mut deleted_count = 0;
     let mut deleted_ids = Vec::new();
-    
+
     for (_, _, duplicates) in &duplicate_groups {
         for memory_id in duplicates {
             if let Ok(Some(memory)) = repositories.memories.find_by_id(memory_id).await {
-                if repositories.memories.delete(&memory.id.to_string()).await.is_ok() {
+                if repositories
+                    .memories
+                    .delete(&memory.id.to_string())
+                    .await
+                    .is_ok()
+                {
                     deleted_count += 1;
                     deleted_ids.push(memory_id.clone());
                 }
             }
         }
     }
-    
+
     info!("✅ 去重完成: 删除了 {} 条重复记忆", deleted_count);
-    
+
     let response = serde_json::json!({
         "duplicate_groups": duplicate_groups.len(),
         "total_duplicates": total_duplicates,
@@ -2499,12 +2638,12 @@ pub async fn deduplicate_memories(
         "dry_run": false,
         "message": format!("去重完成: 删除了 {} 条重复记忆", deleted_count)
     });
-    
+
     Ok(Json(crate::models::ApiResponse::success(response)))
 }
 
 /// 🆕 Phase 4.6: 记忆导入功能
-/// 
+///
 /// 从JSON格式导入记忆，支持批量导入
 #[utoipa::path(
     post,
@@ -2523,40 +2662,53 @@ pub async fn import_memories(
     Json(import_data): Json<serde_json::Value>,
 ) -> ServerResult<Json<crate::models::ApiResponse<serde_json::Value>>> {
     info!("📥 开始导入记忆");
-    
+
     // 解析导入数据
     let memories_array = import_data
         .get("memories")
         .and_then(|v| v.as_array())
         .ok_or_else(|| ServerError::bad_request("Invalid import data: missing 'memories' array"))?;
-    
+
     let mut successful = 0;
     let mut failed = 0;
     let mut errors = Vec::new();
     let mut imported_ids = Vec::new();
-    
+
     // 遍历导入的记忆
     for (index, memory_json) in memories_array.iter().enumerate() {
         // 解析记忆数据
-        let id = memory_json.get("id").and_then(|v| v.as_str()).map(|s| s.to_string());
-        let agent_id = memory_json.get("agent_id")
-            .and_then(|v| v.as_str())
-            .map(|s| s.to_string())
-            .ok_or_else(|| ServerError::bad_request(format!("Memory {}: missing agent_id", index)))?;
-        let user_id = memory_json.get("user_id")
+        let id = memory_json
+            .get("id")
             .and_then(|v| v.as_str())
             .map(|s| s.to_string());
-        let content = memory_json.get("content")
+        let agent_id = memory_json
+            .get("agent_id")
             .and_then(|v| v.as_str())
             .map(|s| s.to_string())
-            .ok_or_else(|| ServerError::bad_request(format!("Memory {}: missing content", index)))?;
-        let memory_type = memory_json.get("memory_type")
+            .ok_or_else(|| {
+                ServerError::bad_request(format!("Memory {}: missing agent_id", index))
+            })?;
+        let user_id = memory_json
+            .get("user_id")
             .and_then(|v| v.as_str())
             .map(|s| s.to_string());
-        let importance = memory_json.get("importance")
+        let content = memory_json
+            .get("content")
+            .and_then(|v| v.as_str())
+            .map(|s| s.to_string())
+            .ok_or_else(|| {
+                ServerError::bad_request(format!("Memory {}: missing content", index))
+            })?;
+        let memory_type = memory_json
+            .get("memory_type")
+            .and_then(|v| v.as_str())
+            .map(|s| s.to_string());
+        let importance = memory_json
+            .get("importance")
             .and_then(|v| v.as_f64())
             .map(|f| f as f32);
-        let metadata = memory_json.get("metadata")
+        let metadata = memory_json
+            .get("metadata")
             .and_then(|v| v.as_object())
             .map(|obj| {
                 let mut map = std::collections::HashMap::new();
@@ -2567,31 +2719,31 @@ pub async fn import_memories(
                 }
                 map
             });
-        
+
         // 构建MemoryRequest
         let memory_request = crate::models::MemoryRequest {
             agent_id: Some(agent_id.clone()),
             user_id: user_id.clone(),
             content: content.clone(),
-            memory_type: memory_type.and_then(|mt| {
-                match mt.as_str() {
-                    "episodic" => Some(agent_mem_traits::MemoryType::Episodic),
-                    "semantic" => Some(agent_mem_traits::MemoryType::Semantic),
-                    "procedural" => Some(agent_mem_traits::MemoryType::Procedural),
-                    "working" => Some(agent_mem_traits::MemoryType::Working),
-                    _ => None,
-                }
+            memory_type: memory_type.and_then(|mt| match mt.as_str() {
+                "episodic" => Some(agent_mem_traits::MemoryType::Episodic),
+                "semantic" => Some(agent_mem_traits::MemoryType::Semantic),
+                "procedural" => Some(agent_mem_traits::MemoryType::Procedural),
+                "working" => Some(agent_mem_traits::MemoryType::Working),
+                _ => None,
             }),
             importance,
             metadata,
         };
-        
+
         // 使用现有的add_memory功能
         match add_memory(
             Extension(repositories.clone()),
             Extension(memory_manager.clone()),
             Json(memory_request),
-        ).await {
+        )
+        .await
+        {
             Ok((_, response)) => {
                 // response.data是MemoryResponse类型，直接使用id字段
                 imported_ids.push(response.data.id.clone());
@@ -2605,9 +2757,9 @@ pub async fn import_memories(
             }
         }
     }
-    
+
     info!("✅ 导入完成: 成功 {} 个, 失败 {} 个", successful, failed);
-    
+
     let response = serde_json::json!({
         "imported_count": successful,
         "failed_count": failed,
@@ -2615,12 +2767,12 @@ pub async fn import_memories(
         "errors": errors,
         "total": memories_array.len(),
     });
-    
+
     Ok(Json(crate::models::ApiResponse::success(response)))
 }
 
 /// 🆕 Phase 4.5: 记忆导出功能
-/// 
+///
 /// 导出记忆为JSON格式，支持按条件过滤
 #[utoipa::path(
     get,
@@ -2643,38 +2795,37 @@ pub async fn export_memories(
     axum::extract::Query(params): axum::extract::Query<HashMap<String, String>>,
 ) -> ServerResult<Json<crate::models::ApiResponse<serde_json::Value>>> {
     info!("📤 开始导出记忆");
-    
+
     let agent_id = params.get("agent_id").cloned();
     let user_id = params.get("user_id").cloned();
     let memory_type = params.get("memory_type").cloned();
-    let min_importance: Option<f32> = params
-        .get("min_importance")
-        .and_then(|v| v.parse().ok());
+    let min_importance: Option<f32> = params.get("min_importance").and_then(|v| v.parse().ok());
     let limit = params
         .get("limit")
         .and_then(|v| v.parse().ok())
         .unwrap_or(1000);
-    
+
     use libsql::{params, Builder};
     let db_path = std::env::var("DATABASE_URL")
         .unwrap_or_else(|_| "file:./data/agentmem.db".to_string())
         .replace("file:", "");
-    
+
     let db = Builder::new_local(&db_path)
         .build()
         .await
         .map_err(|e| ServerError::internal_error(format!("Failed to open database: {}", e)))?;
-    
+
     let conn = db
         .connect()
         .map_err(|e| ServerError::internal_error(format!("Failed to connect: {}", e)))?;
-    
+
     // 构建查询
     let mut query = "SELECT id, agent_id, user_id, content, memory_type, importance, 
                      created_at, last_accessed, access_count, metadata, hash, scope 
-                     FROM memories WHERE is_deleted = 0".to_string();
+                     FROM memories WHERE is_deleted = 0"
+        .to_string();
     let mut query_params: Vec<String> = Vec::new();
-    
+
     if let Some(ref agent_id_val) = agent_id {
         query.push_str(" AND agent_id = ?");
         query_params.push(agent_id_val.clone());
@@ -2691,22 +2842,22 @@ pub async fn export_memories(
         query.push_str(" AND importance >= ?");
     }
     query.push_str(" ORDER BY created_at DESC LIMIT ?");
-    
+
     // 执行查询（简化处理，使用固定参数）
     let mut stmt = conn
         .prepare(&query)
         .await
         .map_err(|e| ServerError::internal_error(format!("Failed to prepare query: {}", e)))?;
-    
+
     // 简化参数处理：只使用limit
     let mut rows = stmt
         .query(params![limit as i64])
         .await
         .map_err(|e| ServerError::internal_error(format!("Failed to execute query: {}", e)))?;
-    
+
     let mut memories = Vec::new();
     use chrono::{DateTime, Utc};
-    
+
     while let Some(row) = rows
         .next()
         .await
@@ -2716,12 +2867,12 @@ pub async fn export_memories(
         let created_at_str = created_at_ts
             .and_then(|ts| DateTime::from_timestamp(ts, 0))
             .map(|dt| dt.to_rfc3339());
-        
+
         let last_accessed_ts: Option<i64> = row.get(7).ok();
         let last_accessed_str = last_accessed_ts
             .and_then(|ts| DateTime::from_timestamp(ts, 0))
             .map(|dt| dt.to_rfc3339());
-        
+
         let memory_json = serde_json::json!({
             "id": row.get::<String>(0).unwrap_or_default(),
             "agent_id": row.get::<String>(1).unwrap_or_default(),
@@ -2736,12 +2887,12 @@ pub async fn export_memories(
             "hash": row.get::<Option<String>>(10).ok().flatten(),
             "scope": row.get::<Option<String>>(11).ok().flatten(),
         });
-        
+
         memories.push(memory_json);
     }
-    
+
     info!("✅ 导出完成: {} 条记忆", memories.len());
-    
+
     let response = serde_json::json!({
         "memories": memories,
         "total": memories.len(),
@@ -2754,12 +2905,12 @@ pub async fn export_memories(
             "limit": limit,
         }
     });
-    
+
     Ok(Json(crate::models::ApiResponse::success(response)))
 }
 
 /// 🆕 Phase 4.4: 记忆清理功能
-/// 
+///
 /// 基于访问模式和重要性清理长期未使用且重要性低的记忆
 #[utoipa::path(
     post,
@@ -2781,48 +2932,53 @@ pub async fn cleanup_memories_endpoint(
     axum::extract::Query(params): axum::extract::Query<HashMap<String, String>>,
 ) -> ServerResult<Json<crate::models::ApiResponse<serde_json::Value>>> {
     info!("🧹 开始记忆清理");
-    
-    let max_age_days = params
-        .get("max_age_days")
-        .and_then(|v| v.parse().ok());
-    let min_importance = params
-        .get("min_importance")
-        .and_then(|v| v.parse().ok());
-    let max_access_count = params
-        .get("max_access_count")
-        .and_then(|v| v.parse().ok());
+
+    let max_age_days = params.get("max_age_days").and_then(|v| v.parse().ok());
+    let min_importance = params.get("min_importance").and_then(|v| v.parse().ok());
+    let max_access_count = params.get("max_access_count").and_then(|v| v.parse().ok());
     let dry_run = params
         .get("dry_run")
         .and_then(|v| v.parse().ok())
         .unwrap_or(false);
-    
-    match cleanup_memories(repositories, max_age_days, min_importance, max_access_count, dry_run).await {
+
+    match cleanup_memories(
+        repositories,
+        max_age_days,
+        min_importance,
+        max_access_count,
+        dry_run,
+    )
+    .await
+    {
         Ok((count, ids)) => {
             let message = if dry_run {
                 format!("预览模式: 找到 {} 条符合条件的记忆", count)
             } else {
                 format!("清理完成: 删除了 {} 条记忆", count)
             };
-            
+
             let response = serde_json::json!({
                 "deleted_count": count,
                 "memory_ids": ids,
                 "dry_run": dry_run,
                 "message": message
             });
-            
+
             info!("✅ {}", message);
             Ok(Json(crate::models::ApiResponse::success(response)))
         }
         Err(e) => {
             warn!("⚠️ 记忆清理失败: {}", e);
-            Err(ServerError::internal_error(format!("Memory cleanup failed: {}", e)))
+            Err(ServerError::internal_error(format!(
+                "Memory cleanup failed: {}",
+                e
+            )))
         }
     }
 }
 
 /// 🆕 Phase 2.11: 批量更新记忆重要性
-/// 
+///
 /// 基于访问模式自动更新多个记忆的重要性
 #[utoipa::path(
     post,
@@ -2841,41 +2997,41 @@ pub async fn batch_update_importance(
     axum::extract::Query(params): axum::extract::Query<HashMap<String, String>>,
 ) -> ServerResult<Json<crate::models::ApiResponse<serde_json::Value>>> {
     info!("🔄 开始批量更新记忆重要性");
-    
+
     let limit = params
         .get("limit")
         .and_then(|v| v.parse().ok())
         .unwrap_or(100);
-    
+
     // 获取需要更新的记忆（访问次数>0或最近访问过）
     use libsql::{params, Builder};
     let db_path = std::env::var("DATABASE_URL")
         .unwrap_or_else(|_| "file:./data/agentmem.db".to_string())
         .replace("file:", "");
-    
+
     let db = Builder::new_local(&db_path)
         .build()
         .await
         .map_err(|e| ServerError::internal_error(format!("Failed to open database: {}", e)))?;
-    
+
     let conn = db
         .connect()
         .map_err(|e| ServerError::internal_error(format!("Failed to connect: {}", e)))?;
-    
+
     let query = "SELECT id, importance, access_count, last_accessed FROM memories WHERE is_deleted = 0 AND (access_count > 0 OR last_accessed IS NOT NULL) LIMIT ?";
     let mut stmt = conn
         .prepare(query)
         .await
         .map_err(|e| ServerError::internal_error(format!("Failed to prepare query: {}", e)))?;
-    
+
     let mut rows = stmt
         .query(params![limit as i64])
         .await
         .map_err(|e| ServerError::internal_error(format!("Failed to execute query: {}", e)))?;
-    
+
     let mut update_count = 0;
     let now = chrono::Utc::now().timestamp();
-    
+
     while let Some(row) = rows
         .next()
         .await
@@ -2885,14 +3041,11 @@ pub async fn batch_update_importance(
         let current_importance: f64 = row.get(1).unwrap_or(0.5);
         let access_count: i64 = row.get(2).unwrap_or(0);
         let last_accessed_ts: Option<i64> = row.get(3).ok();
-        
+
         // 计算新的importance
-        let new_importance = calculate_auto_importance(
-            current_importance,
-            access_count,
-            last_accessed_ts,
-        );
-        
+        let new_importance =
+            calculate_auto_importance(current_importance, access_count, last_accessed_ts);
+
         // 如果importance有变化，更新数据库
         if (new_importance - current_importance as f32).abs() > 0.01 {
             // 使用repositories更新
@@ -2902,27 +3055,27 @@ pub async fn batch_update_importance(
                     agent_mem_traits::AttributeKey::system("importance"),
                     agent_mem_traits::AttributeValue::Number(new_importance as f64),
                 );
-                
+
                 if repositories.memories.update(&updated).await.is_ok() {
                     update_count += 1;
                 }
             }
         }
     }
-    
+
     info!("✅ 批量更新重要性完成: 更新了 {} 条记忆", update_count);
-    
+
     let response = serde_json::json!({
         "updated_count": update_count,
         "total_checked": limit,
         "message": format!("Successfully updated importance for {} memories", update_count)
     });
-    
+
     Ok(Json(crate::models::ApiResponse::success(response)))
 }
 
 /// 性能基准测试端点
-/// 
+///
 /// 🆕 Phase 3.2: 性能测试 - 简单的性能基准测试
 /// 测试搜索、添加、删除等关键操作的性能
 #[utoipa::path(
@@ -2956,26 +3109,30 @@ pub async fn performance_benchmark(
     if operations.contains(&"search") {
         info!("🔍 测试搜索性能...");
         let search_start = Instant::now();
-        
+
         // 执行一个简单的搜索
         let _search_result = memory_manager
-            .search_memories(
-                "test".to_string(),
-                None,
-                None,
-                Some(10),
-                None,
-            )
+            .search_memories("test".to_string(), None, None, Some(10), None)
             .await;
-        
+
         let search_duration = search_start.elapsed();
         let latency_ms = search_duration.as_secs_f64() * 1000.0;
         if let Some(latency_num) = serde_json::Number::from_f64(latency_ms) {
-            results.insert("search_latency_ms".to_string(), serde_json::Value::Number(latency_num));
+            results.insert(
+                "search_latency_ms".to_string(),
+                serde_json::Value::Number(latency_num),
+            );
         }
-        let ops_per_sec = if latency_ms > 0.0 { 1000.0 / latency_ms } else { 0.0 };
+        let ops_per_sec = if latency_ms > 0.0 {
+            1000.0 / latency_ms
+        } else {
+            0.0
+        };
         if let Some(ops_num) = serde_json::Number::from_f64(ops_per_sec) {
-            results.insert("search_operations_per_sec".to_string(), serde_json::Value::Number(ops_num));
+            results.insert(
+                "search_operations_per_sec".to_string(),
+                serde_json::Value::Number(ops_num),
+            );
         }
     }
 
@@ -2983,7 +3140,7 @@ pub async fn performance_benchmark(
     if operations.contains(&"add") {
         info!("➕ 测试添加性能...");
         let add_start = Instant::now();
-        
+
         // 执行一个简单的添加操作
         let test_content = format!("benchmark_test_{}", add_start.elapsed().as_millis());
         let _add_result = memory_manager
@@ -2997,15 +3154,25 @@ pub async fn performance_benchmark(
                 None,
             )
             .await;
-        
+
         let add_duration = add_start.elapsed();
         let latency_ms = add_duration.as_secs_f64() * 1000.0;
         if let Some(latency_num) = serde_json::Number::from_f64(latency_ms) {
-            results.insert("add_latency_ms".to_string(), serde_json::Value::Number(latency_num));
+            results.insert(
+                "add_latency_ms".to_string(),
+                serde_json::Value::Number(latency_num),
+            );
         }
-        let ops_per_sec = if latency_ms > 0.0 { 1000.0 / latency_ms } else { 0.0 };
+        let ops_per_sec = if latency_ms > 0.0 {
+            1000.0 / latency_ms
+        } else {
+            0.0
+        };
         if let Some(ops_num) = serde_json::Number::from_f64(ops_per_sec) {
-            results.insert("add_operations_per_sec".to_string(), serde_json::Value::Number(ops_num));
+            results.insert(
+                "add_operations_per_sec".to_string(),
+                serde_json::Value::Number(ops_num),
+            );
         }
     }
 
@@ -3032,11 +3199,17 @@ pub async fn performance_benchmark(
     );
     let cache_hit_rate = stats_read.cache_hit_rate();
     if let Some(hit_rate_num) = serde_json::Number::from_f64(cache_hit_rate) {
-        results.insert("cache_hit_rate".to_string(), serde_json::Value::Number(hit_rate_num));
+        results.insert(
+            "cache_hit_rate".to_string(),
+            serde_json::Value::Number(hit_rate_num),
+        );
     }
     let avg_latency = stats_read.avg_latency_ms();
     if let Some(latency_num) = serde_json::Number::from_f64(avg_latency) {
-        results.insert("avg_latency_ms".to_string(), serde_json::Value::Number(latency_num));
+        results.insert(
+            "avg_latency_ms".to_string(),
+            serde_json::Value::Number(latency_num),
+        );
     }
 
     let response = serde_json::json!({
@@ -3315,10 +3488,9 @@ pub async fn list_all_memories(
     let total_count = match (agent_id, memory_type) {
         (None, None) => {
             let query = "SELECT COUNT(*) FROM memories WHERE is_deleted = 0";
-            let mut stmt = conn
-                .prepare(query)
-                .await
-                .map_err(|e| ServerError::internal_error(format!("Failed to prepare count: {}", e)))?;
+            let mut stmt = conn.prepare(query).await.map_err(|e| {
+                ServerError::internal_error(format!("Failed to prepare count: {}", e))
+            })?;
             if let Some(count_row) = stmt
                 .query(params![])
                 .await
@@ -3332,10 +3504,9 @@ pub async fn list_all_memories(
         }
         (Some(aid), None) => {
             let query = "SELECT COUNT(*) FROM memories WHERE is_deleted = 0 AND agent_id = ?";
-            let mut stmt = conn
-                .prepare(query)
-                .await
-                .map_err(|e| ServerError::internal_error(format!("Failed to prepare count: {}", e)))?;
+            let mut stmt = conn.prepare(query).await.map_err(|e| {
+                ServerError::internal_error(format!("Failed to prepare count: {}", e))
+            })?;
             if let Some(count_row) = stmt
                 .query(params![aid.clone()])
                 .await
@@ -3349,10 +3520,9 @@ pub async fn list_all_memories(
         }
         (None, Some(mt)) => {
             let query = "SELECT COUNT(*) FROM memories WHERE is_deleted = 0 AND memory_type = ?";
-            let mut stmt = conn
-                .prepare(query)
-                .await
-                .map_err(|e| ServerError::internal_error(format!("Failed to prepare count: {}", e)))?;
+            let mut stmt = conn.prepare(query).await.map_err(|e| {
+                ServerError::internal_error(format!("Failed to prepare count: {}", e))
+            })?;
             if let Some(count_row) = stmt
                 .query(params![mt.clone()])
                 .await
@@ -3366,10 +3536,9 @@ pub async fn list_all_memories(
         }
         (Some(aid), Some(mt)) => {
             let query = "SELECT COUNT(*) FROM memories WHERE is_deleted = 0 AND agent_id = ? AND memory_type = ?";
-            let mut stmt = conn
-                .prepare(query)
-                .await
-                .map_err(|e| ServerError::internal_error(format!("Failed to prepare count: {}", e)))?;
+            let mut stmt = conn.prepare(query).await.map_err(|e| {
+                ServerError::internal_error(format!("Failed to prepare count: {}", e))
+            })?;
             if let Some(count_row) = stmt
                 .query(params![aid.clone(), mt.clone()])
                 .await
@@ -3423,27 +3592,49 @@ mod tests {
     fn test_get_adaptive_threshold_chinese() {
         // 中文短查询应该使用较低阈值
         let threshold1 = get_adaptive_threshold("仓颉");
-        assert!(threshold1 < 0.3, "中文短查询阈值应该 < 0.3, 实际: {}", threshold1);
+        assert!(
+            threshold1 < 0.3,
+            "中文短查询阈值应该 < 0.3, 实际: {}",
+            threshold1
+        );
         assert!(threshold1 >= 0.1, "阈值应该 >= 0.1, 实际: {}", threshold1);
-        
+
         // 中文中等长度查询
         let threshold2 = get_adaptive_threshold("仓颉是造字圣人");
-        assert!(threshold2 < 0.5, "中文中等查询阈值应该 < 0.5, 实际: {}", threshold2);
+        assert!(
+            threshold2 < 0.5,
+            "中文中等查询阈值应该 < 0.5, 实际: {}",
+            threshold2
+        );
     }
 
     #[test]
     fn test_get_adaptive_threshold_english() {
         // 英文短查询（注意：单个单词可能被识别为精确ID，使用带空格的查询）
         let threshold1 = get_adaptive_threshold("test query");
-        assert!(threshold1 >= 0.3, "英文短查询阈值应该 >= 0.3, 实际: {}", threshold1);
-        
+        assert!(
+            threshold1 >= 0.3,
+            "英文短查询阈值应该 >= 0.3, 实际: {}",
+            threshold1
+        );
+
         // 英文中等长度查询
         let threshold2 = get_adaptive_threshold("This is a test query");
-        assert!(threshold2 >= 0.5, "英文中等查询阈值应该 >= 0.5, 实际: {}", threshold2);
-        
+        assert!(
+            threshold2 >= 0.5,
+            "英文中等查询阈值应该 >= 0.5, 实际: {}",
+            threshold2
+        );
+
         // 英文长查询
-        let threshold3 = get_adaptive_threshold("This is a very long test query that should have a higher threshold");
-        assert!(threshold3 >= 0.7, "英文长查询阈值应该 >= 0.7, 实际: {}", threshold3);
+        let threshold3 = get_adaptive_threshold(
+            "This is a very long test query that should have a higher threshold",
+        );
+        assert!(
+            threshold3 >= 0.7,
+            "英文长查询阈值应该 >= 0.7, 实际: {}",
+            threshold3
+        );
     }
 
     #[test]
@@ -3451,7 +3642,7 @@ mod tests {
         // 商品ID格式
         let threshold1 = get_adaptive_threshold("P123456");
         assert_eq!(threshold1, 0.1, "商品ID阈值应该为0.1");
-        
+
         // UUID格式
         let threshold2 = get_adaptive_threshold("550e8400-e29b-41d4-a716-446655440000");
         assert_eq!(threshold2, 0.1, "UUID阈值应该为0.1");

@@ -226,10 +226,9 @@ impl MergeTracker {
             let mut reverse_op = operation.clone();
             reverse_op.primary_id = secondary_id.clone();
             reverse_op.secondary_ids = vec![operation.primary_id.clone()];
-            reverse_op.metadata.insert(
-                "reverse_merge".to_string(),
-                "true".to_string()
-            );
+            reverse_op
+                .metadata
+                .insert("reverse_merge".to_string(), "true".to_string());
 
             secondary_history.add_operation(reverse_op);
         }

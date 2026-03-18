@@ -1,7 +1,7 @@
 //! Event stream implementation for receiving events
 
 use super::Result;
-use agent_mem_performance::telemetry::{MemoryEvent, EventType};
+use agent_mem_performance::telemetry::{EventType, MemoryEvent};
 use std::sync::Arc;
 use std::time::Duration;
 use tokio::sync::{broadcast, RwLock};
@@ -23,7 +23,10 @@ pub struct EventStream {
 
 impl EventStream {
     /// Create a new event stream
-    pub(crate) fn new(rx: broadcast::Receiver<MemoryEvent>, stats: Arc<RwLock<EventBusStats>>) -> Self {
+    pub(crate) fn new(
+        rx: broadcast::Receiver<MemoryEvent>,
+        stats: Arc<RwLock<EventBusStats>>,
+    ) -> Self {
         Self {
             rx,
             filter: None,

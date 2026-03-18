@@ -3,8 +3,8 @@
 // These are simple benchmarks to establish performance baselines.
 // For more comprehensive benchmarking, use criterion.
 
-use crate::{MemvidStore, MemvidConfig, RealMemvidStore};
-use agent_mem_traits::{Memory, Content, AttributeSet, MetadataV4, MemoryId};
+use crate::{MemvidConfig, MemvidStore, RealMemvidStore};
+use agent_mem_traits::{AttributeSet, Content, Memory, MemoryId, MetadataV4};
 
 fn create_test_memory(id: usize) -> Memory {
     Memory {
@@ -41,7 +41,14 @@ mod benchmarks {
         println!("Duration: {:?}", duration);
         println!("Throughput: {:.2} ops/sec", ops_per_sec);
         println!("Target: >10,000 ops/sec");
-        println!("Status: {}", if ops_per_sec > 1000.0 { "✓ PASS" } else { "✗ FAIL" });
+        println!(
+            "Status: {}",
+            if ops_per_sec > 1000.0 {
+                "✓ PASS"
+            } else {
+                "✗ FAIL"
+            }
+        );
 
         // Cleanup
         let _ = tokio::fs::remove_file("bench_sequential.mv2").await;
@@ -74,7 +81,14 @@ mod benchmarks {
         println!("Duration: {:?}", duration);
         println!("Average latency: {:.3} ms", avg_latency_ms);
         println!("Target: <5ms (P95)");
-        println!("Status: {}", if avg_latency_ms < 5.0 { "✓ PASS" } else { "✗ FAIL" });
+        println!(
+            "Status: {}",
+            if avg_latency_ms < 5.0 {
+                "✓ PASS"
+            } else {
+                "✗ FAIL"
+            }
+        );
 
         // Cleanup
         let _ = tokio::fs::remove_file("bench_reads.mv2").await;
@@ -153,7 +167,10 @@ mod benchmarks {
         println!("\n=== Mixed Workload Benchmark ===");
         println!("Operations: 100 (70% read, 20% write, 10% search)");
         println!("Duration: {:?}", duration);
-        println!("Average: {:.3} ms/op", duration.as_secs_f64() * 1000.0 / 100.0);
+        println!(
+            "Average: {:.3} ms/op",
+            duration.as_secs_f64() * 1000.0 / 100.0
+        );
 
         // Cleanup
         let _ = tokio::fs::remove_file("bench_mixed.mv2").await;
@@ -162,11 +179,11 @@ mod benchmarks {
     #[tokio::test]
     async fn bench_batch_add_vs_individual() {
         // Test individual adds
-        let store1 = RealMemvidStore::create("bench_batch_individual.mv2").await.unwrap();
+        let store1 = RealMemvidStore::create("bench_batch_individual.mv2")
+            .await
+            .unwrap();
 
-        let individual_memories: Vec<Memory> = (0..100)
-            .map(|i| create_test_memory(i))
-            .collect();
+        let individual_memories: Vec<Memory> = (0..100).map(|i| create_test_memory(i)).collect();
 
         let start_individual = std::time::Instant::now();
         for memory in &individual_memories {
@@ -175,7 +192,9 @@ mod benchmarks {
         let duration_individual = start_individual.elapsed();
 
         // Test batch add
-        let store2 = RealMemvidStore::create("bench_batch_batch.mv2").await.unwrap();
+        let store2 = RealMemvidStore::create("bench_batch_batch.mv2")
+            .await
+            .unwrap();
 
         let start_batch = std::time::Instant::now();
         let _ = store2.batch_add(&individual_memories).await.unwrap();
@@ -189,7 +208,14 @@ mod benchmarks {
         println!("Batch add: {:?}", duration_batch);
         println!("Speedup: {:.2}x", speedup);
         println!("Target: >5x speedup");
-        println!("Status: {}", if speedup > 2.0 { "✓ PASS" } else { "⚠ IMPROVEMENT NEEDED" });
+        println!(
+            "Status: {}",
+            if speedup > 2.0 {
+                "✓ PASS"
+            } else {
+                "⚠ IMPROVEMENT NEEDED"
+            }
+        );
 
         // Cleanup
         let _ = tokio::fs::remove_file("bench_batch_individual.mv2").await;
@@ -199,11 +225,11 @@ mod benchmarks {
     #[tokio::test]
     async fn bench_batch_get_vs_individual() {
         // First, populate a store
-        let store = RealMemvidStore::create("bench_batch_get.mv2").await.unwrap();
+        let store = RealMemvidStore::create("bench_batch_get.mv2")
+            .await
+            .unwrap();
 
-        let memories: Vec<Memory> = (0..100)
-            .map(|i| create_test_memory(i))
-            .collect();
+        let memories: Vec<Memory> = (0..100).map(|i| create_test_memory(i)).collect();
         store.batch_add(&memories).await.unwrap();
 
         let ids: Vec<MemoryId> = memories.iter().map(|m| m.id.clone()).collect();
@@ -228,7 +254,14 @@ mod benchmarks {
         println!("Batch get: {:?}", duration_batch);
         println!("Speedup: {:.2}x", speedup);
         println!("Target: >2x speedup");
-        println!("Status: {}", if speedup > 1.5 { "✓ PASS" } else { "⚠ IMPROVEMENT NEEDED" });
+        println!(
+            "Status: {}",
+            if speedup > 1.5 {
+                "✓ PASS"
+            } else {
+                "⚠ IMPROVEMENT NEEDED"
+            }
+        );
 
         // Cleanup
         let _ = tokio::fs::remove_file("bench_batch_get.mv2").await;
@@ -241,9 +274,13 @@ mod benchmarks {
             .collect();
 
         // Test individual deletes
-        let store1 = RealMemvidStore::create("bench_batch_del_individual.mv2").await.unwrap();
+        let store1 = RealMemvidStore::create("bench_batch_del_individual.mv2")
+            .await
+            .unwrap();
 
-        let memories: Vec<Memory> = ids.iter().enumerate()
+        let memories: Vec<Memory> = ids
+            .iter()
+            .enumerate()
             .map(|(i, id)| Memory {
                 id: id.clone(),
                 content: Content::text(&format!("Memory {}", i)),
@@ -261,7 +298,9 @@ mod benchmarks {
         let duration_individual = start_individual.elapsed();
 
         // Test batch delete
-        let store2 = RealMemvidStore::create("bench_batch_del_batch.mv2").await.unwrap();
+        let store2 = RealMemvidStore::create("bench_batch_del_batch.mv2")
+            .await
+            .unwrap();
 
         store2.batch_add(&memories).await.unwrap();
         let start_batch = std::time::Instant::now();
@@ -276,7 +315,14 @@ mod benchmarks {
         println!("Batch delete: {:?}", duration_batch);
         println!("Speedup: {:.2}x", speedup);
         println!("Target: >5x speedup");
-        println!("Status: {}", if speedup > 2.0 { "✓ PASS" } else { "⚠ IMPROVEMENT NEEDED" });
+        println!(
+            "Status: {}",
+            if speedup > 2.0 {
+                "✓ PASS"
+            } else {
+                "⚠ IMPROVEMENT NEEDED"
+            }
+        );
 
         // Cleanup
         let _ = tokio::fs::remove_file("bench_batch_del_individual.mv2").await;
@@ -285,7 +331,9 @@ mod benchmarks {
 
     #[tokio::test]
     async fn bench_large_batch_operations() {
-        let store = RealMemvidStore::create("bench_large_batch.mv2").await.unwrap();
+        let store = RealMemvidStore::create("bench_large_batch.mv2")
+            .await
+            .unwrap();
 
         // Test different batch sizes
         let batch_sizes = vec![10, 50, 100, 500, 1000];
@@ -310,8 +358,10 @@ mod benchmarks {
 
             let ops_per_sec = size as f64 / duration.as_secs_f64();
 
-            println!("Batch size: {:>4} | Time: {:>8.2?} | Throughput: {:>8.0} ops/sec",
-                size, duration, ops_per_sec);
+            println!(
+                "Batch size: {:>4} | Time: {:>8.2?} | Throughput: {:>8.0} ops/sec",
+                size, duration, ops_per_sec
+            );
 
             // Cleanup for next iteration
             let ids: Vec<MemoryId> = memories.iter().map(|m| m.id.clone()).collect();
@@ -326,8 +376,8 @@ mod benchmarks {
     // 向量搜索基准测试
     // ============================================================
 
-    use crate::vector_search::{VectorIndex, VectorSearchConfig, EmbeddingGenerator};
     use crate::embedding::LocalEmbedding;
+    use crate::vector_search::{EmbeddingGenerator, VectorIndex, VectorSearchConfig};
     use std::sync::Arc;
 
     #[tokio::test]
@@ -339,10 +389,12 @@ mod benchmarks {
         let start = std::time::Instant::now();
 
         for i in 0..iterations {
-            let _ = index.upsert(
-                &format!("id-{}", i),
-                &format!("Test memory content number {}", i)
-            ).await;
+            let _ = index
+                .upsert(
+                    &format!("id-{}", i),
+                    &format!("Test memory content number {}", i),
+                )
+                .await;
         }
 
         let duration = start.elapsed();
@@ -352,7 +404,10 @@ mod benchmarks {
         println!("Iterations: {}", iterations);
         println!("Total time: {:?}", duration);
         println!("Throughput: {:.0} ops/sec", ops_per_sec);
-        println!("Average: {:.2} ms/op", duration.as_millis() as f64 / iterations as f64);
+        println!(
+            "Average: {:.2} ms/op",
+            duration.as_millis() as f64 / iterations as f64
+        );
     }
 
     #[tokio::test]
@@ -362,10 +417,12 @@ mod benchmarks {
 
         let batch_size = 100;
         let items: Vec<(String, String)> = (0..batch_size)
-            .map(|i| (
-                format!("batch-id-{}", i),
-                format!("Batch test content {}", i)
-            ))
+            .map(|i| {
+                (
+                    format!("batch-id-{}", i),
+                    format!("Batch test content {}", i),
+                )
+            })
             .collect();
 
         let start = std::time::Instant::now();
@@ -378,7 +435,10 @@ mod benchmarks {
         println!("Batch size: {}", batch_size);
         println!("Total time: {:?}", duration);
         println!("Throughput: {:.0} ops/sec", ops_per_sec);
-        println!("Average: {:.2} ms/op", duration.as_millis() as f64 / batch_size as f64);
+        println!(
+            "Average: {:.2} ms/op",
+            duration.as_millis() as f64 / batch_size as f64
+        );
     }
 
     #[tokio::test]
@@ -389,17 +449,21 @@ mod benchmarks {
         let scales = vec![10, 50, 100, 500, 1000];
 
         println!("\n=== Vector Search Scaling Benchmark ===");
-        println!("{:>6} | {:>10} | {:>10} | {:>10}",
-            "Size", "Build(ms)", "Search(ms)", "Throughput");
+        println!(
+            "{:>6} | {:>10} | {:>10} | {:>10}",
+            "Size", "Build(ms)", "Search(ms)", "Throughput"
+        );
         println!("{:-<54}", "");
 
         for size in scales {
             // Build index
             let items: Vec<(String, String)> = (0..size)
-                .map(|i| (
-                    format!("scale-{}-{}", size, i),
-                    format!("Content {} for scale {}", i, size)
-                ))
+                .map(|i| {
+                    (
+                        format!("scale-{}-{}", size, i),
+                        format!("Content {} for scale {}", i, size),
+                    )
+                })
                 .collect();
 
             let build_start = std::time::Instant::now();
@@ -422,7 +486,8 @@ mod benchmarks {
             let search_duration = search_start.elapsed();
             let avg_search_ms = search_duration.as_millis() as f64 / search_iterations as f64;
 
-            println!("{:>6} | {:>10.2} | {:>10.2} | {:>10.0}",
+            println!(
+                "{:>6} | {:>10.2} | {:>10.2} | {:>10.0}",
                 size,
                 build_duration.as_millis(),
                 avg_search_ms,
@@ -443,16 +508,10 @@ mod benchmarks {
 
         // Generate test vectors
         let vectors: Vec<Vec<f32>> = (0..iterations)
-            .map(|_| {
-                (0..dimension)
-                    .map(|_| rand::random::<f32>())
-                    .collect()
-            })
+            .map(|_| (0..dimension).map(|_| rand::random::<f32>()).collect())
             .collect();
 
-        let query_vec: Vec<f32> = (0..dimension)
-            .map(|_| rand::random::<f32>())
-            .collect();
+        let query_vec: Vec<f32> = (0..dimension).map(|_| rand::random::<f32>()).collect();
 
         let start = std::time::Instant::now();
 
@@ -466,7 +525,13 @@ mod benchmarks {
         println!("Dimension: {}", dimension);
         println!("Iterations: {}", iterations);
         println!("Total time: {:?}", duration);
-        println!("Throughput: {:.0} comps/sec", iterations as f64 / duration.as_secs_f64());
-        println!("Average: {:.2} µs/comp", duration.as_micros() as f64 / iterations as f64);
+        println!(
+            "Throughput: {:.0} comps/sec",
+            iterations as f64 / duration.as_secs_f64()
+        );
+        println!(
+            "Average: {:.2} µs/comp",
+            duration.as_micros() as f64 / iterations as f64
+        );
     }
 }

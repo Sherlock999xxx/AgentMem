@@ -405,7 +405,6 @@ async fn demo_graph_statistics(
 
 /// 创建测试记忆
 fn create_memory(id: &str, agent_id: &str, content: &str, user_id: &str) -> Memory {
-    
     let mut memory = Memory::new(
         agent_id.to_string(),
         Some(user_id.to_string()),

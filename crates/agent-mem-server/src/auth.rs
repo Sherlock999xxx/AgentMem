@@ -153,8 +153,10 @@ impl AuthService {
             iat: now.timestamp(),
         };
 
-        let access_token = encode(&Header::default(), &access_claims, &self.encoding_key)
-            .map_err(|e| ServerError::unauthorized(format!("Access token generation failed: {e}")))?;
+        let access_token =
+            encode(&Header::default(), &access_claims, &self.encoding_key).map_err(|e| {
+                ServerError::unauthorized(format!("Access token generation failed: {e}"))
+            })?;
 
         // Generate refresh token
         let refresh_claims = Claims {
@@ -168,7 +170,9 @@ impl AuthService {
         };
 
         let refresh_token = encode(&Header::default(), &refresh_claims, &self.encoding_key)
-            .map_err(|e| ServerError::unauthorized(format!("Refresh token generation failed: {e}")))?;
+            .map_err(|e| {
+                ServerError::unauthorized(format!("Refresh token generation failed: {e}"))
+            })?;
 
         Ok(TokenPair {
             access_token,
@@ -333,13 +337,17 @@ mod tests {
         assert!(!token_pair.refresh_token.is_empty());
 
         // Validate access token
-        let access_claims = auth_service.validate_token(&token_pair.access_token).unwrap();
+        let access_claims = auth_service
+            .validate_token(&token_pair.access_token)
+            .unwrap();
         assert_eq!(access_claims.sub, "user123");
         assert_eq!(access_claims.token_type, "access");
         assert_eq!(access_claims.project_id, Some("project789".to_string()));
 
         // Validate refresh token
-        let refresh_claims = auth_service.validate_token(&token_pair.refresh_token).unwrap();
+        let refresh_claims = auth_service
+            .validate_token(&token_pair.refresh_token)
+            .unwrap();
         assert_eq!(refresh_claims.sub, "user123");
         assert_eq!(refresh_claims.token_type, "refresh");
 
@@ -372,7 +380,9 @@ mod tests {
             .unwrap();
 
         // Validate new access token
-        let new_claims = auth_service.validate_access_token(&new_access_token).unwrap();
+        let new_claims = auth_service
+            .validate_access_token(&new_access_token)
+            .unwrap();
         assert_eq!(new_claims.sub, "user123");
         assert_eq!(new_claims.org_id, "org456");
         assert_eq!(new_claims.roles, vec!["admin".to_string()]);
@@ -403,7 +413,10 @@ mod tests {
         // Try to use access token as refresh token (should fail)
         let result = auth_service.refresh_access_token(&token_pair.access_token, None);
         assert!(result.is_err());
-        assert!(result.unwrap_err().to_string().contains("Invalid token type"));
+        assert!(result
+            .unwrap_err()
+            .to_string()
+            .contains("Invalid token type"));
     }
 
     #[test]

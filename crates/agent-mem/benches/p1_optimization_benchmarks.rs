@@ -10,10 +10,10 @@
 //! cargo bench --bench p1_optimization_benchmarks
 //! ```
 
-use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criterion, Throughput};
 use agent_mem::Memory;
-use tokio::runtime::Runtime;
+use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criterion, Throughput};
 use std::time::Duration;
+use tokio::runtime::Runtime;
 
 /// ✅ P1: 测试克隆优化效果
 ///
@@ -35,7 +35,10 @@ fn bench_clone_optimization(c: &mut Criterion) {
                     // 预先填充数据
                     for i in 0..size {
                         let _ = memory
-                            .add(&format!("测试记忆内容 {} - 这是一个关于编程和技术的描述", i))
+                            .add(&format!(
+                                "测试记忆内容 {} - 这是一个关于编程和技术的描述",
+                                i
+                            ))
                             .await;
                     }
 
@@ -127,9 +130,7 @@ fn bench_search_comprehensive(c: &mut Criterion) {
                     for i in 0..size {
                         let topics = vec!["编程", "Rust", "Python", "AI", "机器学习", "数据库"];
                         let topic = topics[i % topics.len()];
-                        let _ = memory
-                            .add(&format!("关于{}的学习笔记 {}", topic, i))
-                            .await;
+                        let _ = memory.add(&format!("关于{}的学习笔记 {}", topic, i)).await;
                     }
 
                     // 测试搜索（包含文本匹配和向量搜索）
@@ -211,9 +212,8 @@ fn bench_jwt_refresh_tokens(c: &mut Criterion) {
     // 测试 refresh token 性能
     group.bench_function("refresh_access_token", |b| {
         b.iter(|| {
-            let _new_token = black_box(
-                auth_service.refresh_access_token(&token_pair.refresh_token, None)
-            );
+            let _new_token =
+                black_box(auth_service.refresh_access_token(&token_pair.refresh_token, None));
         })
     });
 

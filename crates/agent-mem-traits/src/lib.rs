@@ -12,12 +12,13 @@ pub mod intelligence;
 pub mod llm;
 pub mod memory;
 pub mod memory_store;
+pub mod scheduler;
 pub mod session;
 pub mod storage;
-pub mod scheduler;
 pub mod types;
 
 // Re-export main traits
+pub use abstractions::Memory;
 pub use batch::{
     AdvancedSearch, ArchiveCriteria, BatchMemoryOperations, ConfigurationProvider,
     HealthCheckProvider, MemoryLifecycle, MemoryStats, MemoryUpdate, RetryableOperations,
@@ -37,9 +38,8 @@ pub use memory_store::{
     ProceduralMemoryItem, ProceduralMemoryStore, ProceduralQuery, SemanticMemoryItem,
     SemanticMemoryStore, SemanticQuery, WorkingMemoryItem, WorkingMemoryStore,
 };
-pub use session::SessionManager;
 pub use scheduler::{MemoryScheduler, ScheduleConfig, ScheduleContext};
-pub use abstractions::Memory;
+pub use session::SessionManager;
 pub use storage::{
     EmbeddingVectorStore, GraphResult, GraphStore, HistoryStore, KeyValueStore, LegacyVectorStore,
     VectorStore, VectorStoreStats,

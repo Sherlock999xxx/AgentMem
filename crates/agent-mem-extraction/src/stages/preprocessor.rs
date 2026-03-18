@@ -29,7 +29,8 @@ impl MultimodalPreprocessor {
         let text = text.split_whitespace().collect::<Vec<_>>().join(" ");
 
         // Remove excessive newlines
-        let text = text.lines()
+        let text = text
+            .lines()
             .map(|l| l.trim())
             .filter(|l| !l.is_empty())
             .collect::<Vec<_>>()
@@ -88,7 +89,7 @@ impl ExtractionStage for MultimodalPreprocessor {
             mt
         } else {
             return Err(ExtractionError::ConfigurationError(
-                "Media type not set".to_string()
+                "Media type not set".to_string(),
             ));
         };
 
@@ -131,7 +132,10 @@ impl ExtractionStage for MultimodalPreprocessor {
         // Store preprocessed content in context
         context.set_state("preprocessed_content".to_string(), processed);
 
-        info!("Multimodal preprocessing completed for media type: {}", media_type);
+        info!(
+            "Multimodal preprocessing completed for media type: {}",
+            media_type
+        );
 
         Ok(output)
     }

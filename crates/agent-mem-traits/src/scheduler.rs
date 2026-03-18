@@ -33,7 +33,7 @@
 //! - MemOS: A Memory OS for AI System (ACL 2025)
 //! - AgentMem 2.6 发展路线图
 
-use crate::{Memory, Result, AgentMemError};
+use crate::{AgentMemError, Memory, Result};
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
@@ -159,8 +159,8 @@ impl Default for ScheduleConfig {
             relevance_weight: 0.5,
             importance_weight: 0.3,
             recency_weight: 0.2,
-            decay_rate: 0.1,  // 每天衰减 10%
-            min_score: 0.1,   // 最低分数阈值
+            decay_rate: 0.1, // 每天衰减 10%
+            min_score: 0.1,  // 最低分数阈值
         }
     }
 }
@@ -235,7 +235,7 @@ impl ScheduleConfig {
             relevance_weight: 0.2,
             importance_weight: 0.2,
             recency_weight: 0.6,
-            decay_rate: 0.2,  // 更快的衰减
+            decay_rate: 0.2, // 更快的衰减
             ..Default::default()
         }
     }
@@ -292,8 +292,8 @@ mod tests {
 
     #[test]
     fn test_schedule_context() {
-        let context = ScheduleContext::new(0.8)
-            .with_metadata("key".to_string(), serde_json::json!("value"));
+        let context =
+            ScheduleContext::new(0.8).with_metadata("key".to_string(), serde_json::json!("value"));
 
         assert_eq!(context.relevance_score, 0.8);
         assert_eq!(context.metadata.len(), 1);

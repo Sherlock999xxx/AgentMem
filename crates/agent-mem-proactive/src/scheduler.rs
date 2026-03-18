@@ -248,15 +248,12 @@ impl TaskScheduler {
         let task_type_str = task.task_type.to_string();
         let executor = {
             let executors = self.executors.read().await;
-            executors
-                .get(&task_type_str)
-                .cloned()
-                .ok_or_else(|| {
-                    ProactiveError::TaskExecution(format!(
-                        "No executor for task type: {}",
-                        task_type_str
-                    ))
-                })?
+            executors.get(&task_type_str).cloned().ok_or_else(|| {
+                ProactiveError::TaskExecution(format!(
+                    "No executor for task type: {}",
+                    task_type_str
+                ))
+            })?
         };
 
         let context = TaskExecutionContext {
@@ -431,7 +428,11 @@ impl TaskScheduler {
         Ok(())
     }
 
-    async fn spawn_task_execution(&self, task_id: String, dispatch_kind: DispatchKind) -> Result<()> {
+    async fn spawn_task_execution(
+        &self,
+        task_id: String,
+        dispatch_kind: DispatchKind,
+    ) -> Result<()> {
         let Some(task) = self
             .prepare_task_for_dispatch(&task_id, dispatch_kind)
             .await?
@@ -574,8 +575,12 @@ impl TaskScheduler {
             TriggerType::Event => task.pending_runs.min(available_slots),
             TriggerType::Manual => 0,
             TriggerType::Interval | TriggerType::Cron => {
-                let due = task.next_run.map(|next_run| next_run <= Utc::now()).unwrap_or(false);
-                let batch_ready = !task.task_type.is_batch_task() || self.is_in_batch_window(Utc::now());
+                let due = task
+                    .next_run
+                    .map(|next_run| next_run <= Utc::now())
+                    .unwrap_or(false);
+                let batch_ready =
+                    !task.task_type.is_batch_task() || self.is_in_batch_window(Utc::now());
 
                 if due && batch_ready {
                     1
@@ -597,7 +602,9 @@ impl TaskScheduler {
                 .map(|minutes| from + chrono::TimeDelta::minutes(minutes as i64))),
             TriggerType::Cron => {
                 let cron_expr = schedule.cron.as_deref().ok_or_else(|| {
-                    ProactiveError::InvalidConfig("Cron trigger missing cron expression".to_string())
+                    ProactiveError::InvalidConfig(
+                        "Cron trigger missing cron expression".to_string(),
+                    )
                 })?;
                 let mut cron = Cron::new(cron_expr);
                 let cron = cron.parse().map_err(|err| {
@@ -607,12 +614,14 @@ impl TaskScheduler {
                     ))
                 })?;
 
-                cron.find_next_occurrence(&from, false).map(Some).map_err(|err| {
-                    ProactiveError::InvalidConfig(format!(
-                        "Failed to compute next cron occurrence for `{}`: {}",
-                        cron_expr, err
-                    ))
-                })
+                cron.find_next_occurrence(&from, false)
+                    .map(Some)
+                    .map_err(|err| {
+                        ProactiveError::InvalidConfig(format!(
+                            "Failed to compute next cron occurrence for `{}`: {}",
+                            cron_expr, err
+                        ))
+                    })
             }
             TriggerType::Event | TriggerType::Manual => Ok(None),
         }
@@ -628,8 +637,8 @@ impl TaskScheduler {
             return true;
         };
 
-        let current = NaiveTime::from_hms_opt(now.hour(), now.minute(), 0)
-            .unwrap_or_else(|| now.time());
+        let current =
+            NaiveTime::from_hms_opt(now.hour(), now.minute(), 0).unwrap_or_else(|| now.time());
 
         if start <= end {
             current >= start && current <= end
@@ -695,8 +704,8 @@ impl std::str::FromStr for ProactiveTask {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use chrono::TimeDelta;
     use crate::TaskStatus;
+    use chrono::TimeDelta;
     use tokio::time::sleep;
 
     struct MockExecutor {
@@ -716,7 +725,8 @@ mod tests {
             }
 
             let started_at = Utc::now();
-            let mut result = TaskResult::new("test-1".to_string(), self.task_type.clone(), started_at);
+            let mut result =
+                TaskResult::new("test-1".to_string(), self.task_type.clone(), started_at);
             result.completed(1, 1);
             Ok(result)
         }
@@ -745,7 +755,10 @@ mod tests {
     async fn test_schedule_task_with_cron_sets_next_run() {
         let scheduler = TaskScheduler::with_default_config();
         let task_id = scheduler
-            .schedule_task(ProactiveTask::HealthCheck, TaskSchedule::cron("*/5 * * * *"))
+            .schedule_task(
+                ProactiveTask::HealthCheck,
+                TaskSchedule::cron("*/5 * * * *"),
+            )
             .await
             .unwrap();
 

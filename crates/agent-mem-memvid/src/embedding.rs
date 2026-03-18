@@ -4,7 +4,7 @@
 //! 用于支持语义搜索和向量相似度查询。
 
 use crate::error::{MemvidError, Result};
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
 /// 文本嵌入向量
 pub type EmbeddingVector = Vec<f32>;
@@ -44,11 +44,16 @@ impl crate::vector_search::EmbeddingGenerator for OpenAIEmbedding {
         use reqwest::header;
         use std::io;
 
-        let runtime = tokio::runtime::Runtime::new()
-            .map_err(|e| MemvidError::Io(io::Error::new(io::ErrorKind::Other, format!("Failed to create runtime: {}", e))))?;
+        let runtime = tokio::runtime::Runtime::new().map_err(|e| {
+            MemvidError::Io(io::Error::new(
+                io::ErrorKind::Other,
+                format!("Failed to create runtime: {}", e),
+            ))
+        })?;
 
         runtime.block_on(async {
-            let response = self.client
+            let response = self
+                .client
                 .post("https://api.openai.com/v1/embeddings")
                 .header(header::AUTHORIZATION, format!("Bearer {}", self.api_key))
                 .header(header::CONTENT_TYPE, "application/json")
@@ -58,7 +63,12 @@ impl crate::vector_search::EmbeddingGenerator for OpenAIEmbedding {
                 }))
                 .send()
                 .await
-                .map_err(|e| MemvidError::Io(io::Error::new(io::ErrorKind::Other, format!("OpenAI API error: {}", e))))?;
+                .map_err(|e| {
+                    MemvidError::Io(io::Error::new(
+                        io::ErrorKind::Other,
+                        format!("OpenAI API error: {}", e),
+                    ))
+                })?;
 
             if !response.status().is_success() {
                 return Err(MemvidError::Io(io::Error::new(
@@ -67,14 +77,19 @@ impl crate::vector_search::EmbeddingGenerator for OpenAIEmbedding {
                 )));
             }
 
-            let json: serde_json::Value = response
-                .json()
-                .await
-                .map_err(|e| MemvidError::Io(io::Error::new(io::ErrorKind::Other, format!("Failed to parse JSON: {}", e))))?;
+            let json: serde_json::Value = response.json().await.map_err(|e| {
+                MemvidError::Io(io::Error::new(
+                    io::ErrorKind::Other,
+                    format!("Failed to parse JSON: {}", e),
+                ))
+            })?;
 
-            let embedding = json["data"][0]["embedding"]
-                .as_array()
-                .ok_or_else(|| MemvidError::Io(io::Error::new(io::ErrorKind::Other, "Invalid embedding format")))?;
+            let embedding = json["data"][0]["embedding"].as_array().ok_or_else(|| {
+                MemvidError::Io(io::Error::new(
+                    io::ErrorKind::Other,
+                    "Invalid embedding format",
+                ))
+            })?;
 
             let vector: EmbeddingVector = embedding
                 .iter()

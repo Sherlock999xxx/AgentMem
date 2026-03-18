@@ -38,14 +38,14 @@
 //! # }
 //! ```
 
+pub mod advanced_search;
+pub mod conversion;
+pub mod embedding;
+pub mod error;
+pub mod search;
 pub mod store;
 pub mod store_trait;
-pub mod conversion;
-pub mod search;
 pub mod timeline;
-pub mod error;
-pub mod advanced_search;
-pub mod embedding;
 pub mod vector_search;
 
 #[cfg(test)]
@@ -58,22 +58,28 @@ mod integration_tests;
 pub mod memvid_store;
 
 // Re-exports
-pub use error::{MemvidError, Result};
 pub use advanced_search::{AdvancedSearch, SearchOptions, SearchResult as AdvancedSearchResult};
+pub use error::{MemvidError, Result};
 
 // Vector search exports
-pub use embedding::{EmbeddingVector, OpenAIEmbedding, LocalEmbedding};
 pub use embedding::{cosine_similarity, euclidean_distance, SimilarityResult, SimilarityType};
-pub use vector_search::{VectorSearchConfig, VectorSearchResult, VectorIndex, HybridSearcher, HybridSearchResult, EmbeddingGenerator};
+pub use embedding::{EmbeddingVector, LocalEmbedding, OpenAIEmbedding};
+pub use vector_search::{
+    EmbeddingGenerator, HybridSearchResult, HybridSearcher, VectorIndex, VectorSearchConfig,
+    VectorSearchResult,
+};
 
 // Real MemVid exports (main API)
 pub use memvid_store::{
-    MemvidStore,           // Public facade (implements MemoryProvider trait)
-    MemvidStoreImpl,       // Internal implementation
-    Memvid, PutOptions, SearchRequest, TimelineQuery, OpenReadOptions,
+    Memvid,
+    MemvidStore,     // Public facade (implements MemoryProvider trait)
+    MemvidStoreImpl, // Internal implementation
+    OpenReadOptions,
+    PutOptions,
+    SearchRequest,
+    TimelineQuery,
     VersionInfo,
 };
-
 
 /// MemVid store configuration
 #[derive(Debug, Clone)]

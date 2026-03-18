@@ -60,13 +60,12 @@ impl RetrievalModule {
             if let Some(cache) = &orchestrator.query_embedding_cache {
                 let processed_query_clone = processed_query.clone();
                 let embedder_clone = embedder.clone();
-                cache.get_or_generate(
-                    &processed_query_clone,
-                    move |query| async move {
+                cache
+                    .get_or_generate(&processed_query_clone, move |query| async move {
                         // 缓存未命中，生成嵌入
                         UtilsModule::generate_query_embedding(&query, embedder_clone.as_ref()).await
-                    }
-                ).await?
+                    })
+                    .await?
             } else {
                 // 缓存未启用，直接生成
                 UtilsModule::generate_query_embedding(&processed_query, embedder.as_ref()).await?
@@ -222,13 +221,12 @@ impl RetrievalModule {
             if let Some(cache) = &orchestrator.query_embedding_cache {
                 let query_clone = query.clone();
                 let embedder_clone = embedder.clone();
-                cache.get_or_generate(
-                    &query_clone,
-                    move |q| async move {
+                cache
+                    .get_or_generate(&query_clone, move |q| async move {
                         // 缓存未命中，生成嵌入
                         UtilsModule::generate_query_embedding(&q, embedder_clone.as_ref()).await
-                    }
-                ).await?
+                    })
+                    .await?
             } else {
                 // 缓存未启用，直接生成
                 UtilsModule::generate_query_embedding(&query, embedder.as_ref()).await?
@@ -302,7 +300,7 @@ impl RetrievalModule {
             if let Some(manager) = &orchestrator.memory_manager {
                 use futures::future;
                 use std::sync::Arc;
-                
+
                 // 并行检查每个记忆是否存在
                 let check_futures: Vec<_> = memory_items
                     .iter()
@@ -312,15 +310,17 @@ impl RetrievalModule {
                         async move {
                             // 使用MemoryManager的get_memory方法检查记忆是否存在
                             // get_memory内部会检查is_deleted=0
-                            manager.get_memory(&id).await
+                            manager
+                                .get_memory(&id)
+                                .await
                                 .map(|opt| opt.is_some())
                                 .unwrap_or(false)
                         }
                     })
                     .collect();
-                
+
                 let check_results = future::join_all(check_futures).await;
-                
+
                 // 过滤有效结果（只保留在LibSQL中存在且未删除的记忆）
                 memory_items = memory_items
                     .into_iter()
@@ -334,7 +334,7 @@ impl RetrievalModule {
                         }
                     })
                     .collect();
-                
+
                 info!("🔄 验证完成: 过滤后剩余 {} 条有效结果", memory_items.len());
             }
 

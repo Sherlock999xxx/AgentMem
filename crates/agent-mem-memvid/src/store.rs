@@ -1,10 +1,10 @@
 //! MemVid store implementation
 
+use crate::conversion::{FrameData, MemoryConverter};
 use crate::error::{MemvidError, Result};
-use crate::conversion::{MemoryConverter, FrameData};
 use crate::store_trait::MemoryStore;
 use crate::MemvidConfig;
-use agent_mem_traits::{Memory, MemoryId, Filters};
+use agent_mem_traits::{Filters, Memory, MemoryId};
 use async_trait::async_trait;
 use std::num::NonZeroUsize;
 use std::path::Path;
@@ -46,20 +46,15 @@ impl MemvidStore {
         info!("Creating MemVid store at: {}", config.path);
 
         // Create cache with NonZeroUsize
-        let cache_size = NonZeroUsize::new(config.cache_size)
-            .unwrap_or(NonZeroUsize::new(1000).unwrap());
-        let cache = Arc::new(RwLock::new(
-            lru::LruCache::new(cache_size)
-        ));
+        let cache_size =
+            NonZeroUsize::new(config.cache_size).unwrap_or(NonZeroUsize::new(1000).unwrap());
+        let cache = Arc::new(RwLock::new(lru::LruCache::new(cache_size)));
 
         // Initialize the MemVid file
         // TODO: Integrate with actual memvid-core API
         Self::initialize_file(&config.path).await?;
 
-        let store = Self {
-            config,
-            cache,
-        };
+        let store = Self { config, cache };
 
         info!("MemVid store created successfully");
         Ok(store)
@@ -79,16 +74,11 @@ impl MemvidStore {
             )));
         }
 
-        let cache_size = NonZeroUsize::new(config.cache_size)
-            .unwrap_or(NonZeroUsize::new(1000).unwrap());
-        let cache = Arc::new(RwLock::new(
-            lru::LruCache::new(cache_size)
-        ));
+        let cache_size =
+            NonZeroUsize::new(config.cache_size).unwrap_or(NonZeroUsize::new(1000).unwrap());
+        let cache = Arc::new(RwLock::new(lru::LruCache::new(cache_size)));
 
-        let store = Self {
-            config,
-            cache,
-        };
+        let store = Self { config, cache };
 
         info!("MemVid store opened successfully");
         Ok(store)
@@ -222,7 +212,8 @@ impl MemvidStore {
         // TODO: Use memvid-core search API
         let frames = Self::list_frames(&self.config.path, filters).await?;
 
-        let memories: Result<Vec<Memory>> = frames.into_iter()
+        let memories: Result<Vec<Memory>> = frames
+            .into_iter()
             .map(|frame| MemoryConverter::frame_to_memory(&frame))
             .collect();
 
@@ -296,7 +287,7 @@ impl MemvidStore {
         // Placeholder: Rebuild file without the frame
         let temp_path = format!("{}.tmp", path);
 
-        use tokio::io::{AsyncBufReadExt, BufReader, AsyncWriteExt};
+        use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
 
         // Read and filter
         let input = tokio::fs::File::open(path).await?;
@@ -396,7 +387,7 @@ impl MemoryStore for MemvidStore {
 mod tests {
     use super::*;
     use crate::MemvidConfig;
-    use agent_mem_traits::{MetadataV4, Content, AttributeSet};
+    use agent_mem_traits::{AttributeSet, Content, MetadataV4};
 
     #[tokio::test]
     async fn test_create_store() {

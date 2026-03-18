@@ -2,7 +2,6 @@
 //!
 //! 测试智能处理模块的各种功能
 
-
 #[cfg(test)]
 mod intelligence_tests {
     use super::*;
@@ -90,11 +89,7 @@ mod intelligence_tests {
     /// 测试批处理事实提取
     #[tokio::test]
     async fn test_batch_fact_extraction() {
-        let contents = vec![
-            "我喜欢编程",
-            "我住在中国",
-            "我是一名开发者",
-        ];
+        let contents = vec!["我喜欢编程", "我住在中国", "我是一名开发者"];
 
         assert_eq!(contents.len(), 3);
         assert!(contents.iter().all(|c| !c.is_empty()));
@@ -221,17 +216,10 @@ mod performance_tests {
     #[tokio::test]
     #[ignore]
     async fn test_concurrent_fact_extraction() {
-        let contents = vec![
-            "测试内容1",
-            "测试内容2",
-            "测试内容3",
-        ];
+        let contents = vec!["测试内容1", "测试内容2", "测试内容3"];
 
         // 模拟并发处理
-        let results: Vec<_> = contents
-            .iter()
-            .map(|c| c.len())
-            .collect();
+        let results: Vec<_> = contents.iter().map(|c| c.len()).collect();
 
         assert_eq!(results.len(), 3);
     }

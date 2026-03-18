@@ -88,10 +88,7 @@ async fn test_memory_integrator_inject_memories() {
     let formatted = integrator.inject_memories_to_prompt(&memories);
 
     // 4. 验证格式化结果（极简格式：序号 + 内容）
-    assert!(
-        formatted.contains("1."),
-        "Should contain memory number"
-    );
+    assert!(formatted.contains("1."), "Should contain memory number");
     assert!(
         formatted.contains("coffee"),
         "Should contain memory content"

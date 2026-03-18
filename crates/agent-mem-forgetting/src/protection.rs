@@ -272,7 +272,9 @@ mod tests {
     #[tokio::test]
     async fn test_set_protection() {
         let protection = MemoryProtection::new();
-        protection.set_protection("mem-1".to_string(), ProtectionLevel::High).await;
+        protection
+            .set_protection("mem-1".to_string(), ProtectionLevel::High)
+            .await;
 
         let level = protection.get_protection("mem-1").await;
         assert_eq!(level, ProtectionLevel::High);
@@ -288,7 +290,9 @@ mod tests {
     #[tokio::test]
     async fn test_is_protected() {
         let protection = MemoryProtection::new();
-        protection.set_protection("mem-1".to_string(), ProtectionLevel::Low).await;
+        protection
+            .set_protection("mem-1".to_string(), ProtectionLevel::Low)
+            .await;
 
         assert!(protection.is_protected("mem-1").await);
         assert!(!protection.is_protected("unprotected").await);
@@ -297,7 +301,9 @@ mod tests {
     #[tokio::test]
     async fn test_remove_protection() {
         let protection = MemoryProtection::new();
-        protection.set_protection("mem-1".to_string(), ProtectionLevel::High).await;
+        protection
+            .set_protection("mem-1".to_string(), ProtectionLevel::High)
+            .await;
 
         assert!(protection.is_protected("mem-1").await);
 
@@ -308,7 +314,9 @@ mod tests {
     #[tokio::test]
     async fn test_permanent_protection_check() {
         let protection = MemoryProtection::new();
-        protection.set_protection("mem-1".to_string(), ProtectionLevel::Critical).await;
+        protection
+            .set_protection("mem-1".to_string(), ProtectionLevel::Critical)
+            .await;
 
         assert!(protection.is_permanently_protected("mem-1").await);
         assert!(!protection.is_permanently_protected("unprotected").await);
@@ -317,7 +325,9 @@ mod tests {
     #[tokio::test]
     async fn test_effective_forgetting_time() {
         let protection = MemoryProtection::new();
-        protection.set_protection("mem-1".to_string(), ProtectionLevel::Medium).await;
+        protection
+            .set_protection("mem-1".to_string(), ProtectionLevel::Medium)
+            .await;
 
         // Medium protection = 5x multiplier
         let time = protection.effective_forgetting_time("mem-1", 10.0).await;
@@ -327,7 +337,9 @@ mod tests {
     #[tokio::test]
     async fn test_permanent_forgetting_time() {
         let protection = MemoryProtection::new();
-        protection.set_protection("mem-1".to_string(), ProtectionLevel::Critical).await;
+        protection
+            .set_protection("mem-1".to_string(), ProtectionLevel::Critical)
+            .await;
 
         let time = protection.effective_forgetting_time("mem-1", 10.0).await;
         assert_eq!(time, f64::MAX);
@@ -336,9 +348,15 @@ mod tests {
     #[tokio::test]
     async fn test_by_level() {
         let protection = MemoryProtection::new();
-        protection.set_protection("mem-1".to_string(), ProtectionLevel::High).await;
-        protection.set_protection("mem-2".to_string(), ProtectionLevel::High).await;
-        protection.set_protection("mem-3".to_string(), ProtectionLevel::Low).await;
+        protection
+            .set_protection("mem-1".to_string(), ProtectionLevel::High)
+            .await;
+        protection
+            .set_protection("mem-2".to_string(), ProtectionLevel::High)
+            .await;
+        protection
+            .set_protection("mem-3".to_string(), ProtectionLevel::Low)
+            .await;
 
         let high_memories = protection.by_level(ProtectionLevel::High).await;
         assert_eq!(high_memories.len(), 2);
@@ -349,8 +367,12 @@ mod tests {
     #[tokio::test]
     async fn test_clear_all() {
         let protection = MemoryProtection::new();
-        protection.set_protection("mem-1".to_string(), ProtectionLevel::High).await;
-        protection.set_protection("mem-2".to_string(), ProtectionLevel::Low).await;
+        protection
+            .set_protection("mem-1".to_string(), ProtectionLevel::High)
+            .await;
+        protection
+            .set_protection("mem-2".to_string(), ProtectionLevel::Low)
+            .await;
 
         assert_eq!(protection.protected_count().await, 2);
 
@@ -361,8 +383,12 @@ mod tests {
     #[tokio::test]
     async fn test_all_protections() {
         let protection = MemoryProtection::new();
-        protection.set_protection("mem-1".to_string(), ProtectionLevel::High).await;
-        protection.set_protection("mem-2".to_string(), ProtectionLevel::Low).await;
+        protection
+            .set_protection("mem-1".to_string(), ProtectionLevel::High)
+            .await;
+        protection
+            .set_protection("mem-2".to_string(), ProtectionLevel::Low)
+            .await;
 
         let all = protection.all_protections().await;
         assert_eq!(all.len(), 2);
@@ -378,7 +404,9 @@ mod tests {
     #[tokio::test]
     async fn test_clone() {
         let protection = MemoryProtection::new();
-        protection.set_protection("mem-1".to_string(), ProtectionLevel::High).await;
+        protection
+            .set_protection("mem-1".to_string(), ProtectionLevel::High)
+            .await;
 
         let cloned = protection.clone();
         assert!(cloned.is_protected("mem-1").await);

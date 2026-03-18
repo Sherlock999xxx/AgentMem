@@ -70,9 +70,7 @@ impl From<MemvidError> for AgentMemError {
             MemvidError::MemoryNotFound(id) => {
                 AgentMemError::memory_error(format!("Memory not found: {}", id))
             }
-            MemvidError::Io(e) => {
-                AgentMemError::storage_error(format!("I/O: {}", e))
-            }
+            MemvidError::Io(e) => AgentMemError::storage_error(format!("I/O: {}", e)),
             _ => AgentMemError::storage_error(err.to_string()),
         }
     }

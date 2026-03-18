@@ -131,13 +131,19 @@ impl QuotaManager {
 
         // Check quotas
         if usage.requests_this_minute >= limits.max_requests_per_minute {
-            return Err(ServerError::quota_exceeded("Rate limit exceeded: too many requests per minute"));
+            return Err(ServerError::quota_exceeded(
+                "Rate limit exceeded: too many requests per minute",
+            ));
         }
         if usage.requests_this_hour >= limits.max_requests_per_hour {
-            return Err(ServerError::quota_exceeded("Rate limit exceeded: too many requests per hour"));
+            return Err(ServerError::quota_exceeded(
+                "Rate limit exceeded: too many requests per hour",
+            ));
         }
         if usage.requests_this_day >= limits.max_requests_per_day {
-            return Err(ServerError::quota_exceeded("Rate limit exceeded: too many requests per day"));
+            return Err(ServerError::quota_exceeded(
+                "Rate limit exceeded: too many requests per day",
+            ));
         }
 
         // Increment counters
@@ -228,13 +234,13 @@ impl Default for QuotaManager {
 }
 
 /// Quota checking middleware
-/// 
+///
 /// This middleware enforces rate limiting and quota checks per organization.
 /// It checks:
 /// - Requests per minute
 /// - Requests per hour  
 /// - Requests per day
-/// 
+///
 /// If quota is exceeded, returns a 429 Too Many Requests error.
 pub async fn quota_middleware(request: Request, next: Next) -> Result<Response, ServerError> {
     // Extract authenticated user

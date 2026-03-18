@@ -10,13 +10,16 @@
 //! cargo test --package agent-mem-server --test integration_test_p1
 //! ```
 
-use std::collections::HashMap;
 use agent_mem_traits::CoreMemoryStore;
+use std::collections::HashMap;
 
 // ==================== Test Utilities ====================
 
 /// Test helper: Create test database connection
-async fn create_test_store() -> (agent_mem_storage::backends::libsql_core::LibSqlCoreStore, tempfile::TempPath) {
+async fn create_test_store() -> (
+    agent_mem_storage::backends::libsql_core::LibSqlCoreStore,
+    tempfile::TempPath,
+) {
     use libsql::Builder;
     use tempfile::NamedTempFile;
 
@@ -47,9 +50,12 @@ async fn create_test_store() -> (agent_mem_storage::backends::libsql_core::LibSq
         )
         "#,
         libsql::params![],
-    ).await.expect("Failed to create table");
+    )
+    .await
+    .expect("Failed to create table");
 
-    let store = agent_mem_storage::backends::libsql_core::LibSqlCoreStore::new(std::sync::Arc::new(db));
+    let store =
+        agent_mem_storage::backends::libsql_core::LibSqlCoreStore::new(std::sync::Arc::new(db));
 
     // Return the store and keep the temp path alive
     (store, temp_path)
@@ -60,7 +66,7 @@ async fn create_test_store() -> (agent_mem_storage::backends::libsql_core::LibSq
 #[tokio::test]
 async fn test_validation_add_memory_valid() {
     use agent_mem_server::middleware::validation::validate_add_memory_request;
-    
+
     let result = validate_add_memory_request(
         "Valid test content".to_string(),
         None,
@@ -69,14 +75,14 @@ async fn test_validation_add_memory_valid() {
         Some("test-agent".to_string()),
         None,
     );
-    
+
     assert!(result.is_ok(), "Valid request should pass validation");
 }
 
 #[tokio::test]
 async fn test_validation_add_memory_html_rejection() {
     use agent_mem_server::middleware::validation::validate_add_memory_request;
-    
+
     let dangerous_contents = vec![
         "<script>alert('xss')</script>",
         "<iframe src='evil.com'></iframe>",
@@ -84,53 +90,43 @@ async fn test_validation_add_memory_html_rejection() {
         "onclick='evil()'",
         "onload='evil()'",
     ];
-    
+
     for content in dangerous_contents {
-        let result = validate_add_memory_request(
-            content.to_string(),
-            None,
-            None,
-            None,
-            None,
-            None,
+        let result = validate_add_memory_request(content.to_string(), None, None, None, None, None);
+
+        assert!(
+            result.is_err(),
+            "Content with '{}' should be rejected",
+            content
         );
-        
-        assert!(result.is_err(), "Content with '{}' should be rejected", content);
     }
 }
 
 #[tokio::test]
 async fn test_validation_payload_size_limit() {
     use agent_mem_server::middleware::validation::validate_add_memory_request;
-    
+
     // Create a request that exceeds 1MB
     let large_content = "a".repeat(1_100_000); // Exceeds 1MB
-    
+
     let mut metadata = HashMap::new();
     for i in 0..100 {
         metadata.insert(format!("key{}", i), "value".repeat(1000));
     }
-    
-    let result = validate_add_memory_request(
-        large_content,
-        Some(metadata),
-        None,
-        None,
-        None,
-        None,
-    );
-    
+
+    let result = validate_add_memory_request(large_content, Some(metadata), None, None, None, None);
+
     assert!(result.is_err(), "Payload exceeding 1MB should be rejected");
 }
 
 #[tokio::test]
 async fn test_validation_metadata_constraints() {
     use agent_mem_server::middleware::validation::validate_add_memory_request;
-    
+
     // Test metadata key validation
     let mut metadata = HashMap::new();
     metadata.insert("invalid key!".to_string(), "value".to_string());
-    
+
     let result = validate_add_memory_request(
         "Valid content".to_string(),
         Some(metadata),
@@ -139,15 +135,15 @@ async fn test_validation_metadata_constraints() {
         None,
         None,
     );
-    
+
     assert!(result.is_err(), "Invalid metadata key should be rejected");
-    
+
     // Test metadata entry count limit
     let mut metadata = HashMap::new();
     for i in 0..51 {
         metadata.insert(format!("key{}", i), "value".to_string());
     }
-    
+
     let result = validate_add_memory_request(
         "Valid content".to_string(),
         Some(metadata),
@@ -156,14 +152,17 @@ async fn test_validation_metadata_constraints() {
         None,
         None,
     );
-    
-    assert!(result.is_err(), "Too many metadata entries should be rejected");
+
+    assert!(
+        result.is_err(),
+        "Too many metadata entries should be rejected"
+    );
 }
 
 #[tokio::test]
 async fn test_validation_tag_constraints() {
     use agent_mem_server::middleware::validation::validate_add_memory_request;
-    
+
     // Test invalid tag characters
     let result = validate_add_memory_request(
         "Valid content".to_string(),
@@ -173,9 +172,9 @@ async fn test_validation_tag_constraints() {
         None,
         None,
     );
-    
+
     assert!(result.is_err(), "Invalid tag should be rejected");
-    
+
     // Test too many tags
     let tags: Vec<String> = (0..21).map(|i| format!("tag{}", i)).collect();
     let result = validate_add_memory_request(
@@ -186,7 +185,7 @@ async fn test_validation_tag_constraints() {
         None,
         None,
     );
-    
+
     assert!(result.is_err(), "Too many tags should be rejected");
 }
 
@@ -200,7 +199,7 @@ async fn test_validation_and_database_integration() {
     use agent_mem_server::middleware::validation::validate_add_memory_request;
 
     let (store, _temp_path) = create_test_store().await;
-    
+
     // Test valid request
     let valid_result = validate_add_memory_request(
         "Integration test content".to_string(),
@@ -210,9 +209,9 @@ async fn test_validation_and_database_integration() {
         Some("integration-test-agent".to_string()),
         None,
     );
-    
+
     assert!(valid_result.is_ok(), "Valid request should pass validation");
-    
+
     // Convert to CoreMemoryItem and store
     let item = agent_mem_traits::CoreMemoryItem {
         id: uuid::Uuid::new_v4().to_string(),
@@ -226,10 +225,13 @@ async fn test_validation_and_database_integration() {
         created_at: chrono::Utc::now(),
         updated_at: chrono::Utc::now(),
     };
-    
+
     let store_result = store.set_value(item).await;
-    assert!(store_result.is_ok(), "Should be able to store validated item");
-    
+    assert!(
+        store_result.is_ok(),
+        "Should be able to store validated item"
+    );
+
     // Retrieve and verify
     let retrieved = store.get_value("integration-user", "integration-key").await;
     assert!(retrieved.is_ok(), "Should be able to retrieve stored item");
@@ -240,10 +242,10 @@ async fn test_validation_and_database_integration() {
 async fn test_concurrent_validated_requests() {
     use agent_mem_server::middleware::validation::validate_add_memory_request;
     use tokio::task::JoinSet;
-    
+
     // Simulate concurrent validated requests
     let mut join_set = JoinSet::new();
-    
+
     for i in 0..10 {
         join_set.spawn(async move {
             validate_add_memory_request(
@@ -256,15 +258,18 @@ async fn test_concurrent_validated_requests() {
             )
         });
     }
-    
+
     let mut success_count = 0;
     while let Some(result) = join_set.join_next().await {
         assert!(result.is_ok(), "Task should not panic");
         assert!(result.unwrap().is_ok(), "Each request should be valid");
         success_count += 1;
     }
-    
-    assert_eq!(success_count, 10, "All 10 concurrent requests should succeed");
+
+    assert_eq!(
+        success_count, 10,
+        "All 10 concurrent requests should succeed"
+    );
 }
 
 #[tokio::test]
@@ -272,7 +277,7 @@ async fn test_end_to_end_workflow() {
     use agent_mem_server::middleware::validation::validate_add_memory_request;
 
     let (store, _temp_path) = create_test_store().await;
-    
+
     // Step 1: Validate input
     let validation_result = validate_add_memory_request(
         "End-to-end test content".to_string(),
@@ -286,9 +291,9 @@ async fn test_end_to_end_workflow() {
         Some("e2e-agent".to_string()),
         Some("e2e-session".to_string()),
     );
-    
+
     assert!(validation_result.is_ok(), "Validation should succeed");
-    
+
     // Step 2: Store in database
     let item = agent_mem_traits::CoreMemoryItem {
         id: uuid::Uuid::new_v4().to_string(),
@@ -302,22 +307,28 @@ async fn test_end_to_end_workflow() {
         created_at: chrono::Utc::now(),
         updated_at: chrono::Utc::now(),
     };
-    
-    store.set_value(item.clone()).await.expect("Store should succeed");
-    
+
+    store
+        .set_value(item.clone())
+        .await
+        .expect("Store should succeed");
+
     // Step 3: Retrieve from database
     let retrieved = store.get_value("e2e-user", "e2e-key").await;
     assert!(retrieved.is_ok(), "Retrieval should succeed");
-    
+
     let retrieved_item = retrieved.unwrap().expect("Item should exist");
     assert_eq!(retrieved_item.key, "e2e-key", "Retrieved key should match");
-    assert_eq!(retrieved_item.value, "End-to-end test value", "Retrieved value should match");
-    
+    assert_eq!(
+        retrieved_item.value, "End-to-end test value",
+        "Retrieved value should match"
+    );
+
     // Step 4: Query all (tests cache)
     let all_items = store.get_all("e2e-user").await;
     assert!(all_items.is_ok(), "Get all should succeed");
     assert_eq!(all_items.unwrap().len(), 1, "Should have exactly 1 item");
-    
+
     // Step 5: Verify cache was used
     // Note: libsql 0.9 doesn't expose cache management APIs, so we can't verify cache size
     // but the queries above demonstrate that the store works correctly
@@ -328,7 +339,7 @@ async fn test_end_to_end_workflow() {
 #[tokio::test]
 async fn benchmark_statement_cache_overhead() {
     let (store, _temp_path) = create_test_store().await;
-    
+
     // Prepare test data
     for i in 0..10 {
         let item = agent_mem_traits::CoreMemoryItem {
@@ -343,22 +354,25 @@ async fn benchmark_statement_cache_overhead() {
             created_at: chrono::Utc::now(),
             updated_at: chrono::Utc::now(),
         };
-        
-        store.set_value(item).await.expect("Failed to insert test data");
+
+        store
+            .set_value(item)
+            .await
+            .expect("Failed to insert test data");
     }
-    
+
     // Benchmark queries with caching
     let iterations = 100;
     let start = std::time::Instant::now();
-    
+
     for i in 0..iterations {
         let key = format!("bench-key-{}", i % 10);
         let _result = store.get_value("benchmark-user", &key).await;
     }
-    
+
     let duration = start.elapsed();
     let queries_per_second = iterations as f64 / duration.as_secs_f64();
-    
+
     println!(
         "Statement cache benchmark: {} queries in {:?} ({:.2} queries/sec)",
         iterations, duration, queries_per_second
@@ -376,10 +390,10 @@ async fn benchmark_statement_cache_overhead() {
 #[tokio::test]
 async fn benchmark_validation_performance() {
     use agent_mem_server::middleware::validation::validate_add_memory_request;
-    
+
     let iterations = 1000;
     let start = std::time::Instant::now();
-    
+
     for i in 0..iterations {
         let _result = validate_add_memory_request(
             format!("Benchmark test content {}", i),
@@ -394,15 +408,15 @@ async fn benchmark_validation_performance() {
             None,
         );
     }
-    
+
     let duration = start.elapsed();
     let validations_per_second = iterations as f64 / duration.as_secs_f64();
-    
+
     println!(
         "Validation benchmark: {} validations in {:?} ({:.2} validations/sec)",
         iterations, duration, validations_per_second
     );
-    
+
     // Performance assertion: Should handle at least 1000 validations/sec
     assert!(
         validations_per_second >= 1000.0,

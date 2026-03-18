@@ -1,7 +1,7 @@
 //! Event bus implementation using tokio::sync::broadcast
 
 use super::{EventBusConfig, Result};
-use agent_mem_performance::telemetry::{MemoryEvent, EventType};
+use agent_mem_performance::telemetry::{EventType, MemoryEvent};
 use std::sync::Arc;
 use std::time::{Duration, Instant};
 use tokio::sync::{broadcast, RwLock};
@@ -105,8 +105,7 @@ impl EventBus {
             Ok(receiver_count) => {
                 debug!(
                     "Event published to {} subscribers: {:?}",
-                    receiver_count,
-                    event.event_type
+                    receiver_count, event.event_type
                 );
                 Ok(())
             }
@@ -132,7 +131,10 @@ impl EventBus {
             stats.subscriber_count += 1;
         }
 
-        info!("New subscriber added, total subscribers: {}", self.tx.receiver_count());
+        info!(
+            "New subscriber added, total subscribers: {}",
+            self.tx.receiver_count()
+        );
 
         EventStream::new(rx, self.stats.clone())
     }
@@ -240,10 +242,7 @@ impl EventBus {
 
         let remaining = self.tx.receiver_count();
         if remaining > 0 {
-            warn!(
-                "EventBus shutdown with {} remaining subscribers",
-                remaining
-            );
+            warn!("EventBus shutdown with {} remaining subscribers", remaining);
         } else {
             info!("EventBus shutdown gracefully");
         }
@@ -299,8 +298,8 @@ mod tests {
         let bus = EventBus::new(100);
         let mut subscriber = bus.subscribe().await;
 
-        let event = MemoryEvent::new(EventType::MemoryCreated)
-            .with_memory_id("test-123".to_string());
+        let event =
+            MemoryEvent::new(EventType::MemoryCreated).with_memory_id("test-123".to_string());
 
         // Publish should succeed
         let result = bus.publish(event.clone()).await;
@@ -346,8 +345,8 @@ mod tests {
 
         // Publish some events
         for i in 0..5 {
-            let event = MemoryEvent::new(EventType::MemoryCreated)
-                .with_memory_id(format!("mem-{}", i));
+            let event =
+                MemoryEvent::new(EventType::MemoryCreated).with_memory_id(format!("mem-{}", i));
             // Create a subscriber first
             if i == 0 {
                 let _ = bus.subscribe().await;

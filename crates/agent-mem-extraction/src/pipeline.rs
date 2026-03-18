@@ -1,7 +1,9 @@
 //! Extraction pipeline orchestrator
 
 use crate::error::{ExtractionError, Result};
-use crate::models::{ExtractionContext, ExtractionInput, ExtractionOutput, PipelineConfig, ExecutionMode};
+use crate::models::{
+    ExecutionMode, ExtractionContext, ExtractionInput, ExtractionOutput, PipelineConfig,
+};
 use crate::stage::ExtractionStage;
 use std::collections::HashMap;
 use std::sync::Arc;
@@ -103,11 +105,8 @@ impl ExtractionPipeline {
         info!("Starting extraction pipeline for {}", input.uri);
 
         // Create context
-        let mut context = ExtractionContext::new(
-            id.clone(),
-            input.scope.clone(),
-            self.config.clone(),
-        );
+        let mut context =
+            ExtractionContext::new(id.clone(), input.scope.clone(), self.config.clone());
 
         // Initialize output
         let mut output = ExtractionOutput::new(id.clone());
@@ -115,13 +114,16 @@ impl ExtractionPipeline {
         // Execute stages based on mode
         let result = match self.config.execution_mode {
             ExecutionMode::Sequential => {
-                self.execute_sequential(input, &mut output, &mut context).await
+                self.execute_sequential(input, &mut output, &mut context)
+                    .await
             }
             ExecutionMode::Parallel => {
-                self.execute_parallel(input, &mut output, &mut context).await
+                self.execute_parallel(input, &mut output, &mut context)
+                    .await
             }
             ExecutionMode::Conditional => {
-                self.execute_conditional(input, &mut output, &mut context).await
+                self.execute_conditional(input, &mut output, &mut context)
+                    .await
             }
         };
 
@@ -179,7 +181,10 @@ impl ExtractionPipeline {
 
             // Record timing
             let duration_ms = stage_start.elapsed().as_millis() as u64;
-            output.metrics.stage_timings.insert(stage_name.to_string(), duration_ms);
+            output
+                .metrics
+                .stage_timings
+                .insert(stage_name.to_string(), duration_ms);
 
             debug!("Stage {} completed in {}ms", stage_name, duration_ms);
         }
@@ -244,7 +249,8 @@ impl ExtractionPipeline {
                     );
 
                     // Exponential backoff
-                    tokio::time::sleep(Duration::from_millis(100 * 2_u64.pow(retries as u32))).await;
+                    tokio::time::sleep(Duration::from_millis(100 * 2_u64.pow(retries as u32)))
+                        .await;
                 }
             }
         }
@@ -276,7 +282,7 @@ pub struct PipelineStats {
     pub success_rate: f64,
 }
 
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
 #[cfg(test)]
 mod tests {

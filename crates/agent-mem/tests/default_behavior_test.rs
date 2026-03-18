@@ -44,7 +44,7 @@ async fn test_mem0_mode_initialization() {
     // 测试 Mem0 兼容模式初始化
     // 注意：由于需要创建文件，在测试环境中可能失败，这是可以接受的
     let result = Memory::mem0_mode().await;
-    
+
     if result.is_ok() {
         let mem = result.unwrap();
         // 验证可以添加记忆
@@ -55,7 +55,10 @@ async fn test_mem0_mode_initialization() {
         println!("✅ Mem0 模式初始化成功");
     } else {
         // 在测试环境中可能因为文件系统权限或磁盘空间失败，这是可以接受的
-        println!("⚠️ Mem0 模式初始化失败（可能是环境问题）: {:?}", result.err());
+        println!(
+            "⚠️ Mem0 模式初始化失败（可能是环境问题）: {:?}",
+            result.err()
+        );
     }
 }
 
@@ -223,18 +226,19 @@ async fn test_mem0_style_shortcuts_for_user() {
         !all_memories.is_empty(),
         "应该能获取到至少一条绑定该用户的记忆"
     );
-    
+
     // 尝试搜索（如果失败则跳过，因为搜索需要 embedder 和向量存储）
-    let search_results = mem
-        .search_for_user("User scoped", "shortcut-user")
-        .await;
-    
+    let search_results = mem.search_for_user("User scoped", "shortcut-user").await;
+
     if let Ok(results) = search_results {
         // 搜索成功，验证结果
         println!("搜索成功，找到 {} 条结果", results.len());
     } else {
         // 搜索失败（可能是 embedder 或向量存储未配置），这是可以接受的
-        println!("搜索失败（可能是 embedder 未配置），但记忆已成功添加: {:?}", search_results.err());
+        println!(
+            "搜索失败（可能是 embedder 未配置），但记忆已成功添加: {:?}",
+            search_results.err()
+        );
     }
 }
 
@@ -250,10 +254,7 @@ async fn test_get_all_for_user_with_limit() {
         .get_all_for_user("limit-user", Some(1))
         .await
         .expect("获取用户记忆失败");
-    assert!(
-        limited.len() <= 1,
-        "limit=1 时返回的记忆数量不应超过 1 条"
-    );
+    assert!(limited.len() <= 1, "limit=1 时返回的记忆数量不应超过 1 条");
 }
 
 #[test]

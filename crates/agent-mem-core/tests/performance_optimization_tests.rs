@@ -7,10 +7,7 @@
 //! - Task 2.1.4: 多层缓存性能测试
 
 use agent_mem_core::cache::multi_layer::MultiLayerCache;
-use agent_mem_traits::{
-    abstractions::Memory,
-    Result,
-};
+use agent_mem_traits::{abstractions::Memory, Result};
 use std::sync::Arc;
 
 /// Task 2.1.4 测试：多层缓存性能测试

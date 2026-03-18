@@ -85,7 +85,7 @@ pub(crate) mod test_support {
     use std::collections::HashMap;
 
     use agent_mem_traits::{
-        Result as AgentMemResult, SemanticMemoryItem, SemanticQuery, SemanticMemoryStore,
+        Result as AgentMemResult, SemanticMemoryItem, SemanticMemoryStore, SemanticQuery,
     };
     use async_trait::async_trait;
     use chrono::Utc;
@@ -119,7 +119,10 @@ pub(crate) mod test_support {
 
     #[async_trait]
     impl SemanticMemoryStore for MockSemanticStore {
-        async fn create_item(&self, item: SemanticMemoryItem) -> AgentMemResult<SemanticMemoryItem> {
+        async fn create_item(
+            &self,
+            item: SemanticMemoryItem,
+        ) -> AgentMemResult<SemanticMemoryItem> {
             let key = Self::key(&item.user_id, &item.id);
             self.items.lock().await.insert(key, item.clone());
             Ok(item)
@@ -240,5 +243,4 @@ pub(crate) mod test_support {
             updated_at: now,
         }
     }
-
 }

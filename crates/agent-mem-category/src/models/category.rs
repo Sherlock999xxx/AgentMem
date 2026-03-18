@@ -87,11 +87,7 @@ pub struct Category {
 
 impl Category {
     /// Create a new category
-    pub fn new(
-        path: String,
-        name: String,
-        scope: CategoryScope,
-    ) -> Self {
+    pub fn new(path: String, name: String, scope: CategoryScope) -> Self {
         let now = Utc::now();
         Self {
             id: CategoryId::new(),
@@ -179,7 +175,7 @@ mod tests {
     fn test_category_id() {
         let id = CategoryId::new();
         assert!(!id.as_str().is_empty());
-        
+
         let id2 = CategoryId::from_string("custom-id".to_string());
         assert_eq!(id2.as_str(), "custom-id");
     }
@@ -220,17 +216,17 @@ mod tests {
 
         // Test duplicate child
         let result = parent.add_child(child_id.clone());
-        assert!(matches!(result, Err(CategoryError::CategoryAlreadyExists(_))));
+        assert!(matches!(
+            result,
+            Err(CategoryError::CategoryAlreadyExists(_))
+        ));
     }
 
     #[test]
     fn test_remove_child() {
         let scope = CategoryScope::new("user-123".to_string());
-        let mut parent = Category::new(
-            "/preferences".to_string(),
-            "preferences".to_string(),
-            scope,
-        );
+        let mut parent =
+            Category::new("/preferences".to_string(), "preferences".to_string(), scope);
         let child_id = CategoryId::new();
 
         parent.add_child(child_id.clone()).unwrap();
@@ -244,11 +240,8 @@ mod tests {
     #[test]
     fn test_update_summary() {
         let scope = CategoryScope::new("user-123".to_string());
-        let mut category = Category::new(
-            "/preferences".to_string(),
-            "preferences".to_string(),
-            scope,
-        );
+        let mut category =
+            Category::new("/preferences".to_string(), "preferences".to_string(), scope);
 
         assert!(category.summary.is_none());
         category.update_summary("User preferences and settings".to_string());
@@ -261,11 +254,8 @@ mod tests {
     #[test]
     fn test_update_embedding() {
         let scope = CategoryScope::new("user-123".to_string());
-        let mut category = Category::new(
-            "/preferences".to_string(),
-            "preferences".to_string(),
-            scope,
-        );
+        let mut category =
+            Category::new("/preferences".to_string(), "preferences".to_string(), scope);
 
         let embedding = vec![0.1, 0.2, 0.3];
         category.update_embedding(embedding.clone()).unwrap();
@@ -279,11 +269,8 @@ mod tests {
     #[test]
     fn test_item_count() {
         let scope = CategoryScope::new("user-123".to_string());
-        let mut category = Category::new(
-            "/preferences".to_string(),
-            "preferences".to_string(),
-            scope,
-        );
+        let mut category =
+            Category::new("/preferences".to_string(), "preferences".to_string(), scope);
 
         assert_eq!(category.item_count, 0);
         category.increment_item_count();

@@ -96,7 +96,8 @@ impl WorkingMemoryService {
 
         // Set default TTL if not specified
         if item.expires_at.is_none() && self.config.default_ttl_seconds > 0 {
-            item.expires_at = Some(item.created_at + Duration::seconds(self.config.default_ttl_seconds));
+            item.expires_at =
+                Some(item.created_at + Duration::seconds(self.config.default_ttl_seconds));
         }
 
         // Check capacity
@@ -140,19 +141,23 @@ impl WorkingMemoryService {
         let items: Vec<WorkingMemoryItem> = self
             .storage
             .get(session_id)
-            .map(|map| map.iter().map(|ref_item| ref_item.value().clone()).collect())
+            .map(|map| {
+                map.iter()
+                    .map(|ref_item| ref_item.value().clone())
+                    .collect()
+            })
             .unwrap_or_default();
 
-        debug!(
-            "Retrieved {} items for session {}",
-            items.len(),
-            session_id
-        );
+        debug!("Retrieved {} items for session {}", items.len(), session_id);
         Ok(items)
     }
 
     /// Get an item by ID
-    pub async fn get_item(&self, session_id: &str, item_id: &str) -> Result<Option<WorkingMemoryItem>> {
+    pub async fn get_item(
+        &self,
+        session_id: &str,
+        item_id: &str,
+    ) -> Result<Option<WorkingMemoryItem>> {
         let item = self
             .storage
             .get(session_id)
@@ -202,8 +207,8 @@ impl WorkingMemoryService {
 
             // Publish event
             if let Some(ref bus) = self.event_bus {
-                let event = MemoryEvent::new(EventType::MemoryDeleted)
-                    .with_memory_id(item_id.to_string());
+                let event =
+                    MemoryEvent::new(EventType::MemoryDeleted).with_memory_id(item_id.to_string());
                 let _ = bus.publish(event).await;
             }
 
@@ -253,7 +258,8 @@ impl WorkingMemoryService {
             let expired_ids: Vec<String> = session_map
                 .iter()
                 .filter(|ref_item| {
-                    ref_item.value()
+                    ref_item
+                        .value()
                         .expires_at
                         .map(|exp| exp < now)
                         .unwrap_or(false)
@@ -305,7 +311,8 @@ impl WorkingMemoryService {
         let stats = self.stats.clone();
 
         tokio::spawn(async move {
-            let mut interval = tokio::time::interval(tokio::time::Duration::from_secs(interval_seconds));
+            let mut interval =
+                tokio::time::interval(tokio::time::Duration::from_secs(interval_seconds));
             loop {
                 interval.tick().await;
 
@@ -318,7 +325,8 @@ impl WorkingMemoryService {
                     let expired_ids: Vec<String> = session_map
                         .iter()
                         .filter(|ref_item| {
-                            ref_item.value()
+                            ref_item
+                                .value()
                                 .expires_at
                                 .map(|exp| exp < now)
                                 .unwrap_or(false)
@@ -378,10 +386,7 @@ mod tests {
         let added = service.add_item(item.clone()).await.unwrap();
         assert_eq!(added.id, "item-1");
 
-        let retrieved = service
-            .get_item("session-1", "item-1")
-            .await
-            .unwrap();
+        let retrieved = service.get_item("session-1", "item-1").await.unwrap();
         assert!(retrieved.is_some());
         assert_eq!(retrieved.unwrap().content, "Test content");
     }
@@ -459,10 +464,7 @@ mod tests {
         let removed = service.remove_item("session-1", "item-1").await.unwrap();
         assert!(removed);
 
-        let removed_again = service
-            .remove_item("session-1", "item-1")
-            .await
-            .unwrap();
+        let removed_again = service.remove_item("session-1", "item-1").await.unwrap();
         assert!(!removed_again);
     }
 

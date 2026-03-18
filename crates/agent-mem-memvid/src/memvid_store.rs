@@ -31,17 +31,17 @@
 //! ```
 
 use crate::error::{MemvidError, Result};
-use agent_mem_traits::{Memory, MemoryId, Content, AttributeSet, MetadataV4};
+use agent_mem_traits::{AttributeSet, Content, Memory, MemoryId, MetadataV4};
+use std::io;
 use std::path::Path;
 use std::sync::Arc;
 use tokio::sync::RwLock;
 use tracing::{debug, info};
-use std::io;
 
 /// Re-export memvid-core types
 pub use memvid_core::{
-    Memvid, PutOptions, SearchRequest, SearchResponse, TimelineQuery,
-    OpenReadOptions, Frame, SearchHit, Stats
+    Frame, Memvid, OpenReadOptions, PutOptions, SearchHit, SearchRequest, SearchResponse, Stats,
+    TimelineQuery,
 };
 
 use memvid_core::types::FrameStatus;
@@ -93,7 +93,10 @@ impl MemvidStoreImpl {
         info!("Opening MemVid store: {}", path_str);
 
         if !Path::new(&path_str).exists() {
-            return Err(MemvidError::Io(io::Error::new(io::ErrorKind::NotFound, path_str)));
+            return Err(MemvidError::Io(io::Error::new(
+                io::ErrorKind::NotFound,
+                path_str,
+            )));
         }
 
         let _mem = Memvid::open(&path_str)
@@ -102,7 +105,10 @@ impl MemvidStoreImpl {
         let cache_size = std::num::NonZeroUsize::new(1000).unwrap();
         let cache = Arc::new(RwLock::new(lru::LruCache::new(cache_size)));
 
-        Ok(Self { path: path_str, cache })
+        Ok(Self {
+            path: path_str,
+            cache,
+        })
     }
 
     /// Add a memory
@@ -231,7 +237,10 @@ impl MemvidStoreImpl {
 
             Ok(())
         } else {
-            Err(MemvidError::MemoryNotFound(format!("Memory not found: {}", memory.id)))
+            Err(MemvidError::MemoryNotFound(format!(
+                "Memory not found: {}",
+                memory.id
+            )))
         }
     }
 
@@ -263,7 +272,10 @@ impl MemvidStoreImpl {
             let mut cache = self.cache.write().await;
             cache.pop(id.as_str());
 
-            Err(MemvidError::MemoryNotFound(format!("Memory not found: {}", id)))
+            Err(MemvidError::MemoryNotFound(format!(
+                "Memory not found: {}",
+                id
+            )))
         }
     }
 
@@ -274,7 +286,8 @@ impl MemvidStoreImpl {
         let mut mem = Memvid::open_read_only(Path::new(&self.path))
             .map_err(|e| MemvidError::Memvid(format!("Failed to open: {}", e)))?;
 
-        let stats = mem.stats()
+        let stats = mem
+            .stats()
             .map_err(|e| MemvidError::Memvid(format!("Failed to get stats: {}", e)))?;
 
         let mut memories = Vec::new();
@@ -312,7 +325,8 @@ impl MemvidStoreImpl {
         let mut mem = Memvid::open_read_only(Path::new(&self.path))
             .map_err(|e| MemvidError::Memvid(format!("Failed to open: {}", e)))?;
 
-        let stats = mem.stats()
+        let stats = mem
+            .stats()
             .map_err(|e| MemvidError::Memvid(format!("Failed to get stats: {}", e)))?;
 
         // Count only active frames with mv2://memory/ URIs
@@ -340,17 +354,19 @@ impl MemvidStoreImpl {
         let mut mem = Memvid::open_read_only(Path::new(&self.path))
             .map_err(|e| MemvidError::Memvid(format!("Failed to open: {}", e)))?;
 
-        let response = mem.search(SearchRequest {
-            query: query.to_string(),
-            top_k,
-            snippet_chars: 200,
-            uri: Some("mv2://memory/".to_string()),
-            scope: None,
-            cursor: None,
-            no_sketch: false,
-            as_of_frame: None,
-            as_of_ts: None,
-        }).map_err(|e| MemvidError::Memvid(format!("Search failed: {}", e)))?;
+        let response = mem
+            .search(SearchRequest {
+                query: query.to_string(),
+                top_k,
+                snippet_chars: 200,
+                uri: Some("mv2://memory/".to_string()),
+                scope: None,
+                cursor: None,
+                no_sketch: false,
+                as_of_frame: None,
+                as_of_ts: None,
+            })
+            .map_err(|e| MemvidError::Memvid(format!("Search failed: {}", e)))?;
 
         Ok(response.hits)
     }
@@ -365,17 +381,19 @@ impl MemvidStoreImpl {
         // Add fuzzy operator
         let fuzzy_query = format!("{}~", query);
 
-        let response = mem.search(SearchRequest {
-            query: fuzzy_query,
-            top_k,
-            snippet_chars: 200,
-            uri: Some("mv2://memory/".to_string()),
-            scope: None,
-            cursor: None,
-            no_sketch: false,
-            as_of_frame: None,
-            as_of_ts: None,
-        }).map_err(|e| MemvidError::Memvid(format!("Fuzzy search failed: {}", e)))?;
+        let response = mem
+            .search(SearchRequest {
+                query: fuzzy_query,
+                top_k,
+                snippet_chars: 200,
+                uri: Some("mv2://memory/".to_string()),
+                scope: None,
+                cursor: None,
+                no_sketch: false,
+                as_of_frame: None,
+                as_of_ts: None,
+            })
+            .map_err(|e| MemvidError::Memvid(format!("Fuzzy search failed: {}", e)))?;
 
         Ok(response.hits)
     }
@@ -390,17 +408,19 @@ impl MemvidStoreImpl {
         // Wrap in quotes for exact phrase matching
         let phrase_query = format!("\"{}\"", phrase);
 
-        let response = mem.search(SearchRequest {
-            query: phrase_query,
-            top_k,
-            snippet_chars: 200,
-            uri: Some("mv2://memory/".to_string()),
-            scope: None,
-            cursor: None,
-            no_sketch: false,
-            as_of_frame: None,
-            as_of_ts: None,
-        }).map_err(|e| MemvidError::Memvid(format!("Phrase search failed: {}", e)))?;
+        let response = mem
+            .search(SearchRequest {
+                query: phrase_query,
+                top_k,
+                snippet_chars: 200,
+                uri: Some("mv2://memory/".to_string()),
+                scope: None,
+                cursor: None,
+                no_sketch: false,
+                as_of_frame: None,
+                as_of_ts: None,
+            })
+            .map_err(|e| MemvidError::Memvid(format!("Phrase search failed: {}", e)))?;
 
         Ok(response.hits)
     }
@@ -415,17 +435,19 @@ impl MemvidStoreImpl {
         // Combine queries with OR
         let combined_query = terms.join(" OR ");
 
-        let response = mem.search(SearchRequest {
-            query: combined_query,
-            top_k,
-            snippet_chars: 200,
-            uri: Some("mv2://memory/".to_string()),
-            scope: None,
-            cursor: None,
-            no_sketch: false,
-            as_of_frame: None,
-            as_of_ts: None,
-        }).map_err(|e| MemvidError::Memvid(format!("Multi-term search failed: {}", e)))?;
+        let response = mem
+            .search(SearchRequest {
+                query: combined_query,
+                top_k,
+                snippet_chars: 200,
+                uri: Some("mv2://memory/".to_string()),
+                scope: None,
+                cursor: None,
+                no_sketch: false,
+                as_of_frame: None,
+                as_of_ts: None,
+            })
+            .map_err(|e| MemvidError::Memvid(format!("Multi-term search failed: {}", e)))?;
 
         Ok(response.hits)
     }
@@ -639,7 +661,8 @@ impl MemvidStoreImpl {
             .map_err(|e| MemvidError::Memvid(format!("Failed to open: {}", e)))?;
 
         // Get all frame IDs
-        let stats = mem.stats()
+        let stats = mem
+            .stats()
             .map_err(|e| MemvidError::Memvid(format!("Failed to get stats: {}", e)))?;
         let mut cleared = 0;
 
@@ -691,8 +714,9 @@ impl MemvidStoreImpl {
         // For now, just serialize the content
         match &memory.content {
             Content::Text(text) => Ok(text.as_bytes().to_vec()),
-            Content::Structured(data) => serde_json::to_vec(data)
-                .map_err(|e| MemvidError::Serialization(format!("{}", e))),
+            Content::Structured(data) => {
+                serde_json::to_vec(data).map_err(|e| MemvidError::Serialization(format!("{}", e)))
+            }
             Content::Vector(_vec) => Ok(b"vector".to_vec()), // Placeholder
             Content::Multimodal(_) => Ok(b"multimodal".to_vec()), // Placeholder
             Content::Binary(data) => Ok(data.clone()),
@@ -762,8 +786,10 @@ mod tests {
 // Public Facade: MemvidStore (实现 MemoryProvider trait)
 // ============================================================================
 
-use agent_mem_traits::{MemoryProvider, Message, Session, MemoryItem, HistoryEntry, AgentMemError, MemoryEvent};
-use agent_mem_traits::{MemoryType, Entity, Relation};
+use agent_mem_traits::{
+    AgentMemError, HistoryEntry, MemoryEvent, MemoryItem, MemoryProvider, Message, Session,
+};
+use agent_mem_traits::{Entity, MemoryType, Relation};
 use async_trait::async_trait;
 use chrono::Utc;
 use std::collections::HashMap;
@@ -853,7 +879,9 @@ impl MemvidStore {
         // 这里提供转换以保持向后兼容
         let metadata_map = if let Ok(value) = serde_json::to_value(mem.metadata) {
             if let Some(obj) = value.as_object() {
-                obj.into_iter().map(|(k, v)| (k.clone(), v.clone())).collect()
+                obj.into_iter()
+                    .map(|(k, v)| (k.clone(), v.clone()))
+                    .collect()
             } else {
                 std::collections::HashMap::new()
             }
@@ -887,7 +915,8 @@ impl MemvidStore {
     /// 将 SearchHit 转换为 MemoryItem
     fn search_hit_to_item(&self, hit: SearchHit) -> MemoryItem {
         // Extract memory ID from URI
-        let id = hit.uri
+        let id = hit
+            .uri
             .strip_prefix("mv2://memory/")
             .unwrap_or(&hit.uri)
             .to_string();
@@ -921,7 +950,11 @@ impl MemvidStore {
         if session.id.is_empty() {
             uri.to_string()
         } else {
-            format!("mv2://session/{}/{}", session.id, uri.strip_prefix("mv2://").unwrap_or(uri))
+            format!(
+                "mv2://session/{}/{}",
+                session.id,
+                uri.strip_prefix("mv2://").unwrap_or(uri)
+            )
         }
     }
 }
@@ -933,7 +966,11 @@ impl MemvidStore {
 #[async_trait]
 impl MemoryProvider for MemvidStore {
     /// 添加新记忆
-    async fn add(&self, messages: &[Message], session: &Session) -> std::result::Result<Vec<MemoryItem>, AgentMemError> {
+    async fn add(
+        &self,
+        messages: &[Message],
+        session: &Session,
+    ) -> std::result::Result<Vec<MemoryItem>, AgentMemError> {
         let mut results = Vec::new();
 
         for msg in messages {
@@ -941,7 +978,9 @@ impl MemoryProvider for MemvidStore {
             let memory = self.message_to_memory(msg, session);
 
             // 2. 调用内部实现添加，转换错误类型
-            self.inner.add(&memory).await
+            self.inner
+                .add(&memory)
+                .await
                 .map_err(|e| AgentMemError::StorageError(format!("Failed to add memory: {}", e)))?;
 
             // 3. Memory → MemoryItem 转换（返回值）
@@ -955,7 +994,10 @@ impl MemoryProvider for MemvidStore {
     async fn get(&self, id: &str) -> std::result::Result<Option<MemoryItem>, AgentMemError> {
         let memory_id = MemoryId::from_string(id.to_string());
 
-        match self.inner.get(&memory_id).await
+        match self
+            .inner
+            .get(&memory_id)
+            .await
             .map_err(|e| AgentMemError::StorageError(format!("Failed to get memory: {}", e)))?
         {
             Some(memory) => Ok(Some(self.memory_to_item(memory))),
@@ -964,13 +1006,22 @@ impl MemoryProvider for MemvidStore {
     }
 
     /// 搜索记忆
-    async fn search(&self, query: &str, _session: &Session, limit: usize) -> std::result::Result<Vec<MemoryItem>, AgentMemError> {
+    async fn search(
+        &self,
+        query: &str,
+        _session: &Session,
+        limit: usize,
+    ) -> std::result::Result<Vec<MemoryItem>, AgentMemError> {
         // 注意：当前搜索不区分 session（session 隔离需要在查询时应用）
         // TODO: 实现基于 session 的过滤
-        let hits = self.inner.search(query, limit).await
+        let hits = self
+            .inner
+            .search(query, limit)
+            .await
             .map_err(|e| AgentMemError::StorageError(format!("Failed to search: {}", e)))?;
 
-        Ok(hits.into_iter()
+        Ok(hits
+            .into_iter()
             .map(|hit| self.search_hit_to_item(hit))
             .collect())
     }
@@ -980,15 +1031,19 @@ impl MemoryProvider for MemvidStore {
         let memory_id = MemoryId::from_string(id.to_string());
 
         // 获取现有记忆
-        if let Some(mut existing) = self.inner.get(&memory_id).await
+        if let Some(mut existing) = self
+            .inner
+            .get(&memory_id)
+            .await
             .map_err(|e| AgentMemError::StorageError(format!("Failed to get memory: {}", e)))?
         {
             // 更新内容
             existing.content = Content::text(data);
 
             // 写回
-            self.inner.update(&existing).await
-                .map_err(|e| AgentMemError::StorageError(format!("Failed to update memory: {}", e)))?;
+            self.inner.update(&existing).await.map_err(|e| {
+                AgentMemError::StorageError(format!("Failed to update memory: {}", e))
+            })?;
         }
 
         Ok(())
@@ -997,7 +1052,9 @@ impl MemoryProvider for MemvidStore {
     /// 删除记忆
     async fn delete(&self, id: &str) -> std::result::Result<(), AgentMemError> {
         let memory_id = MemoryId::from_string(id.to_string());
-        self.inner.delete(&memory_id).await
+        self.inner
+            .delete(&memory_id)
+            .await
             .map_err(|e| AgentMemError::StorageError(format!("Failed to delete memory: {}", e)))
     }
 
@@ -1007,9 +1064,9 @@ impl MemoryProvider for MemvidStore {
         let memory_id = MemoryId::from_string(id.to_string());
 
         // 尝试获取版本信息
-        match self.inner.get_version_info(&memory_id).await
-            .map_err(|e| AgentMemError::StorageError(format!("Failed to get version info: {}", e)))?
-        {
+        match self.inner.get_version_info(&memory_id).await.map_err(|e| {
+            AgentMemError::StorageError(format!("Failed to get version info: {}", e))
+        })? {
             Some(version_info) => {
                 // 转换为 HistoryEntry
                 let entry = HistoryEntry {
@@ -1029,10 +1086,16 @@ impl MemoryProvider for MemvidStore {
     }
 
     /// 获取 session 的所有记忆
-    async fn get_all(&self, _session: &Session) -> std::result::Result<Vec<MemoryItem>, AgentMemError> {
+    async fn get_all(
+        &self,
+        _session: &Session,
+    ) -> std::result::Result<Vec<MemoryItem>, AgentMemError> {
         // 注意：当前实现获取所有记忆，不区分 session
         // TODO: 实现基于 session 的过滤
-        let count = self.inner.count().await
+        let count = self
+            .inner
+            .count()
+            .await
             .map_err(|e| AgentMemError::StorageError(format!("Failed to count: {}", e)))?;
 
         // 简化实现：返回最近的一些记忆
@@ -1042,17 +1105,23 @@ impl MemoryProvider for MemvidStore {
         }
 
         // 获取前 100 个记忆（示例）
-        let hits = self.inner.search("*", count.min(100)).await
+        let hits = self
+            .inner
+            .search("*", count.min(100))
+            .await
             .map_err(|e| AgentMemError::StorageError(format!("Failed to search: {}", e)))?;
 
-        Ok(hits.into_iter()
+        Ok(hits
+            .into_iter()
             .map(|hit| self.search_hit_to_item(hit))
             .collect())
     }
 
     /// 重置所有记忆（用于测试）
     async fn reset(&self) -> std::result::Result<(), AgentMemError> {
-        self.inner.clear().await
+        self.inner
+            .clear()
+            .await
             .map_err(|e| AgentMemError::StorageError(format!("Failed to clear: {}", e)))
     }
 }

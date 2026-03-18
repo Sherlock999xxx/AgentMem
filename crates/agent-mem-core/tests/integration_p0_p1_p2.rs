@@ -113,9 +113,7 @@ async fn test_p0_p1_scheduler_importance() {
 /// Test P2: Performance optimization - context compression preparation
 #[tokio::test]
 async fn test_p2_context_compressor_config() {
-    use agent_mem_core::llm_optimizer::{
-        ContextCompressor, ContextCompressorConfig,
-    };
+    use agent_mem_core::llm_optimizer::{ContextCompressor, ContextCompressorConfig};
 
     let config = ContextCompressorConfig::default();
     assert_eq!(config.max_context_tokens, 3000);
@@ -129,9 +127,7 @@ async fn test_p2_context_compressor_config() {
 /// Test P2: Multi-level cache configuration
 #[tokio::test]
 async fn test_p2_multilevel_cache_config() {
-    use agent_mem_core::llm_optimizer::{
-        MultiLevelCache, MultiLevelCacheConfig, CacheLevelConfig,
-    };
+    use agent_mem_core::llm_optimizer::{CacheLevelConfig, MultiLevelCache, MultiLevelCacheConfig};
 
     let l1_config = CacheLevelConfig {
         max_entries: 100,
@@ -194,10 +190,7 @@ async fn test_p1_active_retrieval_preparation() {
 
     // Verify memories have the necessary attributes for active retrieval
     for memory in &memories {
-        assert!(
-            memory.content().len() > 0,
-            "Memory should have content"
-        );
+        assert!(memory.content().len() > 0, "Memory should have content");
     }
 }
 

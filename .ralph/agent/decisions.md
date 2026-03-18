@@ -19,3 +19,12 @@ Use this file to record consequential decisions when confidence is 80 or below.
 - Reasoning: 本轮验证时发现仅为复用 `MemoryDeduplicator` / `MemorySummarizer` 引入 `agent-mem-core` 会触发 `crates/agent-mem-core/src/storage/coordinator.rs` 的既有编译错误，阻断 `agent-mem-proactive` 的独立构建。当前任务的关键交付是让 proactive executor 真正接到现有 memory/category 抽象并可通过测试，因此优先保证本 crate 可编译、可验证；去重与摘要算法本身较小，内联实现的风险可控。
 - Reversibility: 中高。后续若 `agent-mem-core` 编译问题修复，可以把内联 helper 替换回核心库实现，而不影响 executor 的 store/category manager 注入接口。
 - Timestamp (UTC ISO 8601): 2026-03-18T04:10:00Z
+
+## DEC-003
+- Decision: file-centric 合同冻结阶段是否直接公开底层 `resource/category/proactive` crate 的内部结构
+- Chosen Option: 先在 server/client 侧定义独立的 API-facing DTO，并用共享 fixtures 冻结字段基线，而不是直接重导出底层 crate 结构
+- Confidence: 77
+- Alternatives Considered: 1) 直接把底层 crate 类型提升为公共合同 2) 只写文档，不在 Rust server/client 中落地真实模型 3) 直接同时改顶层 facade、server、client 和 SDK
+- Reasoning: 当前底层 crate 的结构主要面向内部实现，字段命名、状态值和多租户语义还没有经过跨语言合同收敛。先在 server/client 定义独立 DTO 可以冻结外部语义，减少对内部实现细节的泄漏，也避免为了重用类型额外引入耦合和依赖扩散。
+- Reversibility: 高。后续如果内部类型稳定，可以为这些 API DTO 增加 `From/TryFrom` 适配，甚至逐步合并实现，但不会破坏已冻结的外部合同。
+- Timestamp (UTC ISO 8601): 2026-03-18T10:11:00Z

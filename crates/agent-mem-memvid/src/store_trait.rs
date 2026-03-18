@@ -1,7 +1,7 @@
 //! Storage trait for MemVid backend
 
 use crate::error::Result;
-use agent_mem_traits::{Memory, MemoryId, Filters};
+use agent_mem_traits::{Filters, Memory, MemoryId};
 use async_trait::async_trait;
 
 /// Core memory store trait for MemVid backend

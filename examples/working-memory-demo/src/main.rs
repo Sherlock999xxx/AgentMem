@@ -110,7 +110,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let final_stats = service.get_stats().await;
     println!("Total items: {}", final_stats.total_items);
-    println!("Expired items cleaned: {}", final_stats.expired_items_cleaned);
+    println!(
+        "Expired items cleaned: {}",
+        final_stats.expired_items_cleaned
+    );
 
     if let Some(cleanup_time) = final_stats.last_cleanup_at {
         println!("Last cleanup: {:?}", cleanup_time);

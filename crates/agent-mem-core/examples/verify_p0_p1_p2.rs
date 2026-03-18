@@ -6,7 +6,7 @@
 //! 🎯 Purpose: 实际运行验证功能
 
 use agent_mem_core::Memory;
-use agent_mem_traits::scheduler::{ScheduleConfig, MemoryScheduler};
+use agent_mem_traits::scheduler::{MemoryScheduler, ScheduleConfig};
 use std::sync::Arc;
 
 fn main() {
@@ -66,8 +66,14 @@ fn main() {
 
     println!("✓ ContextCompressorConfig created");
     println!("  - Max tokens: {}", compressor_config.max_context_tokens);
-    println!("  - Compression ratio: {}", compressor_config.target_compression_ratio);
-    println!("  - Importance threshold: {}", compressor_config.importance_threshold);
+    println!(
+        "  - Compression ratio: {}",
+        compressor_config.target_compression_ratio
+    );
+    println!(
+        "  - Importance threshold: {}",
+        compressor_config.importance_threshold
+    );
     println!();
 
     // 验证 MultiLevelCacheConfig

@@ -6,9 +6,7 @@
 //! - 步骤序列处理
 //! - 过程记忆存储
 
-use agent_mem_compat::{
-    Mem0Client, StepStatus, StepType, Task, TaskPriority, WorkflowStep,
-};
+use agent_mem_compat::{Mem0Client, StepStatus, StepType, Task, TaskPriority, WorkflowStep};
 use agent_mem_traits::Session;
 use chrono::Utc;
 use serde_json::json;

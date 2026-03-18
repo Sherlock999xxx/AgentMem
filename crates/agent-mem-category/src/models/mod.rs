@@ -66,10 +66,8 @@ mod tests {
         assert_eq!(scope.user_id, "user-123");
         assert_eq!(scope.agent_id, None);
 
-        let scope_with_agent = CategoryScope::with_agent(
-            "user-123".to_string(),
-            "agent-456".to_string(),
-        );
+        let scope_with_agent =
+            CategoryScope::with_agent("user-123".to_string(), "agent-456".to_string());
         assert_eq!(scope_with_agent.agent_id, Some("agent-456".to_string()));
     }
 }

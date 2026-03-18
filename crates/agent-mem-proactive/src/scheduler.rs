@@ -1,9 +1,9 @@
 //! TaskScheduler implementation
 
-use std::sync::Arc;
-use std::time::Duration;
 use async_trait::async_trait;
 use chrono::Utc;
+use std::sync::Arc;
+use std::time::Duration;
 use tokio::sync::{mpsc, RwLock};
 use tokio::time::interval;
 use tracing::{error, info, warn};
@@ -11,8 +11,8 @@ use tracing::{error, info, warn};
 use crate::error::{ProactiveError, Result};
 use crate::models::{
     ProactiveConfig, ProactiveTask, ScheduledTask, SchedulerState, SchedulerStateInner,
-    SchedulerStats, TaskConfig, TaskExecutionContext, TaskId, TaskResult, TaskSchedule,
-    TaskStatus, TriggerType,
+    SchedulerStats, TaskConfig, TaskExecutionContext, TaskId, TaskResult, TaskSchedule, TaskStatus,
+    TriggerType,
 };
 
 /// Task executor trait - implemented by different task types
@@ -57,7 +57,10 @@ impl TaskScheduler {
     pub async fn register_executor<E: TaskExecutor + 'static>(&self, executor: E) {
         let task_type = executor.task_type().to_string();
         info!("Registering executor for task type: {}", task_type);
-        self.executors.write().await.insert(task_type, Box::new(executor));
+        self.executors
+            .write()
+            .await
+            .insert(task_type, Box::new(executor));
     }
 
     /// Get scheduler state
@@ -97,16 +100,17 @@ impl TaskScheduler {
         // Validate task type has executor
         let task_type_str = task_type.to_string();
         if !self.executors.read().await.contains_key(&task_type_str) {
-            warn!(
-                "No executor registered for task type: {}",
-                task_type_str
-            );
+            warn!("No executor registered for task type: {}", task_type_str);
         }
 
         let task_id = task.id.clone();
         self.state.write().await.add_task(task);
 
-        info!("Scheduled task {} with ID {}", task_type.display_name(), task_id);
+        info!(
+            "Scheduled task {} with ID {}",
+            task_type.display_name(),
+            task_id
+        );
         Ok(task_id)
     }
 
@@ -173,10 +177,12 @@ impl TaskScheduler {
             let mut executors = self.executors.write().await;
             match executors.remove(&task_type_str) {
                 Some(exec) => exec,
-                None => return Err(ProactiveError::TaskExecution(format!(
-                    "No executor for task type: {}",
-                    task_type_str
-                ))),
+                None => {
+                    return Err(ProactiveError::TaskExecution(format!(
+                        "No executor for task type: {}",
+                        task_type_str
+                    )))
+                }
             }
         };
 
@@ -219,13 +225,15 @@ impl TaskScheduler {
                 None,
             ),
             Err(e) => {
-                let mut task_result = TaskResult::new(
-                    task_id.clone(),
-                    task_type.clone(),
-                    task_updated_at,
-                );
+                let mut task_result =
+                    TaskResult::new(task_id.clone(), task_type.clone(), task_updated_at);
                 task_result.failed(e.to_string());
-                (TaskStatus::Failed, Some(task_result.clone()), 0, Some(e.to_string()))
+                (
+                    TaskStatus::Failed,
+                    Some(task_result.clone()),
+                    0,
+                    Some(e.to_string()),
+                )
             }
         };
 
@@ -308,7 +316,11 @@ impl TaskScheduler {
 
             // Check if task should run
             if self.should_run_task(&task).await {
-                info!("Executing task: {} (ID: {})", task.task_type.display_name(), task.id);
+                info!(
+                    "Executing task: {} (ID: {})",
+                    task.task_type.display_name(),
+                    task.id
+                );
 
                 // Execute in background without blocking the scheduler
                 let scheduler = Arc::new(self.clone_inner());
@@ -337,8 +349,7 @@ impl TaskScheduler {
                 }
                 _ => {
                     // For interval-based tasks, check if enough time has passed
-                    let default_interval = task.task_type.default_interval_minutes()
-                        .unwrap_or(5);
+                    let default_interval = task.task_type.default_interval_minutes().unwrap_or(5);
 
                     // If task is currently running, don't start another
                     if last_result.status == TaskStatus::Running {
@@ -395,29 +406,22 @@ impl TaskScheduler {
 
     /// Add default task schedules based on config
     pub async fn add_default_tasks(&self) -> Result<()> {
-        // Auto-categorize - event-driven
-        self.schedule_task(
+        let default_tasks = [
             ProactiveTask::AutoCategorize,
-            TaskSchedule::event(),
-        ).await?;
-
-        // Dedupe merge - every 5 minutes
-        self.schedule_task(
             ProactiveTask::DedupeMerge,
-            TaskSchedule::interval(5),
-        ).await?;
-
-        // Generate summaries - every hour
-        self.schedule_task(
             ProactiveTask::GenerateSummaries,
-            TaskSchedule::interval(60),
-        ).await?;
-
-        // Health check - every minute
-        self.schedule_task(
+            ProactiveTask::IndexOptimization,
+            ProactiveTask::ResourceArchival,
             ProactiveTask::HealthCheck,
-            TaskSchedule::interval(1),
-        ).await?;
+        ];
+
+        for task_type in default_tasks {
+            let schedule = match task_type.default_interval_minutes() {
+                Some(minutes) => TaskSchedule::interval(minutes),
+                None => TaskSchedule::event(),
+            };
+            self.schedule_task(task_type, schedule).await?;
+        }
 
         Ok(())
     }
@@ -435,7 +439,9 @@ impl TaskScheduleExt for TaskSchedule {
     fn schedule_string(&self) -> String {
         match self.trigger_type() {
             TriggerType::Cron => self.cron().unwrap_or("* * * * *").to_string(),
-            TriggerType::Interval => format!("interval:{}min", self.interval_minutes().unwrap_or(60)),
+            TriggerType::Interval => {
+                format!("interval:{}min", self.interval_minutes().unwrap_or(60))
+            }
             TriggerType::Event => "event".to_string(),
             TriggerType::Manual => "manual".to_string(),
         }

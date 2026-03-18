@@ -28,46 +28,43 @@
 //! # Example
 //!
 //! ```no_run
-//! use agent_mem_proactive::{ProactiveConfig, TaskScheduler, ProactiveTask, TaskSchedule};
+//! use agent_mem_proactive::{ProactiveAgent, ProactiveConfig};
 //!
 //! # #[tokio::main]
 //! # async fn main() -> Result<(), Box<dyn std::error::Error>> {
-//! // Create scheduler with default config
+//! // Create proactive agent with default config
 //! let config = ProactiveConfig::default();
-//! let scheduler = TaskScheduler::new(config);
-//!
-//! // Schedule some tasks
-//! scheduler.schedule_task(
-//!     ProactiveTask::HealthCheck,
-//!     TaskSchedule::interval(5), // Every 5 minutes
-//! ).await?;
+//! let agent = ProactiveAgent::new(config);
+//! agent.initialize().await?;
 //!
 //! // List scheduled tasks
-//! let tasks = scheduler.list_tasks().await;
+//! let tasks = agent.list_tasks().await;
 //! println!("Scheduled {} tasks", tasks.len());
 //!
 //! # Ok(())
 //! # }
 //! ```
 
+pub mod agent;
 pub mod error;
 pub mod executors;
 pub mod models;
 pub mod scheduler;
 
 // Re-exports
+pub use agent::ProactiveAgent;
 pub use error::{ProactiveError, Result};
 pub use models::{
     ProactiveConfig, ProactiveTask, RetryConfig, ScheduledTask, SchedulerState, SchedulerStats,
-    TaskConfig, TaskExecutionContext, TaskResult, TaskSchedule, TaskScheduleConfig,
-    TaskStatus, TriggerType, TaskId,
+    TaskConfig, TaskExecutionContext, TaskId, TaskResult, TaskSchedule, TaskScheduleConfig,
+    TaskStatus, TriggerType,
 };
 pub use scheduler::{TaskExecutor, TaskScheduler};
 
 // Re-export executors
 pub use executors::{
-    AutoCategorizeExecutor, DedupeMergeExecutor, GenerateSummariesExecutor,
-    HealthCheckExecutor, IndexOptimizationExecutor, ResourceArchivalExecutor,
+    AutoCategorizeExecutor, DedupeMergeExecutor, GenerateSummariesExecutor, HealthCheckExecutor,
+    IndexOptimizationExecutor, ResourceArchivalExecutor,
 };
 
 /// Version information
@@ -95,10 +92,7 @@ mod tests {
 
     #[test]
     fn test_proactive_task_display() {
-        assert_eq!(
-            ProactiveTask::AutoCategorize.to_string(),
-            "auto_categorize"
-        );
+        assert_eq!(ProactiveTask::AutoCategorize.to_string(), "auto_categorize");
         assert_eq!(ProactiveTask::DedupeMerge.to_string(), "dedupe_merge");
     }
 }

@@ -136,3 +136,8 @@
 - 为处理当前注入的 `task.resume` 恢复事件，已先核对 `$RALPH_BIN tools task ready` 与 `$RALPH_BIN tools task list`，运行时任务表分别返回 `No ready tasks` 与 `No tasks found`；说明 objective 对应的 runtime task 已经全部终态，只差一次显式收尾信号。
 - 已再次用内容匹配确认 `mem111.md` 仍保留 `Mem0`/“代码证据驱动的集成差距矩阵”，`plan1.1.1.md` 仍保留阶段 `A-F` 与 SDK 波次 `D0-D3`；当前 `HEAD` 为 `26b37e0`。
 - 本轮新建最小 finalization task `task-1773822353-5abb` 仅用于承接恢复收尾：补记 scratchpad、发出 `objective.done`，随后关闭该任务并结束 loop；不再引入新的代码、文档或实现范围。
+
+## 2026-03-18（本轮：objective.done at HEAD 93c3eec）
+- 已按当前注入事件重新核对运行态：`$RALPH_BIN tools task ready` 返回 `No ready tasks`，`$RALPH_BIN tools task list` 返回 `No tasks found`，当前 `HEAD` 为 `93c3eec`。
+- 已再次抽样确认 `mem111.md` 仍包含外部平台对照与“代码证据驱动的集成差距矩阵”，`plan1.1.1.md` 仍包含阶段 `A-F` 与 SDK 波次 `D0-D3`，说明 objective 产物在该提交上完整存在。
+- 本轮已创建最小收尾任务 `task-1773822691-48e0`，仅用于承接本次 pending `objective.done`；接下来只做事件重放、关闭该任务并结束 loop，不追加新的实现或计划范围。

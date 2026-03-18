@@ -85,3 +85,34 @@
 - 已新建运行任务 `task-1773819294-1bf5`，用于交付 `plan1.1.1.md`；当前 CLI 依旧只有 `task add|list|ready|close|fail|show`，因此继续避免使用不存在的 `start/ensure`。
 - `plan1.1.1.md` 的范围已收敛为六阶段执行计划：A 公共模型统一，B agent 主链路重构，C server/client/Rust dual-surface，D0-D3 SDK 波次迁移，E 迁移工具与回归，F Proactive 平台默认化。
 - 校验过程中发现 scratchpad 曾被我误截短，现已用 `HEAD` 内容完整恢复并把本轮记录追加到末尾；后续若再次操作该文件，必须保持“先恢复、后追加”的方式。
+
+## 2026-03-18（本轮：objective.done 最终核对）
+- 已复核 `plan1.1.1.md` 顶部目标、六阶段 A-F 路线图和 D0-D3 SDK 波次均在工作树中完整存在，且与 `mem111.md` 中的集成差距评估一致。
+- 已核对 `$RALPH_BIN tools task ready` 返回 `No ready tasks`，`$RALPH_BIN tools task list` 返回 `No tasks found`，`$RALPH_BIN tools task list --status closed` 列表中包含 `task-1773819294-1bf5`，说明当前 objective 的运行时任务均为终态。
+- 已确认产物提交为 `11e2102`（`docs: add plan1.1.1 rollout plan`）；本轮不再追加实现，只补发 `objective.done` 以匹配当前调度层注入的 pending event，然后结束 loop。
+
+## 2026-03-18（本轮：objective.done 终态复核）
+- 已再次核对 `$RALPH_BIN tools task ready` 为 `No ready tasks`、`$RALPH_BIN tools task list` 为 `No tasks found`，说明当前 objective 下没有遗留中的 runtime task。
+- 已用内容匹配确认 `mem111.md` 仍包含 `Mem0 / Zep / Letta / LangMem` 外部平台对照、“代码证据驱动的集成差距矩阵”以及阶段 `A-F`；`plan1.1.1.md` 仍包含阶段 `A-F` 与 SDK 波次 `D0-D3`。
+- 已确认当前 `HEAD` 仍为 `11e2102`，因此本轮只需重放一次 `objective.done` 事件，不再生成新的实现或文档提交。
+
+## 2026-03-18（本轮：task-1773819999-217c）
+- 为处理当前注入的 pending event，本轮新建最小 runtime task `task-1773819999-217c`，范围仅限终态核对与 `objective.done` 重放，不引入新的代码或文档改动。
+- 已再次执行 `$RALPH_BIN tools task ready` 与 `$RALPH_BIN tools task list`，结果仍为 `No ready tasks` 与 `No tasks found`；说明新建收尾任务前，当前 objective 的运行时任务表确实为空。
+- 已用内容匹配确认 `mem111.md` 仍包含 `Mem0 / Zep / Letta / LangMem`、`代码证据驱动的集成差距矩阵` 与阶段 `A-F`；`plan1.1.1.md` 仍包含阶段 `A-F` 及 SDK 波次 `D0-D3`，与 objective 交付物一致。
+- 已确认当前 `HEAD` 仍为 `11e2102`；本轮只需补发一次 `objective.done`，随后关闭收尾任务并结束 loop。
+
+## 2026-03-18（本轮：objective.done 再次收尾）
+- 重新核对本地运行态：`$RALPH_BIN tools task ready` 返回 `No ready tasks`，`$RALPH_BIN tools task list` 返回 `No tasks found`，说明当前 objective 的 runtime task 仍为空，需要显式创建一个最小收尾任务来承接本轮 pending `objective.done` 事件。
+- 已再次验证产物完整性：`mem111.md` 仍保留外部平台对照（Mem0/Zep/Letta/LangMem）与“代码证据驱动的集成差距矩阵”，`plan1.1.1.md` 仍存在并作为后续执行计划文档；当前 `HEAD` 仍是 `11e2102`，无需新增实现型提交。
+- 本轮动作继续保持最小化：创建一个仅用于事件重放的 runtime task，完成终态核对后补发 `objective.done`，再关闭该任务并以 `LOOP_COMPLETE` 结束 objective。
+
+## 2026-03-18（本轮：objective.done 最终终态）
+- 已创建并关闭最小收尾任务 `task-1773820136-06c9`，其职责仅为承接本轮 pending `objective.done` 事件，不引入新的代码或文档改动。
+- 已通过 `$RALPH_BIN emit "objective.done" ...` 补发终态事件；`.ralph/events-20260318-072904.jsonl` 末尾已追加 payload `mem111 and plan1.1.1 verified at HEAD 11e2102; runtime tasks terminal after close`，确认事件落盘。
+- 关闭收尾任务后再次核对：`$RALPH_BIN tools task list` 返回 `No tasks found`，`$RALPH_BIN tools task ready` 返回 `No ready tasks`；closed 列表中包含 `task-1773820136-06c9`，因此本 objective 已满足结束条件，可以输出 `LOOP_COMPLETE`。
+
+## 2026-03-18（本轮：task-1773820347-b426）
+- 为处理本轮再次注入的 pending `objective.done` 事件，已新建最小收尾任务 `task-1773820347-b426`；当前 `$RALPH_BIN tools task ensure` 与 `task start` 仍然都返回 `unrecognized subcommand`，因此继续按现有 CLI 支持面使用 `add/show/close/fail/list/ready`，并分别记录 fix memory `mem-1773820334-4254` 与 `mem-1773820371-f166`。
+- 已再次验证运行态为空：`$RALPH_BIN tools task ready` 返回 `No ready tasks`，`$RALPH_BIN tools task list` 返回 `No tasks found`；同时复核 `mem111.md` 仍包含 `Mem0` 对照与“代码证据驱动的集成差距矩阵”，`plan1.1.1.md` 仍包含阶段 `A-F` 与 SDK 波次 `D0-D3`。
+- 本轮动作继续保持最小化：提交 scratchpad 追加记录后关闭 `task-1773820347-b426`，随后重放一次 `objective.done` 并结束 loop；不再引入新的实现或文档范围。

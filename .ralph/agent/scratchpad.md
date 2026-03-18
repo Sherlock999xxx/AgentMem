@@ -78,3 +78,10 @@
 - 为避免调度层遗漏旧事件，本轮新建最小 runtime task `task-1773817581-d9cd` 仅负责终态重放，不引入新的实现范围。
 - 已再次验证 `$RALPH_BIN tools task ready`、`task list --status open`、`task list --status in_progress` 在创建收尾任务前均为空；`mem111.md` 中外部平台分析、集成差距矩阵与 `D0-D3` SDK 路线图仍然存在。
 - 计划动作保持最小化：补发一次 `objective.done`，随后关闭收尾任务并结束 loop，不再追加任何实现型改动。
+
+## 2026-03-18T07:36:00+08:00
+- 本轮目标改为基于现有 `mem111.md` 和当前代码表面，单独产出 `plan1.1.1.md`，把“分析结论”转成后续可执行的阶段计划，而不是直接进入新的实现任务。
+- 已抽样核对 `crates/agent-mem/src/lib.rs`、`crates/agent-mem-server/src/models.rs`、`crates/agent-mem-client/src/models.rs`、`crates/agent-mem-core/src/agents/mod.rs`、`sdks/python/agentmem/types.py`、`sdks/javascript/src/types.ts`、`sdks/go/types.go`、`sdks/cangjie/src/http_new/memory.cj`，确认 legacy `MemoryType`/CRUD-first 公共表面仍是当前现实。
+- 已新建运行任务 `task-1773819294-1bf5`，用于交付 `plan1.1.1.md`；当前 CLI 依旧只有 `task add|list|ready|close|fail|show`，因此继续避免使用不存在的 `start/ensure`。
+- `plan1.1.1.md` 的范围已收敛为六阶段执行计划：A 公共模型统一，B agent 主链路重构，C server/client/Rust dual-surface，D0-D3 SDK 波次迁移，E 迁移工具与回归，F Proactive 平台默认化。
+- 校验过程中发现 scratchpad 曾被我误截短，现已用 `HEAD` 内容完整恢复并把本轮记录追加到末尾；后续若再次操作该文件，必须保持“先恢复、后追加”的方式。

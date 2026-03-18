@@ -63,3 +63,18 @@
 - 已重新抽样核对 `crates/agent-mem/src/lib.rs`、`crates/agent-mem-core/src/agents/mod.rs`、`crates/agent-mem-core/src/manager.rs`、`crates/agent-mem-core/src/retrieval/router.rs`、`crates/agent-mem-client/src/models.rs`、`crates/agent-mem-server/src/models.rs` 及 Python/JavaScript/Go/仓颉 SDK 类型层，确认 `mem111.md` 中“legacy-first 公共表面未切换、MemoryType 仍是主轴”的判断仍与代码一致。
 - 已复核 Mem0、Zep、Letta、LangMem 的官方资料，四者当前共同趋势仍是把记忆能力包装成统一产品 surface、后台整理能力和可操作工作区，而不是继续堆叠更多内部 memory type。这个结论与 `mem111.md` 当前建议一致，因此本轮只做轻量补注，不改核心判断。
 - 当前 objective 已具备结束条件：中文总评、代码证据、外部平台检索、后续阶段化计划均已在 `mem111.md` 内成文；后续工作应切换到新的实施 objective，而不是继续在本分析目标下追加伪实现。
+
+## 2026-03-18（本轮：objective.done 收尾确认）
+- 已核对 `$RALPH_BIN tools task list --status open` 与 `--status in_progress`，两者均返回 `No tasks found`；当前 objective 下不存在剩余非终态 runtime task。
+- 已再次确认旧 umbrella task `task-1772345012-d328` 为 `failed` 终态，符合“被阶段化路线图取代，不再作为单个实现任务继续推进”的收口判断。
+- `.ralph/events-20260318-065034.jsonl` 已包含 `objective.done` 事件，payload 指向中文 `mem111.md` 已完成、scratchpad 已恢复、提交为 `08893d5`；因此本轮无需再追加实现，只需结束 loop。
+
+## 2026-03-18（本轮：task.resume 恢复性终检）
+- 按工作流重新执行 `$RALPH_BIN tools task ready`、`task list --status open`、`task list --status in_progress`，结果分别为 `No ready tasks`、`No tasks found`、`No tasks found`；注入上下文中的 blocked/open 旧任务已不再存在于实际运行时任务表。
+- 重新抽样检查 `mem111.md`，确认外部平台章节（Mem0/Zep/Letta/LangMem）、“代码证据驱动的集成差距矩阵”以及 SDK `D0-D3` 路线图都仍在，目标产物保持完整。
+- 结论维持不变：本 objective 已完成，当前轮次只需补发 `objective.done` 事件并输出 `LOOP_COMPLETE`。
+
+## 2026-03-18（本轮：objective.done 终态重放）
+- 为避免调度层遗漏旧事件，本轮新建最小 runtime task `task-1773817581-d9cd` 仅负责终态重放，不引入新的实现范围。
+- 已再次验证 `$RALPH_BIN tools task ready`、`task list --status open`、`task list --status in_progress` 在创建收尾任务前均为空；`mem111.md` 中外部平台分析、集成差距矩阵与 `D0-D3` SDK 路线图仍然存在。
+- 计划动作保持最小化：补发一次 `objective.done`，随后关闭收尾任务并结束 loop，不再追加任何实现型改动。

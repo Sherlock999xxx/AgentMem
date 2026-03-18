@@ -74,6 +74,22 @@
 
 ## Fixes
 
+### mem-1773815198-3d58
+> failure: cmd=/Users/louloulin/.cargo/bin/ralph tools task start task-1772345012-d328, exit=2, error=unrecognized subcommand start, next=use supported show/close/fail lifecycle and avoid start in the current Ralph CLI
+<!-- tags: tooling, error-handling, ralph | created: 2026-03-18 -->
+
+### mem-1773814652-981b
+> failure: cmd=rg --files sdks/cangjie/src sdks/cangjie/src/http_new sdks/cangjie/src/http_new/models sdks/cangjie/src/http_new/client, exit=2, error=request included nonexistent cangjie subpaths models/client, next=search only existing sdk directories before narrowing to files
+<!-- tags: tooling, error-handling, rg | created: 2026-03-18 -->
+
+### mem-1773814569-57b6
+> failure: cmd=/Users/louloulin/.cargo/bin/ralph tools task start task-1773806393-53f8, exit=2, error=unrecognized subcommand start, next=use supported task lifecycle commands only and rely on task state files/ready list for progression
+<!-- tags: tooling, error-handling, ralph | created: 2026-03-18 -->
+
+### mem-1773814527-cab2
+> failure: cmd=sed -n '1,260p' .ralph/agent/scratchpad.md, exit=1, error=.ralph/agent/scratchpad.md missing, next=recreate scratchpad and append current loop notes
+<!-- tags: tooling, error-handling, ralph | created: 2026-03-18 -->
+
 ### mem-1773806393-5075
 > failure: cmd=/Users/louloulin/.cargo/bin/ralph tools task ensure "Update mem111 with integration gap assessment and SDK migration roadmap" --key analysis:mem111-integration-roadmap -p 2 -d ..., exit=2, error=unrecognized subcommand ensure, next=use ralph tools task add when ensure is unavailable in the current CLI
 <!-- tags: tooling, error-handling, ralph | created: 2026-03-18 -->
@@ -123,6 +139,14 @@
 <!-- tags: tooling, error-handling, ralph | created: 2026-03-18 -->
 
 ## Context
+
+### mem-1773815306-3758
+> context: task-1772345012-d328 is an umbrella implementation task superseded by the Chinese mem111 integration assessment; future implementation should be recreated as smaller stage tasks from the A-F and D0-D3 roadmap instead of reopening the original task
+<!-- tags: agentmem, migration, planning | created: 2026-03-18 -->
+
+### mem-1773814891-b082
+> context: mem111 integration assessment confirms public Rust/server/client/SDK surfaces remain MemoryType-first; SDK migration should proceed contract-first, then Python+JavaScript beta, Go stabilization, and Cangjie parity
+<!-- tags: agentmem, migration, sdk | created: 2026-03-18 -->
 
 ### mem-1773806361-0c4b
 > context: AgentMem workspace now has resource/category/extraction/proactive crates, but public Rust/client/server/SDK surfaces remain MemoryType-first; the main remaining gap is platform-level file-centric model and migration API exposure

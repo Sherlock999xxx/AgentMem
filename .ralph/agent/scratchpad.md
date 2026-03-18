@@ -51,3 +51,9 @@
 - 已将 SDK 迁移路线图从“顺序建议”扩展为 D0-D3 四个波次：先冻结跨语言合同，再以 Python/JavaScript 做 Beta 探路，Go 做协议收口，仓颉做最终对齐。
 - 已补充统一验收标准：共享 contract fixtures、四套 SDK 一致的任务状态/错误码语义、迁移 dry-run 报告与资源挂载到主动任务的完整示例链路。
 - 风险补记：创建 scratchpad 时误覆盖旧内容，已立即恢复并改为追加记录；后续若再操作 `.ralph/agent/scratchpad.md`，必须先读取现有内容再追加。
+
+## 2026-03-18（本轮：objective 收口）
+- 复核后确认：当前中文目标“全面分析整个代码、搜索相关记忆平台、评价现状并把后续改造计划写入 `mem111.md`”已经由提交 `3f9aeb0` 实质完成；`mem111.md` 现已包含代码证据矩阵、外部平台对照、阶段 A-F 与 SDK 波次 D0-D3 路线图。
+- 运行时仍残留 `task-1772345012-d328` 这一旧的阶段总任务，但其描述是“集成 8 个 agents + 迁移全部 SDK”的实施收口项，和当前分析型 objective 不再匹配，也不满足 Ralph 单任务 1-2 轮可验证的原子粒度。
+- 本轮再次验证 `$RALPH_BIN tools task start` 依旧不存在，报错 `unrecognized subcommand 'start'`；已补记 fix memory `mem-1773815198-3d58`，后续在当前 CLI 中继续只使用 `show/close/fail/list/ready`。
+- 收口策略：不伪造“集成已完成”，而是将该旧总任务按 superseded/非原子任务处理为终态；后续若进入真正的集成实现目标，应基于 `mem111.md` 的阶段拆分重新创建独立实施任务，而不是重新打开这个 umbrella task。

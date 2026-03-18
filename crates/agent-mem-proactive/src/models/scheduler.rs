@@ -39,6 +39,8 @@ pub struct SchedulerStats {
     pub completed_tasks: u64,
     /// Tasks failed
     pub failed_tasks: u64,
+    /// Tasks cancelled
+    pub cancelled_tasks: u64,
     /// Total execution time in milliseconds
     pub total_execution_time_ms: u64,
     /// Last error message
@@ -46,16 +48,29 @@ pub struct SchedulerStats {
 }
 
 impl SchedulerStats {
+    /// Increment running tasks.
+    pub fn record_start(&mut self) {
+        self.running_tasks += 1;
+    }
+
     /// Increment completed tasks
     pub fn record_completion(&mut self, duration_ms: u64) {
+        self.running_tasks = self.running_tasks.saturating_sub(1);
         self.completed_tasks += 1;
         self.total_execution_time_ms += duration_ms;
     }
 
     /// Increment failed tasks
     pub fn record_failure(&mut self, error: String) {
+        self.running_tasks = self.running_tasks.saturating_sub(1);
         self.failed_tasks += 1;
         self.last_error = Some(error);
+    }
+
+    /// Increment cancelled tasks
+    pub fn record_cancellation(&mut self) {
+        self.running_tasks = self.running_tasks.saturating_sub(1);
+        self.cancelled_tasks += 1;
     }
 }
 

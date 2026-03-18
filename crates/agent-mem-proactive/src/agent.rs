@@ -108,6 +108,16 @@ impl ProactiveAgent {
         self.scheduler.run_task_now(task_id).await
     }
 
+    /// Trigger an event-driven task.
+    pub async fn trigger_task(&self, task_id: &str) -> Result<()> {
+        self.scheduler.trigger_task(task_id).await
+    }
+
+    /// Cancel a queued or running background task.
+    pub async fn cancel_task(&self, task_id: &str) -> Result<()> {
+        self.scheduler.cancel_task(task_id).await
+    }
+
     async fn ensure_task_from_config(&self, task_config: &TaskScheduleConfig) -> Result<()> {
         let task_type = ProactiveTask::from_str(&task_config.task_type)?;
         let existing = self
@@ -238,5 +248,23 @@ mod tests {
         let error = agent.initialize().await.unwrap_err();
 
         assert!(matches!(error, ProactiveError::InvalidConfig(_)));
+    }
+
+    #[tokio::test]
+    async fn test_trigger_task_forwards_to_scheduler() {
+        let mut config = ProactiveConfig::test();
+        config.task_schedules = vec![TaskScheduleConfig::new(
+            "auto_categorize",
+            TaskSchedule::event(),
+        )];
+
+        let agent = ProactiveAgent::new(config);
+        agent.initialize().await.unwrap();
+
+        let task_id = agent.list_tasks().await[0].id.clone();
+        agent.trigger_task(&task_id).await.unwrap();
+
+        let task = agent.scheduler().get_task(&task_id).await.unwrap();
+        assert!(task.pending_runs <= 1);
     }
 }

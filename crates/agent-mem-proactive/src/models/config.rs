@@ -100,6 +100,18 @@ impl TaskSchedule {
         self.retry = Some(retry);
         self
     }
+
+    /// Render a stable schedule string for display/debugging.
+    pub fn schedule_string(&self) -> String {
+        match self.trigger_type {
+            TriggerType::Cron => self.cron.clone().unwrap_or_else(|| "* * * * *".to_string()),
+            TriggerType::Interval => {
+                format!("interval:{}min", self.interval_minutes.unwrap_or(60))
+            }
+            TriggerType::Event => "event".to_string(),
+            TriggerType::Manual => "manual".to_string(),
+        }
+    }
 }
 
 /// Retry configuration

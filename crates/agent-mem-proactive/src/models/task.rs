@@ -4,6 +4,8 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
+use super::config::TaskSchedule;
+
 /// Unique task identifier
 pub type TaskId = String;
 
@@ -63,6 +65,17 @@ impl ProactiveTask {
                 | ProactiveTask::IndexOptimization
         )
     }
+
+    /// Check if this task should be gated by the batch window.
+    pub fn is_batch_task(&self) -> bool {
+        matches!(
+            self,
+            ProactiveTask::DedupeMerge
+                | ProactiveTask::GenerateSummaries
+                | ProactiveTask::IndexOptimization
+                | ProactiveTask::ResourceArchival
+        )
+    }
 }
 
 /// Status of a proactive task
@@ -108,11 +121,7 @@ pub struct TaskResult {
 
 impl TaskResult {
     /// Create a new task result
-    pub fn new(
-        task_id: TaskId,
-        task_type: ProactiveTask,
-        started_at: DateTime<Utc>,
-    ) -> Self {
+    pub fn new(task_id: TaskId, task_type: ProactiveTask, started_at: DateTime<Utc>) -> Self {
         Self {
             task_id,
             task_type,
@@ -220,8 +229,14 @@ pub struct ScheduledTask {
     pub status: TaskStatus,
     /// Cron expression or interval
     pub schedule: String,
+    /// Full schedule configuration
+    pub schedule_config: TaskSchedule,
     /// Whether task is enabled
     pub enabled: bool,
+    /// Queued runs waiting to be dispatched
+    pub pending_runs: u32,
+    /// Number of currently running executions
+    pub running_count: u32,
     /// Last execution result
     pub last_result: Option<TaskResult>,
     /// Next scheduled run time
@@ -241,12 +256,22 @@ impl ScheduledTask {
             task_type,
             status: TaskStatus::Pending,
             schedule,
+            schedule_config: TaskSchedule::manual(),
             enabled: true,
+            pending_runs: 0,
+            running_count: 0,
             last_result: None,
             next_run: None,
             created_at: now,
             updated_at: now,
         }
+    }
+
+    /// Create a new scheduled task from a structured schedule.
+    pub fn from_schedule(task_type: ProactiveTask, schedule_config: TaskSchedule) -> Self {
+        let mut task = Self::new(task_type, schedule_config.schedule_string());
+        task.schedule_config = schedule_config;
+        task
     }
 
     /// Mark as disabled
@@ -262,6 +287,40 @@ impl ScheduledTask {
         self.status = TaskStatus::Pending;
         self.updated_at = Utc::now();
     }
+
+    /// Queue an event-driven run.
+    pub fn queue_run(&mut self) {
+        self.pending_runs = self.pending_runs.saturating_add(1);
+        self.updated_at = Utc::now();
+    }
+
+    /// Mark a run as dispatched.
+    pub fn mark_running(&mut self) {
+        self.running_count = self.running_count.saturating_add(1);
+        self.status = TaskStatus::Running;
+        self.updated_at = Utc::now();
+    }
+
+    /// Mark a run as cancelled.
+    pub fn mark_cancelled(&mut self) {
+        self.running_count = self.running_count.saturating_sub(1);
+        self.pending_runs = 0;
+        self.status = TaskStatus::Cancelled;
+        self.updated_at = Utc::now();
+    }
+
+    /// Mark a run as completed or failed.
+    pub fn mark_finished(&mut self, result: TaskResult) {
+        self.running_count = self.running_count.saturating_sub(1);
+        self.status = result.status.clone();
+        self.last_result = Some(result);
+        self.updated_at = Utc::now();
+    }
+
+    /// Check whether the task can start another execution.
+    pub fn can_start(&self) -> bool {
+        self.enabled && self.running_count < self.schedule_config.max_concurrent.max(1)
+    }
 }
 
 #[cfg(test)]
@@ -270,28 +329,33 @@ mod tests {
 
     #[test]
     fn test_task_display_name() {
-        assert_eq!(ProactiveTask::AutoCategorize.display_name(), "Auto Categorize");
+        assert_eq!(
+            ProactiveTask::AutoCategorize.display_name(),
+            "Auto Categorize"
+        );
         assert_eq!(ProactiveTask::DedupeMerge.display_name(), "Dedupe Merge");
     }
 
     #[test]
     fn test_task_default_interval() {
-        assert_eq!(ProactiveTask::DedupeMerge.default_interval_minutes(), Some(5));
+        assert_eq!(
+            ProactiveTask::DedupeMerge.default_interval_minutes(),
+            Some(5)
+        );
         assert_eq!(
             ProactiveTask::GenerateSummaries.default_interval_minutes(),
             Some(60)
         );
-        assert_eq!(ProactiveTask::AutoCategorize.default_interval_minutes(), None);
+        assert_eq!(
+            ProactiveTask::AutoCategorize.default_interval_minutes(),
+            None
+        );
     }
 
     #[test]
     fn test_task_result() {
         let started = Utc::now();
-        let mut result = TaskResult::new(
-            "test-1".to_string(),
-            ProactiveTask::DedupeMerge,
-            started,
-        );
+        let mut result = TaskResult::new("test-1".to_string(), ProactiveTask::DedupeMerge, started);
 
         result.completed(100, 50);
 
@@ -307,5 +371,17 @@ mod tests {
 
         assert!(task.enabled);
         assert_eq!(task.status, TaskStatus::Pending);
+    }
+
+    #[test]
+    fn test_scheduled_task_from_schedule() {
+        let task = ScheduledTask::from_schedule(
+            ProactiveTask::AutoCategorize,
+            TaskSchedule::event().with_max_concurrent(2),
+        );
+
+        assert_eq!(task.schedule, "event");
+        assert_eq!(task.schedule_config.max_concurrent, 2);
+        assert!(task.can_start());
     }
 }

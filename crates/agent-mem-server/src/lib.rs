@@ -20,12 +20,16 @@ pub mod websocket;
 
 pub use config::ServerConfig;
 pub use error::{ServerError, ServerResult};
-pub use error_handler::{ErrorHandler, ErrorMonitor, safe_expect, safe_unwrap}; // ✅ Phase 0.1: 导出错误处理工具
+pub use error_handler::{safe_expect, safe_unwrap, ErrorHandler, ErrorMonitor}; // ✅ Phase 0.1: 导出错误处理工具
 pub use server::MemoryServer;
 
 /// Re-export commonly used types
 pub use models::{
-    BatchRequest, BatchResponse, HealthResponse, MemoryRequest, MemoryResponse, MetricsResponse,
+    BatchRequest, BatchResponse, CategoryDescriptor, CategoryMetadataDescriptor, CategoryStatus,
+    ExtractedEntity, ExtractedRelation, ExtractionRequest, ExtractionResult, HealthResponse,
+    MemoryRequest, MemoryResponse, MetricsResponse, MigrationPlan, MigrationReport,
+    OperationStatus, PlatformErrorCode, ProactiveTaskInfo, ResourceDescriptor,
+    ResourceMetadataDescriptor, ResourceStatus, SchedulerState, SchedulerStats, ScopeDescriptor,
     SearchRequest, SearchResponse,
 };
 

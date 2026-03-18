@@ -1,0 +1,11 @@
+{
+  "state": "running",
+  "total_tasks": 6,
+  "running_tasks": 1,
+  "completed_tasks": 24,
+  "failed_tasks": 1,
+  "cancelled_tasks": 0,
+  "total_execution_time_ms": 182400,
+  "last_error": null,
+  "updated_at": "2026-03-18T10:12:30Z"
+}

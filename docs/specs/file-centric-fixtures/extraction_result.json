@@ -1,0 +1,46 @@
+{
+  "job_id": "extract-123",
+  "resource_id": "res-123",
+  "status": "succeeded",
+  "category_paths": [
+    "/preferences/communication"
+  ],
+  "memory_ids": [
+    "mem-1",
+    "mem-2"
+  ],
+  "entities": [
+    {
+      "id": "entity-1",
+      "name": "formal updates",
+      "entity_type": "concept",
+      "confidence": 0.98,
+      "attributes": {
+        "source": "phrase"
+      },
+      "span_start": 12,
+      "span_end": 26
+    }
+  ],
+  "relations": [
+    {
+      "id": "relation-1",
+      "subject_id": "entity-1",
+      "subject": "formal updates",
+      "predicate": "belongs_to",
+      "object_id": "cat-comm-style",
+      "object": "/preferences/communication/style",
+      "relation_type": "belongs_to",
+      "confidence": 0.92,
+      "attributes": {
+        "source": "category_router"
+      }
+    }
+  ],
+  "warnings": [],
+  "error_code": null,
+  "error_message": null,
+  "duration_ms": 187,
+  "started_at": "2026-03-18T10:01:02Z",
+  "completed_at": "2026-03-18T10:01:02Z"
+}

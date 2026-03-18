@@ -116,3 +116,8 @@
 - 为处理本轮再次注入的 pending `objective.done` 事件，已新建最小收尾任务 `task-1773820347-b426`；当前 `$RALPH_BIN tools task ensure` 与 `task start` 仍然都返回 `unrecognized subcommand`，因此继续按现有 CLI 支持面使用 `add/show/close/fail/list/ready`，并分别记录 fix memory `mem-1773820334-4254` 与 `mem-1773820371-f166`。
 - 已再次验证运行态为空：`$RALPH_BIN tools task ready` 返回 `No ready tasks`，`$RALPH_BIN tools task list` 返回 `No tasks found`；同时复核 `mem111.md` 仍包含 `Mem0` 对照与“代码证据驱动的集成差距矩阵”，`plan1.1.1.md` 仍包含阶段 `A-F` 与 SDK 波次 `D0-D3`。
 - 本轮动作继续保持最小化：提交 scratchpad 追加记录后关闭 `task-1773820347-b426`，随后重放一次 `objective.done` 并结束 loop；不再引入新的实现或文档范围。
+
+## 2026-03-18（本轮：task-1773820792-896e）
+- 为承接当前再次注入的 pending `objective.done` 事件，已创建最小收尾任务 `task-1773820792-896e`，范围仅限终态复核、事件重放和任务关闭，不引入新的实现。
+- 已复核当前 `HEAD` 为 `40e22f8`；`mem111.md` 仍包含 `Mem0` 与“代码证据驱动的集成差距矩阵”，`plan1.1.1.md` 仍包含六阶段计划和 `D0-D3` SDK 波次，交付物状态与当前 objective 一致。
+- 再次尝试 `$RALPH_BIN tools task start task-1773820792-896e` 仍失败为 `unrecognized subcommand 'start'`，已记录 fix memory `mem-1773820822-db1a`；因此继续按当前 CLI 实际支持面把该新建任务视作本轮 active task，并在发出 `objective.done` 后关闭它。

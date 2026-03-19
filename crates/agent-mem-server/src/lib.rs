@@ -25,12 +25,14 @@ pub use server::MemoryServer;
 
 /// Re-export commonly used types
 pub use models::{
-    BatchRequest, BatchResponse, CategoryDescriptor, CategoryMetadataDescriptor, CategoryStatus,
-    ExtractedEntity, ExtractedRelation, ExtractionRequest, ExtractionResult, HealthResponse,
-    MemoryRequest, MemoryResponse, MetricsResponse, MigrationPlan, MigrationReport,
-    OperationStatus, PlatformErrorCode, ProactiveTaskInfo, ResourceDescriptor,
-    ResourceMetadataDescriptor, ResourceStatus, SchedulerState, SchedulerStats, ScopeDescriptor,
-    SearchRequest, SearchResponse,
+    ApplyMigrationRequest, BatchRequest, BatchResponse, CancelProactiveTaskRequest,
+    CategoryDescriptor, CategoryMetadataDescriptor, CategoryStatus, ExtractedEntity,
+    ExtractedRelation, ExtractionRequest, ExtractionResult, HealthResponse, MemoryRequest,
+    MemoryResponse, MetricsResponse, MigrationPlan, MigrationReport, MountResourceRequest,
+    OperationStatus, PlanMigrationRequest, PlatformErrorCode, ProactiveTaskInfo,
+    ResourceDescriptor, ResourceMetadataDescriptor, ResourceStatus, RollbackMigrationRequest,
+    RunProactiveTaskRequest, SchedulerState, SchedulerStats, ScopeDescriptor,
+    SearchCategoriesRequest, SearchRequest, SearchResponse,
 };
 
 #[cfg(test)]

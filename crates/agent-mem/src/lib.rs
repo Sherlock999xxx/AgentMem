@@ -101,6 +101,7 @@ pub mod chat;
 pub mod history;
 pub mod memory;
 pub mod orchestrator;
+pub mod platform;
 pub mod types;
 pub mod visualization;
 
@@ -108,6 +109,15 @@ pub mod visualization;
 pub use api_simplification::{EnhancedError, ErrorEnhancer, FluentMemory, SmartDefaults};
 pub use builder::MemoryBuilder;
 pub use memory::Memory;
+pub use platform::{
+    ApplyMigrationRequest, CancelProactiveTaskRequest, CategoryDescriptor,
+    CategoryMetadataDescriptor, CategoryStatus, ExtractedEntity, ExtractedRelation,
+    ExtractionRequest, ExtractionResult, MountResourceRequest, MigrationPlan,
+    MigrationReport, OperationStatus, PlanMigrationRequest, PlatformErrorCode,
+    ProactiveTaskInfo, ResourceDescriptor, ResourceMetadataDescriptor, ResourceStatus,
+    RollbackMigrationRequest, RunProactiveTaskRequest, SchedulerState, SchedulerStats,
+    ScopeDescriptor, SearchCategoriesRequest,
+};
 // BatchBuilder and SearchBuilder are defined in orchestrator::core but not exported
 // They can be accessed via orchestrator methods
 pub use types::{

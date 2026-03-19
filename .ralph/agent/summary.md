@@ -1,8 +1,8 @@
 # Loop Summary
 
-**Status:** Failed: stale loop detected
-**Iterations:** 17
-**Duration:** 27m 10s
+**Status:** Failed: too many consecutive failures
+**Iterations:** 5
+**Duration:** 5m 42s
 
 ## Tasks
 
@@ -14,4 +14,4 @@ _No events recorded._
 
 ## Final Commit
 
-8f7b056: chore: record terminal objective verification
+71fd8bc: style: 统一代码格式并移除多余空行

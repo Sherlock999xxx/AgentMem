@@ -696,6 +696,100 @@ pub struct SchedulerStats {
     pub updated_at: DateTime<Utc>,
 }
 
+/// Preview request for mounting a resource onto the file-centric surface.
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema, Validate)]
+pub struct MountResourceRequest {
+    /// File-like URI to mount.
+    #[validate(length(min = 1, max = 2048))]
+    pub uri: String,
+
+    /// Optional MIME type hint supplied by the caller.
+    #[validate(length(min = 1, max = 255))]
+    pub media_type: Option<String>,
+
+    /// Multi-tenant ownership scope.
+    #[validate(nested)]
+    pub scope: ScopeDescriptor,
+
+    /// Optional metadata supplied at mount time.
+    pub metadata: Option<ResourceMetadataDescriptor>,
+}
+
+/// Request for category-aware search.
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema, Validate)]
+pub struct SearchCategoriesRequest {
+    /// Multi-tenant ownership scope.
+    #[validate(nested)]
+    pub scope: ScopeDescriptor,
+
+    /// Search query to match against category name and summary.
+    #[validate(length(min = 1, max = 255))]
+    pub query: String,
+
+    /// Maximum number of categories to return.
+    #[validate(range(min = 1, max = 100))]
+    pub limit: Option<usize>,
+}
+
+/// Preview request for planning legacy migration.
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema, Validate)]
+pub struct PlanMigrationRequest {
+    /// Multi-tenant ownership scope.
+    #[validate(nested)]
+    pub scope: ScopeDescriptor,
+
+    /// Whether to keep the operation as dry-run only.
+    pub dry_run: bool,
+
+    /// Source public surface label.
+    #[validate(length(min = 1, max = 64))]
+    pub source_surface: String,
+
+    /// Target public surface label.
+    #[validate(length(min = 1, max = 64))]
+    pub target_surface: String,
+}
+
+/// Preview request for applying a legacy migration plan.
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema, Validate)]
+pub struct ApplyMigrationRequest {
+    /// Existing migration plan identifier.
+    #[validate(length(min = 1, max = 255))]
+    pub plan_id: String,
+
+    /// Multi-tenant ownership scope.
+    #[validate(nested)]
+    pub scope: ScopeDescriptor,
+}
+
+/// Preview request for rolling back a migration run.
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema, Validate)]
+pub struct RollbackMigrationRequest {
+    /// Existing migration run identifier.
+    #[validate(length(min = 1, max = 255))]
+    pub migration_id: String,
+
+    /// Multi-tenant ownership scope.
+    #[validate(nested)]
+    pub scope: ScopeDescriptor,
+}
+
+/// Preview request for running a proactive task immediately.
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema, Validate)]
+pub struct RunProactiveTaskRequest {
+    /// Multi-tenant ownership scope.
+    #[validate(nested)]
+    pub scope: ScopeDescriptor,
+}
+
+/// Preview request for cancelling a proactive task.
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema, Validate)]
+pub struct CancelProactiveTaskRequest {
+    /// Multi-tenant ownership scope.
+    #[validate(nested)]
+    pub scope: ScopeDescriptor,
+}
+
 /// Generic API response wrapper
 #[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
 pub struct ApiResponse<T> {
@@ -859,6 +953,35 @@ mod tests {
             persist_output: true,
             include_entities: true,
             include_relations: true,
+        };
+
+        assert!(request.validate().is_err());
+    }
+
+    #[test]
+    fn test_mount_resource_request_validation() {
+        let request = MountResourceRequest {
+            uri: "file:///tmp/note.md".to_string(),
+            media_type: Some("text/markdown".to_string()),
+            scope: ScopeDescriptor {
+                user_id: "user-123".to_string(),
+                agent_id: Some("agent-abc".to_string()),
+            },
+            metadata: None,
+        };
+
+        assert!(request.validate().is_ok());
+    }
+
+    #[test]
+    fn test_search_categories_request_validation_fails_when_query_empty() {
+        let request = SearchCategoriesRequest {
+            scope: ScopeDescriptor {
+                user_id: "user-123".to_string(),
+                agent_id: None,
+            },
+            query: String::new(),
+            limit: Some(5),
         };
 
         assert!(request.validate().is_err());

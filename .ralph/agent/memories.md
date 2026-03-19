@@ -74,6 +74,26 @@
 
 ## Fixes
 
+### mem-1773880639-57b6
+> fix: agent-mem-server/src/routes/working_memory.rs line 118-122: .map(|v| v.as_str()) returned Option<Option<&str>>, changed to .and_then() to flatten to Option<&str> so it works with WorkingMemoryItem.agent_id: String
+<!-- tags: server, rust, type-mismatch | created: 2026-03-19 -->
+
+### mem-1773833989-b033
+> failure: cmd=rg --files crates/agent-mem-server/src/routes crates/agent-mem-client/src/client crates/agent-mem/src, exit=2, error=request included nonexistent crates/agent-mem-client/src/client path, next=search only existing file paths like crates/agent-mem-client/src/client.rs before narrowing further
+<!-- tags: tooling, error-handling, rg | created: 2026-03-18 -->
+
+### mem-1773833989-aa8b
+> failure: cmd=/Users/louloulin/.cargo/bin/ralph tools task start task-1773831045-6d1e, exit=2, error=unrecognized subcommand 'start', next=treat the prompt-selected dual-surface task as active and use the supported add/show/close lifecycle in this Ralph CLI
+<!-- tags: tooling, error-handling, ralph | created: 2026-03-18 -->
+
+### mem-1773833888-d054
+> failure: cmd=sed -n '1,220p' .ralph/agent/scratchpad.md, exit=1, error=.ralph/agent/scratchpad.md missing, next=recreate scratchpad with current loop notes before implementation
+<!-- tags: tooling, error-handling, ralph | created: 2026-03-18 -->
+
+### mem-1773833153-35c9
+> failure: cmd=cargo test -p agent-mem-client --lib --target-dir /tmp/agentmem-client-dual-surface-target (and parallel agent-mem/agent-mem-server variants), exit=101, error=failed to create directory /tmp because this environment reports File exists for the /tmp target root, next=use isolated --target-dir paths under /var/tmp for verification in this workspace
+<!-- tags: cargo, testing, error-handling | created: 2026-03-18 -->
+
 ### mem-1773832320-ca16
 > failure: cmd=cargo test -p agent-mem-client models::tests --target-dir /tmp/agentmem-client-contract-target, exit=101, error=file-centric fixture roundtrip failed because f32 confidence fields serialized as 0.9800000190734863/0.9200000166893005 instead of 0.98/0.92, next=promote public extracted-entity and extracted-relation confidence fields to f64 so the frozen wire fixtures remain stable
 <!-- tags: cargo, testing, client, contracts, serde | created: 2026-03-18 -->

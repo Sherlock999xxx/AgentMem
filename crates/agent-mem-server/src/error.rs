@@ -99,6 +99,12 @@ pub enum ServerError {
         context: Option<ErrorContext>,
     },
 
+    #[error("Not implemented: {message}")]
+    NotImplemented {
+        message: String,
+        context: Option<ErrorContext>,
+    },
+
     #[error("Server binding failed: {message}")]
     BindError {
         message: String,
@@ -250,6 +256,14 @@ impl ServerError {
             context: None,
         }
     }
+
+    /// Create a not implemented error
+    pub fn not_implemented(msg: impl Into<String>) -> Self {
+        ServerError::NotImplemented {
+            message: msg.into(),
+            context: None,
+        }
+    }
 }
 
 impl IntoResponse for ServerError {
@@ -271,6 +285,9 @@ impl IntoResponse for ServerError {
             }
             ServerError::ValidationError { message, .. } => {
                 (StatusCode::BAD_REQUEST, "VALIDATION_ERROR", message)
+            }
+            ServerError::NotImplemented { message, .. } => {
+                (StatusCode::NOT_IMPLEMENTED, "NOT_IMPLEMENTED", message)
             }
             ServerError::BindError { message, .. } => {
                 (StatusCode::INTERNAL_SERVER_ERROR, "BIND_ERROR", message)
@@ -349,5 +366,11 @@ mod tests {
             ServerError::MemoryError { .. } => {}
             _ => panic!("Expected MemoryError"),
         }
+    }
+
+    #[test]
+    fn test_not_implemented_error_status() {
+        let response = ServerError::not_implemented("preview route").into_response();
+        assert_eq!(response.status(), StatusCode::NOT_IMPLEMENTED);
     }
 }

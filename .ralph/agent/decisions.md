@@ -28,3 +28,21 @@ Use this file to record consequential decisions when confidence is 80 or below.
 - Reasoning: 当前底层 crate 的结构主要面向内部实现，字段命名、状态值和多租户语义还没有经过跨语言合同收敛。先在 server/client 定义独立 DTO 可以冻结外部语义，减少对内部实现细节的泄漏，也避免为了重用类型额外引入耦合和依赖扩散。
 - Reversibility: 高。后续如果内部类型稳定，可以为这些 API DTO 增加 `From/TryFrom` 适配，甚至逐步合并实现，但不会破坏已冻结的外部合同。
 - Timestamp (UTC ISO 8601): 2026-03-18T10:11:00Z
+
+## DEC-004
+- Decision: `task-1773831045-6d1e` 的 dual-surface 入口是否先接临时内存实现，还是先发布 typed preview surface
+- Chosen Option: 先在 `agent-mem` / server / client 三层引入 typed preview entrypoints，并让 server 返回明确的 `501 Not Implemented`、Rust facade 返回 `UnsupportedOperation`，等待下一任务把后端链路接到真实的 `resource -> extract -> categorize`
+- Confidence: 79
+- Alternatives Considered: 1) 直接在 server 内接一套临时 in-memory resource/category manager 伪实现 2) 继续只保留 DTO，不新增真实入口 3) 一次性把入口和 ingest 主链路同时做完
+- Reasoning: 当前下一个 ready task 已经专门负责把 ingest 主链路接通。如果本轮为了"看起来可用"临时接一套独立 in-memory backend，会制造和真实持久化/编排链路不一致的行为，反而增加返工和歧义。先冻结路径、方法名、请求响应类型和错误语义，可以让 Rust/server/client 公开表面同步到位，同时把未完成的后端状态显式暴露出来。
+- Reversibility: 高。下一轮只需要替换 handler/facade 内部实现，不需要再改外部路径、方法签名和客户端调用方式。
+- Timestamp (UTC ISO 8601): 2026-03-18T11:34:00Z
+
+## DEC-005
+- Decision: `task-1773831045-7cb2` file-centric routes 如何接通后端 manager
+- Chosen Option: 在 server 内新建 `FileCentricState` struct，持有 `Arc<dyn ResourceManagerTrait>`、`Arc<InMemoryCategoryManager>`、`Arc<RwLock<Option<ExtractionPipeline>>>`，并在 router 初始化时注入为 Extension layer
+- Confidence: 78
+- Alternatives Considered: 1) 把 resource/category/extraction crate 的类型直接提升为 public API 2) 用 trait object (`Arc<dyn Trait>`) 封装 manager 3) 每个 handler 内直接 new 一个 manager 实例
+- Reasoning: 当前 resource/category/extraction crate 的内部结构尚未经过外部 API 收敛，使用 trait object 可以解耦接口，后续如需替换实现（如从 in-memory 到持久化）不影响 handler 签名。`InMemoryCategoryManager` 已有完整的 trait 实现，直接持有即可，无需额外包装。选择 RwLock 包裹 Option<ExtractionPipeline> 是因为 pipeline 可能未配置，用 `None` 表示 stub 行为。
+- Reversibility: 高。后续可以替换 State 内部的 manager 实现，或改为持有 `Arc<dyn Trait + Send + Sync>` 统一接口。
+- Timestamp (UTC ISO 8601): 2026-03-19T00:57:00Z

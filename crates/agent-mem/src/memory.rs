@@ -13,6 +13,12 @@ use agent_mem_traits::{AgentMemError, MemoryItem, Result};
 
 use crate::builder::MemoryBuilder;
 use crate::orchestrator::MemoryOrchestrator;
+use crate::platform::{
+    ApplyMigrationRequest, CancelProactiveTaskRequest, CategoryDescriptor, ExtractionRequest,
+    ExtractionResult, MigrationPlan, MigrationReport, MountResourceRequest, ProactiveTaskInfo,
+    ResourceDescriptor, RollbackMigrationRequest, RunProactiveTaskRequest, SchedulerStats,
+    ScopeDescriptor, SearchCategoriesRequest,
+};
 use crate::types::{
     AddMemoryOptions, AddResult, DeleteAllOptions, GetAllOptions, MemoryScope, MemoryStats,
     SearchOptions,
@@ -1656,6 +1662,103 @@ impl Memory {
         let options = scope.to_options();
         self.add_with_options(content, options).await
     }
+
+    /// Preview file-centric surface for mounting a resource.
+    pub async fn mount_resource(
+        &self,
+        request: MountResourceRequest,
+    ) -> Result<ResourceDescriptor> {
+        let _ = request;
+        Err(file_centric_preview_error("mount_resource"))
+    }
+
+    /// Preview file-centric surface for fetching a mounted resource.
+    pub async fn get_resource(&self, resource_id: &str) -> Result<ResourceDescriptor> {
+        let _ = resource_id;
+        Err(file_centric_preview_error("get_resource"))
+    }
+
+    /// Preview file-centric surface for extraction.
+    pub async fn extract_resource(&self, request: ExtractionRequest) -> Result<ExtractionResult> {
+        let _ = request;
+        Err(file_centric_preview_error("extract_resource"))
+    }
+
+    /// Preview file-centric surface for listing categories.
+    pub async fn list_categories(&self, scope: ScopeDescriptor) -> Result<Vec<CategoryDescriptor>> {
+        let _ = scope;
+        Err(file_centric_preview_error("list_categories"))
+    }
+
+    /// Preview file-centric surface for searching categories.
+    pub async fn search_categories(
+        &self,
+        request: SearchCategoriesRequest,
+    ) -> Result<Vec<CategoryDescriptor>> {
+        let _ = request;
+        Err(file_centric_preview_error("search_categories"))
+    }
+
+    /// Preview file-centric surface for planning legacy migration.
+    pub async fn plan_legacy_migration(
+        &self,
+        request: crate::platform::PlanMigrationRequest,
+    ) -> Result<MigrationPlan> {
+        let _ = request;
+        Err(file_centric_preview_error("plan_legacy_migration"))
+    }
+
+    /// Preview file-centric surface for applying legacy migration.
+    pub async fn apply_legacy_migration(
+        &self,
+        request: ApplyMigrationRequest,
+    ) -> Result<MigrationReport> {
+        let _ = request;
+        Err(file_centric_preview_error("apply_legacy_migration"))
+    }
+
+    /// Preview file-centric surface for rolling back a legacy migration.
+    pub async fn rollback_legacy_migration(
+        &self,
+        request: RollbackMigrationRequest,
+    ) -> Result<MigrationReport> {
+        let _ = request;
+        Err(file_centric_preview_error("rollback_legacy_migration"))
+    }
+
+    /// Preview file-centric surface for listing proactive tasks.
+    pub async fn list_proactive_tasks(
+        &self,
+        scope: ScopeDescriptor,
+    ) -> Result<Vec<ProactiveTaskInfo>> {
+        let _ = scope;
+        Err(file_centric_preview_error("list_proactive_tasks"))
+    }
+
+    /// Preview file-centric surface for running a proactive task.
+    pub async fn run_proactive_task(
+        &self,
+        task_id: &str,
+        request: RunProactiveTaskRequest,
+    ) -> Result<ProactiveTaskInfo> {
+        let _ = (task_id, request);
+        Err(file_centric_preview_error("run_proactive_task"))
+    }
+
+    /// Preview file-centric surface for cancelling a proactive task.
+    pub async fn cancel_proactive_task(
+        &self,
+        task_id: &str,
+        request: CancelProactiveTaskRequest,
+    ) -> Result<ProactiveTaskInfo> {
+        let _ = (task_id, request);
+        Err(file_centric_preview_error("cancel_proactive_task"))
+    }
+
+    /// Preview file-centric surface for scheduler statistics.
+    pub async fn get_scheduler_stats(&self) -> Result<SchedulerStats> {
+        Err(file_centric_preview_error("get_scheduler_stats"))
+    }
 }
 
 /// 性能统计信息
@@ -1673,4 +1776,10 @@ pub struct PerformanceStats {
     pub queries_per_second: f32,
     /// 内存使用（MB）
     pub memory_usage_mb: f32,
+}
+
+fn file_centric_preview_error(operation: &str) -> AgentMemError {
+    AgentMemError::unsupported_operation(format!(
+        "File-centric preview entrypoint `{operation}` is exposed, but the backend wiring is scheduled for the resource->extract->categorize task"
+    ))
 }

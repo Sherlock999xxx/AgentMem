@@ -5,6 +5,7 @@ pub mod agents;
 pub mod chat;
 pub mod chat_lumosai; // LumosAI集成
 pub mod docs;
+pub mod file_centric;
 // Graph routes require PostgreSQL-specific managers (temporarily disabled for LibSQL)
 #[cfg(feature = "postgres")]
 pub mod graph;
@@ -34,6 +35,7 @@ use crate::rbac::RbacChecker;
 use tracing::info;
 // ✅ 使用memory::MemoryManager（基于agent-mem统一API）
 use crate::routes::memory::MemoryManager;
+use crate::routes::file_centric::FileCentricState;
 use crate::sse::SseManager;
 use crate::websocket::WebSocketManager;
 use agent_mem_core::storage::factory::Repositories;
@@ -139,6 +141,10 @@ pub async fn create_router(
 
     info!("MCP server initialized successfully");
 
+    // 🆕 Initialize file-centric state with resource and category managers
+    let file_centric_state = Arc::new(FileCentricState::new());
+    info!("File-centric state initialized");
+
     let mut app = Router::new()
         // Memory management routes (✅ 使用Memory统一API)
         // 🆕 Fix 1: 添加GET方法支持全局列表查询
@@ -190,6 +196,43 @@ pub async fn create_router(
         .route(
             "/api/v1/memories/batch/update",
             post(memory::batch_update_memories),
+        )
+        // File-centric preview routes
+        .route("/api/v1/resources/mount", post(file_centric::mount_resource))
+        .route("/api/v1/resources/:resource_id", get(file_centric::get_resource))
+        .route("/api/v1/resources/extract", post(file_centric::extract_resource))
+        .route("/api/v1/categories", get(file_centric::list_categories))
+        .route(
+            "/api/v1/categories/search",
+            post(file_centric::search_categories),
+        )
+        .route(
+            "/api/v1/migrations/plan",
+            post(file_centric::plan_legacy_migration),
+        )
+        .route(
+            "/api/v1/migrations/apply",
+            post(file_centric::apply_legacy_migration),
+        )
+        .route(
+            "/api/v1/migrations/rollback",
+            post(file_centric::rollback_legacy_migration),
+        )
+        .route(
+            "/api/v1/proactive/tasks",
+            get(file_centric::list_proactive_tasks),
+        )
+        .route(
+            "/api/v1/proactive/tasks/:task_id/run",
+            post(file_centric::run_proactive_task),
+        )
+        .route(
+            "/api/v1/proactive/tasks/:task_id/cancel",
+            post(file_centric::cancel_proactive_task),
+        )
+        .route(
+            "/api/v1/proactive/scheduler/stats",
+            get(file_centric::get_scheduler_stats),
         )
         // Health and monitoring
         .route("/health", get(health::health_check))
@@ -432,6 +475,7 @@ pub async fn create_router(
         .layer(Extension(mcp_server)) // 🆕 Add MCP server extension
         .layer(Extension(metrics_registry))
         .layer(Extension(memory_manager))
+        .layer(Extension(file_centric_state)) // 🆕 File-centric resource/category managers
         .layer(Extension(Arc::new(repositories)))
         .layer(Extension(Arc::new(QuotaManager::new()))); // ✅ API限流管理器
 
@@ -455,6 +499,18 @@ pub async fn create_router(
         memory::get_search_statistics,
         memory::warmup_cache,
         memory::performance_benchmark,
+        file_centric::mount_resource,
+        file_centric::get_resource,
+        file_centric::extract_resource,
+        file_centric::list_categories,
+        file_centric::search_categories,
+        file_centric::plan_legacy_migration,
+        file_centric::apply_legacy_migration,
+        file_centric::rollback_legacy_migration,
+        file_centric::list_proactive_tasks,
+        file_centric::run_proactive_task,
+        file_centric::cancel_proactive_task,
+        file_centric::get_scheduler_stats,
         users::register_user,
         users::login_user,
         users::get_current_user,
@@ -523,6 +579,31 @@ pub async fn create_router(
             crate::models::SearchResponse,
             crate::models::BatchRequest,
             crate::models::BatchResponse,
+            crate::models::MountResourceRequest,
+            crate::models::ResourceDescriptor,
+            crate::models::ResourceMetadataDescriptor,
+            crate::models::ResourceStatus,
+            crate::models::ScopeDescriptor,
+            crate::models::CategoryDescriptor,
+            crate::models::CategoryMetadataDescriptor,
+            crate::models::CategoryStatus,
+            crate::models::SearchCategoriesRequest,
+            crate::models::ExtractionRequest,
+            crate::models::ExtractionResult,
+            crate::models::ExtractedEntity,
+            crate::models::ExtractedRelation,
+            crate::models::MigrationPlan,
+            crate::models::PlanMigrationRequest,
+            crate::models::MigrationReport,
+            crate::models::ApplyMigrationRequest,
+            crate::models::RollbackMigrationRequest,
+            crate::models::ProactiveTaskInfo,
+            crate::models::RunProactiveTaskRequest,
+            crate::models::CancelProactiveTaskRequest,
+            crate::models::SchedulerStats,
+            crate::models::SchedulerState,
+            crate::models::OperationStatus,
+            crate::models::PlatformErrorCode,
             crate::models::HealthResponse,
             crate::models::ComponentStatus,
             crate::models::MetricsResponse,
@@ -587,6 +668,7 @@ pub async fn create_router(
         (name = "mcp", description = "MCP (Model Context Protocol) server operations"),
         (name = "working-memory", description = "Working Memory operations for session-based temporary context"),
         (name = "graph", description = "Knowledge graph visualization and querying operations"),
+        (name = "file-centric", description = "Preview file-centric platform operations"),
         (name = "health", description = "Health and monitoring"),
         (name = "statistics", description = "Dashboard statistics and analytics"),
     ),

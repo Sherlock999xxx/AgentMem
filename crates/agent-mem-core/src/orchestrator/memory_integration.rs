@@ -575,6 +575,8 @@ impl MemoryIntegrator {
                     context: Some(context),
                     enable_topic_extraction: true,
                     enable_context_synthesis: true,
+                    resource_id: None,
+                    category_path: None,
                 };
 
                 match active_retrieval.retrieve(request).await {

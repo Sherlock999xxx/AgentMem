@@ -52,6 +52,18 @@ pub struct RetrievalRequest {
     pub enable_topic_extraction: bool,
     /// 是否启用上下文合成
     pub enable_context_synthesis: bool,
+    /// Resource ID for resource-first retrieval (optional)
+    ///
+    /// When present, restricts retrieval to memories extracted from this specific resource.
+    /// Enables resource-centric retrieval path: mount -> extract -> retrieve.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub resource_id: Option<String>,
+    /// Category path for category-aware retrieval (optional)
+    ///
+    /// When present, restricts retrieval to memories within this category hierarchy.
+    /// Format: "/category/subcategory" (e.g., "/preferences/communication/style")
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub category_path: Option<String>,
 }
 
 /// 检索响应

@@ -302,6 +302,10 @@ impl RetrievalRouter {
         let confidence =
             self.calculate_decision_confidence(&selected_strategies, &request_features);
 
+        // Check if resource_id or category_path is provided
+        let route_by_resource_or_category =
+            request.resource_id.is_some() || request.category_path.is_some();
+
         let decision = RouteDecision {
             selected_strategies: selected_strategies.clone(),
             target_memory_types: target_memory_types.clone(),
@@ -309,9 +313,9 @@ impl RetrievalRouter {
             confidence,
             reasoning,
             estimated_performance,
-            route_by_resource_or_category: false,
-            target_resource_id: None,
-            target_category_path: None,
+            route_by_resource_or_category,
+            target_resource_id: request.resource_id.clone(),
+            target_category_path: request.category_path.clone(),
         };
 
         let routing_time_ms = start_time.elapsed().as_millis() as u64;
@@ -389,6 +393,11 @@ impl RetrievalRouter {
         request: &RetrievalRequest,
         extracted_topics: &[ExtractedTopic],
     ) -> Result<Vec<MemoryType>> {
+        // File-centric routing: if resource_id is specified, route to Resource memory type
+        if request.resource_id.is_some() {
+            return Ok(vec![MemoryType::Resource]);
+        }
+
         // 如果请求中指定了目标类型，直接使用
         if let Some(target_types) = &request.target_memory_types {
             return Ok(target_types.clone());
@@ -677,6 +686,8 @@ mod tests {
         assert_eq!(decision.confidence, 0.85);
         assert_eq!(decision.reasoning.len(), 1);
         assert!(!decision.route_by_resource_or_category);
+        assert!(decision.target_resource_id.is_none());
+        assert!(decision.target_category_path.is_none());
     }
 
     #[test]
@@ -797,5 +808,33 @@ mod tests {
 
         assert!(hybrid_weight >= embedding_weight);
         assert!(embedding_weight > bm25_weight);
+    }
+
+    #[test]
+    fn test_route_decision_with_file_centric_routing() {
+        let decision = RouteDecision {
+            selected_strategies: vec![RetrievalStrategy::Embedding],
+            target_memory_types: vec![MemoryType::Resource],
+            strategy_weights: HashMap::new(),
+            confidence: 0.9,
+            reasoning: vec!["Resource-first retrieval".to_string()],
+            estimated_performance: PerformanceEstimate {
+                estimated_response_time_ms: 80,
+                estimated_accuracy: 0.92,
+                estimated_recall: 0.88,
+                estimated_resource_usage: 0.4,
+            },
+            route_by_resource_or_category: true,
+            target_resource_id: Some("resource-123".to_string()),
+            target_category_path: Some("/preferences/communication".to_string()),
+        };
+
+        assert!(decision.route_by_resource_or_category);
+        assert_eq!(decision.target_resource_id, Some("resource-123".to_string()));
+        assert_eq!(
+            decision.target_category_path,
+            Some("/preferences/communication".to_string())
+        );
+        assert!(decision.target_memory_types.contains(&MemoryType::Resource));
     }
 }

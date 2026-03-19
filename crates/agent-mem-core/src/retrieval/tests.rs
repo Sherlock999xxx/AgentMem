@@ -22,6 +22,8 @@ fn create_test_retrieval_request() -> RetrievalRequest {
         }),
         enable_topic_extraction: true,
         enable_context_synthesis: true,
+        resource_id: None,
+        category_path: None,
     }
 }
 
@@ -148,7 +150,8 @@ async fn test_router_strategy_selection() -> anyhow::Result<()> {
         context: None,
         enable_topic_extraction: false,
         enable_context_synthesis: false,
-    Ok(())
+        resource_id: None,
+        category_path: None,
     };
 
     let result = router.route_retrieval(&request, &[]).await?;

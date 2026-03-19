@@ -2,6 +2,10 @@
 
 ## Patterns
 
+### mem-1773892066-eeb2
+> Phase B breakdown: The umbrella task is too large for single iteration. Break into 4 atomic tasks: B.1 (RouteBy enum), B.2 (ResourceAgent mount/extract), B.3 (Router file-centric), B.4 (Integration test). Execute in order B.1 → B.3 → B.2 → B.4.
+<!-- tags: agentmem, phase-b, task-breakdown | created: 2026-03-19 -->
+
 ### mem-1773804355-b9e7
 > pattern: when multiple cargo runs contend during Ralph loops, switch verification to a fresh per-task --target-dir instead of waiting on the shared artifact lock
 <!-- tags: cargo, testing, ralph | created: 2026-03-18 -->

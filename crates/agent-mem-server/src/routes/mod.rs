@@ -201,6 +201,8 @@ pub async fn create_router(
         .route("/api/v1/resources/mount", post(file_centric::mount_resource))
         .route("/api/v1/resources/:resource_id", get(file_centric::get_resource))
         .route("/api/v1/resources/extract", post(file_centric::extract_resource))
+        .route("/api/v1/categories/by-path", get(file_centric::get_category_by_path))
+        .route("/api/v1/categories/:category_id", get(file_centric::get_category))
         .route("/api/v1/categories", get(file_centric::list_categories))
         .route(
             "/api/v1/categories/search",
@@ -219,8 +221,16 @@ pub async fn create_router(
             post(file_centric::rollback_legacy_migration),
         )
         .route(
+            "/api/v1/migrations/:migration_id",
+            get(file_centric::get_migration_status),
+        )
+        .route(
             "/api/v1/proactive/tasks",
             get(file_centric::list_proactive_tasks),
+        )
+        .route(
+            "/api/v1/proactive/tasks/:task_id",
+            get(file_centric::get_proactive_task),
         )
         .route(
             "/api/v1/proactive/tasks/:task_id/run",
@@ -231,8 +241,125 @@ pub async fn create_router(
             post(file_centric::cancel_proactive_task),
         )
         .route(
+            "/api/v1/proactive/stats",
+            get(file_centric::get_scheduler_stats_canonical),
+        )
+        .route(
             "/api/v1/proactive/scheduler/stats",
             get(file_centric::get_scheduler_stats),
+        )
+        // Canonical file-centric surface and compatibility aliases for SDKs
+        .route(
+            "/api/v1/file-centric/resources",
+            get(file_centric::list_resources).post(file_centric::mount_resource_canonical),
+        )
+        .route(
+            "/api/v1/file-centric/resources/:resource_id",
+            get(file_centric::get_resource_canonical),
+        )
+        .route(
+            "/api/v1/file-centric/resources/:resource_id/extract",
+            post(file_centric::extract_resource_canonical),
+        )
+        .route(
+            "/api/v1/file-centric/extraction",
+            post(file_centric::extract_resource_canonical),
+        )
+        .route(
+            "/api/v1/file-centric/extraction/extract",
+            post(file_centric::extract_resource_canonical),
+        )
+        .route(
+            "/api/v1/file-centric/extraction/:job_id",
+            get(file_centric::get_extraction_status),
+        )
+        .route(
+            "/api/v1/file-centric/extraction/jobs/:job_id",
+            get(file_centric::get_extraction_status),
+        )
+        .route(
+            "/api/v1/file-centric/extractions/:job_id",
+            get(file_centric::get_extraction_status),
+        )
+        .route(
+            "/api/v1/file-centric/categories/by-path",
+            get(file_centric::get_category_by_path),
+        )
+        .route(
+            "/api/v1/file-centric/categories/:category_id",
+            get(file_centric::get_category),
+        )
+        .route(
+            "/api/v1/file-centric/categories",
+            get(file_centric::list_categories_canonical),
+        )
+        .route(
+            "/api/v1/file-centric/categories/search",
+            post(file_centric::search_categories_canonical),
+        )
+        .route(
+            "/api/v1/file-centric/migration/plan",
+            post(file_centric::plan_legacy_migration_canonical),
+        )
+        .route(
+            "/api/v1/file-centric/migration/apply",
+            post(file_centric::apply_legacy_migration_canonical),
+        )
+        .route(
+            "/api/v1/file-centric/migration/:migration_id",
+            get(file_centric::get_migration_status),
+        )
+        .route(
+            "/api/v1/file-centric/migration/:migration_id/rollback",
+            post(file_centric::rollback_legacy_migration_canonical),
+        )
+        .route(
+            "/api/v1/file-centric/migration/migrations/:migration_id",
+            get(file_centric::get_migration_status),
+        )
+        .route(
+            "/api/v1/file-centric/migration/migrations/:migration_id/rollback",
+            post(file_centric::rollback_legacy_migration_canonical),
+        )
+        .route(
+            "/api/v1/file-centric/migrations/plan",
+            post(file_centric::plan_legacy_migration_canonical),
+        )
+        .route(
+            "/api/v1/file-centric/migrations/apply",
+            post(file_centric::apply_legacy_migration_canonical),
+        )
+        .route(
+            "/api/v1/file-centric/migrations/:migration_id",
+            get(file_centric::get_migration_status),
+        )
+        .route(
+            "/api/v1/file-centric/migrations/:migration_id/rollback",
+            post(file_centric::rollback_legacy_migration_canonical),
+        )
+        .route(
+            "/api/v1/file-centric/proactive/tasks",
+            get(file_centric::list_proactive_tasks_canonical),
+        )
+        .route(
+            "/api/v1/file-centric/proactive/tasks/:task_id",
+            get(file_centric::get_proactive_task),
+        )
+        .route(
+            "/api/v1/file-centric/proactive/tasks/:task_id/run",
+            post(file_centric::run_proactive_task_canonical),
+        )
+        .route(
+            "/api/v1/file-centric/proactive/tasks/:task_id/cancel",
+            post(file_centric::cancel_proactive_task_canonical),
+        )
+        .route(
+            "/api/v1/file-centric/proactive/stats",
+            get(file_centric::get_scheduler_stats_canonical),
+        )
+        .route(
+            "/api/v1/file-centric/proactive/scheduler/stats",
+            get(file_centric::get_scheduler_stats_canonical),
         )
         // Health and monitoring
         .route("/health", get(health::health_check))

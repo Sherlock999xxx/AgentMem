@@ -74,6 +74,14 @@
 
 ## Fixes
 
+### mem-1773885617-61a5
+> fix: agent-mem-memvid SearchHit API changed in memvid-core 2.0.135. Changed hit.snippet to hit.text, and hit.score from f32 to Option<f32>. Also fixed memory_to_item by extracting created_at/updated_at before moving mem.metadata to JSON.
+<!-- tags: cargo, memvid, api-change | created: 2026-03-19 -->
+
+### mem-1773884301-dab6
+> fix: Fixed pre-existing clippy lint failures in agent-mem-traits and agent-mem-extraction. agent-mem-traits: Added #![allow(deprecated)] to suppress deprecated MemoryItem warnings for backward compatibility. agent-mem-extraction: Removed unused imports (ExtractionError, Result, PathBuf, ResourceContent), removed unnecessary mut on variables, added #[derive(Default)] instead of manual impl, fixed enumerate loop to avoid unused index, added #[allow(clippy::needless_range_loop)] and #[allow(clippy::borrowed_box)] where needed. Remaining 4 warnings are dead code warnings for unused fields/methods.
+<!-- tags: cargo, clippy, cleanup | created: 2026-03-19 -->
+
 ### mem-1773880639-57b6
 > fix: agent-mem-server/src/routes/working_memory.rs line 118-122: .map(|v| v.as_str()) returned Option<Option<&str>>, changed to .and_then() to flatten to Option<&str> so it works with WorkingMemoryItem.agent_id: String
 <!-- tags: server, rust, type-mismatch | created: 2026-03-19 -->
@@ -247,6 +255,14 @@
 <!-- tags: tooling, error-handling, ralph | created: 2026-03-18 -->
 
 ## Context
+
+### mem-1773883158-1fd4
+> file-centric penetration phases A/C complete: platform types exported, routes wired, tests pass. Clippy fails on pre-existing agent-mem-traits (45 deprecated MemoryItem errors) and agent-mem-extraction (16 lint issues) - not related to file-centric changes
+<!-- tags: agentmem, file-centric, verification | created: 2026-03-19 -->
+
+### mem-1773882247-68b2
+> file-centric dual-surface entrypoints complete: platform module exports ResourceDescriptor/CategoryDescriptor/ExtractionRequest/Result/MigrationPlan/Report/ProactiveTask types, client adds mount/get/extract/list/search methods, server wires file_centric routes with FileCentricState to ResourceManager/CategoryManager. 5 server + 22 client tests pass.
+<!-- tags: agentmem, file-centric, api | created: 2026-03-19 -->
 
 ### mem-1773832507-03ee
 > context: docs/specs/file-centric-fixtures now define the canonical file-centric DTO wire examples for resource/category/extraction/migration/proactive, mirrored by agent-mem-client and agent-mem-server model types; extracted confidence fields were promoted to f64 to keep fixture roundtrips stable

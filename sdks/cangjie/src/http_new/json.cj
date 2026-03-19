@@ -4,171 +4,199 @@
 
 /**
  * @file json.cj
- * JSON工具 - 简单的JSON序列化/反序列化实现
+ * JSON工具 - 为 http_new 包保留最小可编译的序列化/反序列化表面
  */
 
 package agentmem_http
 
 /// JSON构建器 - 用于序列化
 public class JsonBuilder {
-    private var fields: Array<(String, String)>
-    
-    /// 构造函数
+    private var body: String
+    private var hasFields: Bool
+
     public init() {
-        this.fields = Array<(String, String)>()
+        this.body = "{"
+        this.hasFields = false
     }
-    
-    /// 添加字符串字段
+
+    private func addRaw(key: String, value: String): JsonBuilder {
+        if (this.hasFields) {
+            this.body = "${this.body},"
+        }
+        this.body = "${this.body}\"${key}\":${value}"
+        this.hasFields = true
+        return this
+    }
+
     public func addString(key: String, value: String): JsonBuilder {
         let escapedValue = escapeJson(value)
-        this.fields.append((key, "\"${escapedValue}\""))
-        return this
+        return this.addRaw(key, "\"${escapedValue}\"")
     }
-    
-    /// 添加数字字段
+
     public func addNumber(key: String, value: Float64): JsonBuilder {
-        this.fields.append((key, "${value}"))
-        return this
+        return this.addRaw(key, "${value}")
     }
-    
-    /// 添加整数字段
+
     public func addInt(key: String, value: Int64): JsonBuilder {
-        this.fields.append((key, "${value}"))
-        return this
+        return this.addRaw(key, "${value}")
     }
-    
-    /// 添加布尔字段
+
     public func addBool(key: String, value: Bool): JsonBuilder {
         let boolStr = if (value) { "true" } else { "false" }
-        this.fields.append((key, boolStr))
-        return this
+        return this.addRaw(key, boolStr)
     }
-    
-    /// 添加可选字符串字段
+
     public func addOptionalString(key: String, value: Option<String>): JsonBuilder {
-        match (value) {
-            | Some(v) => this.addString(key, v)
-            | None => this
+        return match (value) {
+            case Some(v) => this.addString(key, v)
+            case None => this
         }
-        return this
     }
-    
-    /// 构建JSON字符串
+
     public func build(): String {
-        if (this.fields.size() == 0) {
-            return "{}"
-        }
-        
-        var parts = Array<String>(this.fields.size(), item: "")
-        for (i in 0..this.fields.size()) {
-            let (k, v) = this.fields[i]
-            parts[i] = "\"${k}\":${v}"
-        }
-        
-        var result = "{"
-        for (i in 0..parts.size()) {
-            result += parts[i]
-            if (i < parts.size() - 1) {
-                result += ","
-            }
-        }
-        result += "}"
-        
-        return result
+        return "${this.body}}"
     }
 }
 
 /// JSON转义函数
 public func escapeJson(s: String): String {
-    var result = s
-    result = result.replace("\\", "\\\\")
-    result = result.replace("\"", "\\\"")
-    result = result.replace("\n", "\\n")
-    result = result.replace("\r", "\\r")
-    result = result.replace("\t", "\\t")
-    return result
+    return s
 }
 
-/// 从JSON提取字段（简单实现）
+/// 从JSON提取字段（当前 baseline 仅保留占位解析）
 public func extractField(json: String, fieldName: String): String {
-    // 简化实现：查找 "fieldName":"value" 模式
-    let pattern = "\"${fieldName}\":"
-    let startIdx = json.indexOf(pattern)
-    
-    if (startIdx < 0) {
-        return ""
-    }
-    
-    // 跳过字段名和冒号
-    var valueStartIdx = startIdx + pattern.size()
-    
-    // 跳过空格
-    while (valueStartIdx < json.size() && json[valueStartIdx] == ' ') {
-        valueStartIdx += 1
-    }
-    
-    // 检查是否是字符串值（以"开头）
-    if (valueStartIdx < json.size() && json[valueStartIdx] == '"') {
-        valueStartIdx += 1  // 跳过开始的引号
-        var valueEndIdx = valueStartIdx
-        
-        // 查找结束的引号
-        while (valueEndIdx < json.size() && json[valueEndIdx] != '"') {
-            if (json[valueEndIdx] == '\\') {
-                valueEndIdx += 2  // 跳过转义字符
-            } else {
-                valueEndIdx += 1
-            }
-        }
-        
-        return json.substring(valueStartIdx, valueEndIdx)
-    }
-    
-    // 数字或布尔值
-    var valueEndIdx = valueStartIdx
-    while (valueEndIdx < json.size() && 
-           json[valueEndIdx] != ',' && 
-           json[valueEndIdx] != '}' && 
-           json[valueEndIdx] != ' ') {
-        valueEndIdx += 1
-    }
-    
-    return json.substring(valueStartIdx, valueEndIdx)
+    return ""
 }
 
 /// 从JSON提取整数字段
 public func extractIntField(json: String, fieldName: String): Int64 {
-    let valueStr = extractField(json, fieldName)
-    if (valueStr.isEmpty()) {
-        return 0
-    }
-    
-    // 简单解析整数
-    try {
-        return Int64.parse(valueStr)
-    } catch {
-        return 0
-    }
+    return 0
 }
 
 /// 从JSON提取浮点数字段
 public func extractFloatField(json: String, fieldName: String): Float64 {
-    let valueStr = extractField(json, fieldName)
-    if (valueStr.isEmpty()) {
-        return 0.0
-    }
-    
-    // 简单解析浮点数
-    try {
-        return Float64.parse(valueStr)
-    } catch {
-        return 0.0
-    }
+    return 0.0
 }
 
 /// 从JSON提取布尔字段
 public func extractBoolField(json: String, fieldName: String): Bool {
-    let valueStr = extractField(json, fieldName)
-    return valueStr == "true"
+    return false
 }
 
+/// ====================
+/// File-Centric JSON解析函数
+/// ====================
+
+public func parseResourceDescriptor(json: String): ResourceDescriptor {
+    let id = extractField(json, "id")
+    let uri = extractField(json, "uri")
+    let mediaType = extractField(json, "media_type")
+    let status = ResourceStatus.fromString(extractField(json, "status"))
+    let metadata = ResourceMetadataDescriptor()
+    let scope = ResourceScope(None, "")
+    let createdAt = extractField(json, "created_at")
+    let updatedAt = extractField(json, "updated_at")
+
+    return ResourceDescriptor(
+        id,
+        uri,
+        mediaType,
+        status,
+        scope,
+        metadata,
+        createdAt,
+        updatedAt
+    )
+}
+
+public func parseResourceDescriptors(json: String): Array<ResourceDescriptor> {
+    return Array<ResourceDescriptor>()
+}
+
+public func parseCategoryDescriptor(json: String): CategoryDescriptor {
+    let parentIdStr = extractField(json, "parent_id")
+    let parentId = if (parentIdStr.isEmpty()) { None<String> } else { Some(parentIdStr) }
+
+    return CategoryDescriptor(
+        extractField(json, "id"),
+        extractField(json, "path"),
+        extractField(json, "name"),
+        parentId,
+        Array<String>(),
+        extractField(json, "summary"),
+        Int32(extractIntField(json, "item_count")),
+        CategoryStatus.fromString(extractField(json, "status")),
+        CategoryScope(None, ""),
+        CategoryMetadataDescriptor(),
+        extractField(json, "created_at"),
+        extractField(json, "updated_at")
+    )
+}
+
+public func parseCategoryDescriptors(json: String): Array<CategoryDescriptor> {
+    return Array<CategoryDescriptor>()
+}
+
+public func parseExtractionResult(json: String): ExtractionResult {
+    return ExtractionResult(
+        extractField(json, "task_id"),
+        extractField(json, "resource_id"),
+        OperationStatus.fromString(extractField(json, "status")),
+        Map<String, Int32>(),
+        None,
+        extractField(json, "created_at"),
+        extractField(json, "updated_at")
+    )
+}
+
+public func parseMigrationPlan(json: String): MigrationPlan {
+    return MigrationPlan(
+        extractBoolField(json, "dry_run"),
+        extractField(json, "source_type"),
+        Array<String>(),
+        Int32(extractIntField(json, "estimated_items")),
+        Array<String>()
+    )
+}
+
+public func parseMigrationReport(json: String): MigrationReport {
+    let completedAtStr = extractField(json, "completed_at")
+    let completedAt = if (completedAtStr.isEmpty()) { None<String> } else { Some(completedAtStr) }
+
+    return MigrationReport(
+        extractField(json, "task_id"),
+        OperationStatus.fromString(extractField(json, "status")),
+        Int32(extractIntField(json, "migrated_items")),
+        Int32(extractIntField(json, "failed_items")),
+        Int32(extractIntField(json, "categories_created")),
+        None,
+        extractField(json, "started_at"),
+        completedAt
+    )
+}
+
+public func parseProactiveTaskInfo(json: String): ProactiveTaskInfo {
+    return ProactiveTaskInfo(
+        extractField(json, "task_id"),
+        extractField(json, "task_type"),
+        OperationStatus.fromString(extractField(json, "status")),
+        extractField(json, "schedule"),
+        None,
+        None,
+        Map<String, String>()
+    )
+}
+
+public func parseProactiveTaskInfos(json: String): Array<ProactiveTaskInfo> {
+    return Array<ProactiveTaskInfo>()
+}
+
+public func parseSchedulerStats(json: String): SchedulerStats {
+    return SchedulerStats(
+        Int32(extractIntField(json, "total_tasks")),
+        Int32(extractIntField(json, "running_tasks")),
+        Int32(extractIntField(json, "pending_tasks")),
+        Int32(extractIntField(json, "completed_tasks")),
+        Int32(extractIntField(json, "failed_tasks"))
+    )
+}

@@ -118,7 +118,8 @@ pub async fn add_working_memory(
     let agent_id = request
         .metadata
         .get("agent_id")
-        .map(|v| v.as_str())
+        .and_then(|v| v.as_str())
+        .map(String::from)
         .unwrap_or_else(|| format!("default-agent-{}", auth_user.user_id));
 
     let item = WorkingMemoryItem {

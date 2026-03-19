@@ -289,3 +289,13 @@ Phase C - Dual-surface entrypoints (server/client/Rust API)
 - Add client methods for resource operations
 - Ensure backward compatibility
 
+## 2026-03-19
+- Task: `task-1773924797-9514` (`Repair Cangjie http_new package compiler baseline`).
+- `ralph tools task start task-1773924797-9514` still fails with `unrecognized subcommand 'start'`; using the selected ready task as the active unit of work and proceeding with the actual compiler repair.
+- Reproduced failing baseline with `/Users/louloulin/Documents/linchong/cj/CangjieSDK-Darwin/cangjie/bin/cjc -p sdks/cangjie/src/http_new --output-dir logs/cangjie-http-new-build`.
+- First compiler blockers were package-wide syntax drift against installed `cjc`: old `match` arm syntax (`| ... =>`) and unsupported default parameters in `client.cj`/`memory.cj`.
+- Working references in `sdks/cangjie/src/core/types.cj` and `sdks/cangjie/src/tests/unit_tests.cj` confirmed current syntax expects `case ... =>` in match blocks and overloaded initializers instead of default arguments.
+- Additional blockers found during inspection: `api.cj` mutated `path` while declaring it with `let`, the package defined `ExtractionRequest` twice (`file_centric.cj` and `api.cj`), and the standalone package could not rely on higher-level helper packages during `cjc -p` compilation.
+- Verification: `/Users/louloulin/Documents/linchong/cj/CangjieSDK-Darwin/cangjie/bin/cjc -p sdks/cangjie/src/http_new --output-dir logs/cangjie-http-new-build` now exits `0` and emits only warnings.
+- Runtime check: `DYLD_LIBRARY_PATH=/Users/louloulin/Documents/linchong/cj/CangjieSDK-Darwin/cangjie/runtime/lib/darwin_aarch64_llvm:/Users/louloulin/Documents/linchong/cj/CangjieSDK-Darwin/cangjie/lib/darwin_aarch64_llvm ./logs/cangjie-http-new-build/main` exits `0` and the bundled smoke tests report `6/6` passing.
+- Remaining caveat: `http_new/json.cj` now uses minimal compile-safe stub parsing for this standalone package, so the baseline is compiler-valid and runnable, but real JSON fidelity still belongs to a later parity task rather than this compiler-baseline repair.

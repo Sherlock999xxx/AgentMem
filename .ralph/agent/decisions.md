@@ -46,3 +46,30 @@ Use this file to record consequential decisions when confidence is 80 or below.
 - Reasoning: 当前 resource/category/extraction crate 的内部结构尚未经过外部 API 收敛，使用 trait object 可以解耦接口，后续如需替换实现（如从 in-memory 到持久化）不影响 handler 签名。`InMemoryCategoryManager` 已有完整的 trait 实现，直接持有即可，无需额外包装。选择 RwLock 包裹 Option<ExtractionPipeline> 是因为 pipeline 可能未配置，用 `None` 表示 stub 行为。
 - Reversibility: 高。后续可以替换 State 内部的 manager 实现，或改为持有 `Arc<dyn Trait + Send + Sync>` 统一接口。
 - Timestamp (UTC ISO 8601): 2026-03-19T00:57:00Z
+
+## DEC-006
+- Decision: `task-1773924455-9358` 是否应直接提交当前 JavaScript / Go / 仓颉 file-centric SDK 改动
+- Chosen Option: 不提交，先将本任务标记为 blocked/failed，并为下一轮创建“对齐 preview server route contract 与 SDK surface”的原子任务
+- Confidence: 79
+- Alternatives Considered: 1) 直接按当前改动提交，接受 SDK 先于 server 的 route 漂移 2) 在本轮同时大改 Rust server/client 路由以追平 18 个 SDK 方法 3) 仅修复仓颉语法/编译问题后提交剩余 SDK 改动
+- Reasoning: 代码实证表明当前 Rust preview surface 只暴露 `/api/v1/resources/*`、`/api/v1/categories/*`、`/api/v1/migrations/*`、`/api/v1/proactive/*` 的子集；而待提交 SDK 改动普遍假设 `/api/v1/file-centric/*` 路由，并暴露 `get_category_by_path`、`get_migration_status`、`get_proactive_task` 等 server 当前不存在的接口。此时提交会把跨语言 SDK 固化到一个并不存在的公共合同上，后续返工成本更高。先把阻塞显式化，再拆出 route/contract 对齐任务，风险更低。
+- Reversibility: 高。下一轮既可以扩 server 追平 SDK 合同，也可以收缩 SDK 到当前 preview surface；本次保留未提交状态不会扩大用户影响面。
+- Timestamp (UTC ISO 8601): 2026-03-19T14:15:00Z
+
+## DEC-007
+- Decision: `task-1773924797-863f` 的 route-contract 对齐是直接替换旧 preview 路径，还是叠加新的 canonical file-centric 路由层
+- Chosen Option: 保留现有 `/api/v1/resources|categories|migrations|proactive/*` preview 路由不变，并新增 `/api/v1/file-centric/*` canonical 路由与 collection-style 响应 envelope，缺失的 get/status 端点以轻量 stub 或现有 handler 复用方式补齐
+- Confidence: 78
+- Alternatives Considered: 1) 直接把现有 preview 路由整体重命名为 `/api/v1/file-centric/*` 2) 只修 SDK，不扩 server 3) 一次性把所有 SDK 分支差异路径也全部纳入 server 兼容层
+- Reasoning: 现有 Rust client 和已有 preview 测试仍依赖未加前缀的路径，直接替换会制造不必要的回归；而完全不扩 server 会继续阻塞已经进入 SDK wave 的 file-centric surface。叠加 canonical 路由层可以用最小改动把 Python/JS 目标合同落到真实 server 上，同时把旧 preview surface 继续保留为兼容层。对 Go/Cangjie 的个别路径偏差，后续再在各 SDK 内收敛更稳妥。
+- Reversibility: 高。后续可在文档和客户端完成迁移后逐步废弃旧 preview 路由，或继续补充少量 alias，而不影响已新增的 canonical surface。
+- Timestamp (UTC ISO 8601): 2026-03-19T15:05:00Z
+
+## DEC-008
+- Decision: `task-1773924797-9514` 中 `http_new` 包重复定义 `ExtractionRequest` 时，是否通过重命名 API helper 保持旧签名，还是统一到已存在的 file-centric `ExtractionRequest`
+- Chosen Option: 删除 `api.cj` 中重复的 helper 定义，并让 `FileCentricApi.extractResource` 直接消费 `file_centric.cj` 里已有的 `ExtractionRequest`
+- Confidence: 74
+- Alternatives Considered: 1) 把 `api.cj` 的 helper 重命名为另一个请求类型，仅为通过编译保留旧字段形状 2) 暂时移除 `extractResource` API，等后续 parity 任务再补回 3) 同时大改整个仓颉 file-centric DTO 以完全追平其它 SDK
+- Reasoning: 当前任务目标是恢复 `http_new` 包对现有 `cjc` 的可编译性，而不是重新设计整个 Cangjie SDK。保留两个同名请求类型会继续阻断编译，也会让公共表面更分裂。直接统一到现有 file-centric `ExtractionRequest` 至少保证“一个概念一个类型”，并把改动范围控制在当前包内；如果后续还需调整字段与路由合同，可以在此基础上继续收敛，而不必先处理命名冲突。
+- Reversibility: 高。后续可以继续演进 `ExtractionRequest` 字段或为 `extractResource` 增加适配层，但不需要再处理重复类型冲突。
+- Timestamp (UTC ISO 8601): 2026-03-19T16:10:00Z

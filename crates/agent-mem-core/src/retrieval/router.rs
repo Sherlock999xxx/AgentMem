@@ -76,6 +76,18 @@ pub struct RouteDecision {
     pub reasoning: Vec<String>,
     /// 预估性能指标
     pub estimated_performance: PerformanceEstimate,
+    /// File-centric routing: prioritize resource/category context over MemoryType
+    ///
+    /// When true, the router should consider resource_id and category_path
+    /// from the request for routing decisions instead of relying solely on MemoryType.
+    #[serde(default)]
+    pub route_by_resource_or_category: bool,
+    /// Target resource ID for resource-first routing (optional)
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub target_resource_id: Option<String>,
+    /// Target category path for category-aware retrieval (optional)
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub target_category_path: Option<String>,
 }
 
 /// 性能预估
@@ -297,6 +309,9 @@ impl RetrievalRouter {
             confidence,
             reasoning,
             estimated_performance,
+            route_by_resource_or_category: false,
+            target_resource_id: None,
+            target_category_path: None,
         };
 
         let routing_time_ms = start_time.elapsed().as_millis() as u64;
@@ -653,11 +668,15 @@ mod tests {
                 estimated_recall: 0.9,
                 estimated_resource_usage: 0.5,
             },
+            route_by_resource_or_category: false,
+            target_resource_id: None,
+            target_category_path: None,
         };
 
         assert_eq!(decision.selected_strategies.len(), 2);
         assert_eq!(decision.confidence, 0.85);
         assert_eq!(decision.reasoning.len(), 1);
+        assert!(!decision.route_by_resource_or_category);
     }
 
     #[test]

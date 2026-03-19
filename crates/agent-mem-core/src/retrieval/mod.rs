@@ -17,7 +17,7 @@ pub mod topic_extractor;
 mod tests;
 
 // Re-export main types
-pub use agent_registry::AgentRegistry;
+pub use agent_registry::{AgentRegistry, RouteBy};
 pub use router::{
     RetrievalRouter, RetrievalRouterConfig, RetrievalStrategy, RouteDecision, RoutingResult,
 };

@@ -44,7 +44,7 @@
   - File: sdks/python/agentmem/types.py
   - Verification: Python syntax check passed
 
-- **D1.2 Python client methods** ⏳ Pending
+- **D1.2 Python client methods** ⏳ Next task
   - Add mount_resource, get_resource, extract_resource methods to client.py
   - Add list_categories, search_categories methods
   - Add plan_legacy_migration, apply_legacy_migration, rollback_migration methods

@@ -27,6 +27,26 @@ from .types import (
     NotFoundError,
     RateLimitError,
     ServerError,
+    # File-centric types
+    ResourceDescriptor,
+    CategoryDescriptor,
+    ExtractionRequest,
+    ExtractionResult,
+    MigrationPlan,
+    MigrationReport,
+    ProactiveTaskInfo,
+    SchedulerStats,
+    ErrorResponse,
+    ResourceStatus,
+    CategoryStatus,
+    OperationStatus,
+    PlatformErrorCode,
+    ScopeDescriptor,
+    CategoryNotFoundError,
+    ResourceUriConflictError,
+    MigrationConflictError,
+    TaskTimeoutError,
+    BackgroundTaskUnavailableError,
 )
 
 
@@ -461,3 +481,369 @@ class AgentMemClient:
             System metrics
         """
         return await self._make_request("GET", "/metrics", use_cache=True)
+
+    # =========================================================================
+    # File-Centric API Methods (Phase D1)
+    # =========================================================================
+
+    # --- Resource Operations ---
+
+    async def mount_resource(
+        self,
+        uri: str,
+        media_type: str,
+        user_id: str,
+        agent_id: str,
+        metadata: Optional[Dict[str, Any]] = None,
+    ) -> ResourceDescriptor:
+        """
+        Mount a resource (file-like entity) into the memory system.
+
+        Args:
+            uri: Resource URI (e.g., file:///path/to/file.md)
+            media_type: MIME type of the resource
+            user_id: User identifier
+            agent_id: Agent identifier
+            metadata: Optional resource metadata
+
+        Returns:
+            Resource descriptor
+        """
+        data: Dict[str, Any] = {
+            "uri": uri,
+            "media_type": media_type,
+            "scope": {"user_id": user_id, "agent_id": agent_id},
+        }
+        if metadata:
+            data["metadata"] = metadata
+
+        response = await self._make_request("POST", "/api/v1/file-centric/resources", data=data)
+        return ResourceDescriptor.from_dict(response)
+
+    async def get_resource(self, resource_id: str) -> ResourceDescriptor:
+        """
+        Get a resource by ID.
+
+        Args:
+            resource_id: Resource identifier
+
+        Returns:
+            Resource descriptor
+        """
+        response = await self._make_request(
+            "GET", f"/api/v1/file-centric/resources/{resource_id}", use_cache=True
+        )
+        return ResourceDescriptor.from_dict(response)
+
+    async def list_resources(
+        self,
+        user_id: str,
+        agent_id: str,
+        status: Optional[ResourceStatus] = None,
+        limit: int = 100,
+    ) -> List[ResourceDescriptor]:
+        """
+        List resources for a scope.
+
+        Args:
+            user_id: User identifier
+            agent_id: Agent identifier
+            status: Optional filter by status
+            limit: Maximum number of resources to return
+
+        Returns:
+            List of resource descriptors
+        """
+        params: Dict[str, Any] = {
+            "user_id": user_id,
+            "agent_id": agent_id,
+            "limit": limit,
+        }
+        if status:
+            params["status"] = status.value
+
+        response = await self._make_request(
+            "GET", "/api/v1/file-centric/resources", params=params, use_cache=True
+        )
+        return [ResourceDescriptor.from_dict(r) for r in response.get("resources", [])]
+
+    # --- Category Operations ---
+
+    async def get_category(self, category_id: str) -> CategoryDescriptor:
+        """
+        Get a category by ID.
+
+        Args:
+            category_id: Category identifier
+
+        Returns:
+            Category descriptor
+        """
+        response = await self._make_request(
+            "GET", f"/api/v1/file-centric/categories/{category_id}", use_cache=True
+        )
+        return CategoryDescriptor.from_dict(response)
+
+    async def get_category_by_path(self, path: str, user_id: str, agent_id: str) -> CategoryDescriptor:
+        """
+        Get a category by path.
+
+        Args:
+            path: Category path (e.g., /preferences/communication)
+            user_id: User identifier
+            agent_id: Agent identifier
+
+        Returns:
+            Category descriptor
+        """
+        params = {"path": path, "user_id": user_id, "agent_id": agent_id}
+        response = await self._make_request(
+            "GET", "/api/v1/file-centric/categories/by-path", params=params, use_cache=True
+        )
+        return CategoryDescriptor.from_dict(response)
+
+    async def list_categories(
+        self,
+        user_id: str,
+        agent_id: str,
+        parent_id: Optional[str] = None,
+        limit: int = 100,
+    ) -> List[CategoryDescriptor]:
+        """
+        List categories for a scope.
+
+        Args:
+            user_id: User identifier
+            agent_id: Agent identifier
+            parent_id: Optional filter by parent category
+            limit: Maximum number of categories to return
+
+        Returns:
+            List of category descriptors
+        """
+        params: Dict[str, Any] = {
+            "user_id": user_id,
+            "agent_id": agent_id,
+            "limit": limit,
+        }
+        if parent_id:
+            params["parent_id"] = parent_id
+
+        response = await self._make_request(
+            "GET", "/api/v1/file-centric/categories", params=params, use_cache=True
+        )
+        return [CategoryDescriptor.from_dict(c) for c in response.get("categories", [])]
+
+    async def search_categories(
+        self,
+        query: str,
+        user_id: str,
+        agent_id: str,
+        limit: int = 10,
+    ) -> List[CategoryDescriptor]:
+        """
+        Search categories by query.
+
+        Args:
+            query: Search query string
+            user_id: User identifier
+            agent_id: Agent identifier
+            limit: Maximum number of results
+
+        Returns:
+            List of matching category descriptors
+        """
+        data = {
+            "query": query,
+            "scope": {"user_id": user_id, "agent_id": agent_id},
+            "limit": limit,
+        }
+        response = await self._make_request("POST", "/api/v1/file-centric/categories/search", data=data)
+        return [CategoryDescriptor.from_dict(c) for c in response.get("categories", [])]
+
+    # --- Extraction Operations ---
+
+    async def extract_resource(self, request: ExtractionRequest) -> ExtractionResult:
+        """
+        Extract structured data from a mounted resource.
+
+        Args:
+            request: Extraction request parameters
+
+        Returns:
+            Extraction result
+        """
+        response = await self._make_request(
+            "POST", "/api/v1/file-centric/extraction", data=request.to_dict()
+        )
+        return ExtractionResult.from_dict(response)
+
+    async def get_extraction_status(self, job_id: str) -> ExtractionResult:
+        """
+        Get the status of an extraction job.
+
+        Args:
+            job_id: Extraction job identifier
+
+        Returns:
+            Extraction result
+        """
+        response = await self._make_request(
+            "GET", f"/api/v1/file-centric/extraction/{job_id}", use_cache=True
+        )
+        return ExtractionResult.from_dict(response)
+
+    # --- Migration Operations ---
+
+    async def plan_legacy_migration(
+        self,
+        user_id: str,
+        agent_id: str,
+        dry_run: bool = True,
+    ) -> MigrationPlan:
+        """
+        Plan a migration from legacy memory to file-centric surface.
+
+        Args:
+            user_id: User identifier
+            agent_id: Agent identifier
+            dry_run: If True, only simulate the migration
+
+        Returns:
+            Migration plan
+        """
+        data = {
+            "scope": {"user_id": user_id, "agent_id": agent_id},
+            "dry_run": dry_run,
+        }
+        response = await self._make_request("POST", "/api/v1/file-centric/migration/plan", data=data)
+        return MigrationPlan.from_dict(response)
+
+    async def apply_legacy_migration(
+        self,
+        plan_id: str,
+        dry_run: bool = False,
+    ) -> MigrationReport:
+        """
+        Apply a migration plan.
+
+        Args:
+            plan_id: Migration plan identifier
+            dry_run: If True, only simulate the migration
+
+        Returns:
+            Migration report
+        """
+        data = {"plan_id": plan_id, "dry_run": dry_run}
+        response = await self._make_request("POST", "/api/v1/file-centric/migration/apply", data=data)
+        return MigrationReport.from_dict(response)
+
+    async def get_migration_status(self, migration_id: str) -> MigrationReport:
+        """
+        Get the status of a migration.
+
+        Args:
+            migration_id: Migration identifier
+
+        Returns:
+            Migration report
+        """
+        response = await self._make_request(
+            "GET", f"/api/v1/file-centric/migration/{migration_id}", use_cache=True
+        )
+        return MigrationReport.from_dict(response)
+
+    async def rollback_migration(self, migration_id: str) -> bool:
+        """
+        Roll back a migration.
+
+        Args:
+            migration_id: Migration identifier
+
+        Returns:
+            True if successful
+        """
+        await self._make_request("POST", f"/api/v1/file-centric/migration/{migration_id}/rollback")
+        return True
+
+    # --- Proactive Task Operations ---
+
+    async def list_proactive_tasks(
+        self,
+        user_id: str,
+        agent_id: str,
+        task_type: Optional[str] = None,
+    ) -> List[ProactiveTaskInfo]:
+        """
+        List proactive background tasks.
+
+        Args:
+            user_id: User identifier
+            agent_id: Agent identifier
+            task_type: Optional filter by task type
+
+        Returns:
+            List of proactive task info
+        """
+        params: Dict[str, Any] = {
+            "user_id": user_id,
+            "agent_id": agent_id,
+        }
+        if task_type:
+            params["task_type"] = task_type
+
+        response = await self._make_request(
+            "GET", "/api/v1/file-centric/proactive/tasks", params=params, use_cache=True
+        )
+        return [ProactiveTaskInfo.from_dict(t) for t in response.get("tasks", [])]
+
+    async def get_proactive_task(self, task_id: str) -> ProactiveTaskInfo:
+        """
+        Get a proactive task by ID.
+
+        Args:
+            task_id: Task identifier
+
+        Returns:
+            Proactive task info
+        """
+        response = await self._make_request(
+            "GET", f"/api/v1/file-centric/proactive/tasks/{task_id}", use_cache=True
+        )
+        return ProactiveTaskInfo.from_dict(response)
+
+    async def run_proactive_task(self, task_id: str) -> ProactiveTaskInfo:
+        """
+        Trigger a proactive task to run immediately.
+
+        Args:
+            task_id: Task identifier
+
+        Returns:
+            Updated proactive task info
+        """
+        response = await self._make_request("POST", f"/api/v1/file-centric/proactive/tasks/{task_id}/run")
+        return ProactiveTaskInfo.from_dict(response)
+
+    async def cancel_proactive_task(self, task_id: str) -> ProactiveTaskInfo:
+        """
+        Cancel a running proactive task.
+
+        Args:
+            task_id: Task identifier
+
+        Returns:
+            Updated proactive task info
+        """
+        response = await self._make_request("POST", f"/api/v1/file-centric/proactive/tasks/{task_id}/cancel")
+        return ProactiveTaskInfo.from_dict(response)
+
+    async def get_scheduler_stats(self) -> SchedulerStats:
+        """
+        Get scheduler statistics.
+
+        Returns:
+            Scheduler statistics
+        """
+        response = await self._make_request("GET", "/api/v1/file-centric/proactive/stats", use_cache=True)
+        return SchedulerStats.from_dict(response)

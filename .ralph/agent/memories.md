@@ -2,6 +2,10 @@
 
 ## Patterns
 
+### mem-1773903608-5a4c
+> Python SDK file-centric types complete: Added ResourceStatus/CategoryStatus/OperationStatus/PlatformErrorCode enums, ResourceDescriptor/CategoryDescriptor/ExtractionRequest/Result/MigrationPlan/Report/ProactiveTaskInfo/SchedulerStats/ErrorResponse dataclasses. Matches frozen contract fixtures. Commit 125d137.
+<!-- tags: agentmem, sdk, python, file-centric | created: 2026-03-19 -->
+
 ### mem-1773902836-1fc0
 > Phase B complete: Agent collaboration chain refactoring finished. All Phase B tasks closed. Verification standards met: (1) Resource-first routing works (2) Category-aware retrieval works (3) MemoryType no longer only routing key. 9 integration tests pass. Next: Phase C - Dual-surface entrypoints.
 <!-- tags: agentmem, phase-b, complete | created: 2026-03-19 -->

@@ -364,6 +364,8 @@ impl ActiveRetrievalSystem {
                     priority: 5, // Normal priority
                     timeout: Some(std::time::Duration::from_secs(5)),
                     retry_count: 0,
+                    resource_id: None,
+                    category_path: None,
                 };
 
                 // 调用真实 Agent

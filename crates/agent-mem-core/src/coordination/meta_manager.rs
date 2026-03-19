@@ -128,6 +128,15 @@ pub struct TaskRequest {
     pub timeout: Option<Duration>,
     /// Retry count
     pub retry_count: usize,
+    /// Resource ID for file-centric routing (optional)
+    /// When present, indicates this task operates on a specific resource
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub resource_id: Option<String>,
+    /// Category path for file-centric routing (optional)
+    /// When present, indicates this task operates within a specific category hierarchy
+    /// Format: "/category/subcategory" (e.g., "/preferences/communication/style")
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub category_path: Option<String>,
 }
 
 impl TaskRequest {
@@ -141,6 +150,8 @@ impl TaskRequest {
             priority: 5,
             timeout: None,
             retry_count: 0,
+            resource_id: None,
+            category_path: None,
         }
     }
 
@@ -153,6 +164,18 @@ impl TaskRequest {
     /// Set task timeout
     pub fn with_timeout(mut self, timeout: Duration) -> Self {
         self.timeout = Some(timeout);
+        self
+    }
+
+    /// Set resource ID for file-centric routing
+    pub fn with_resource_id(mut self, resource_id: String) -> Self {
+        self.resource_id = Some(resource_id);
+        self
+    }
+
+    /// Set category path for file-centric routing
+    pub fn with_category_path(mut self, category_path: String) -> Self {
+        self.category_path = Some(category_path);
         self
     }
 }

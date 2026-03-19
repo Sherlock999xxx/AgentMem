@@ -3,7 +3,8 @@
 //! 管理所有记忆 Agent 的注册表，用于检索系统调用真实的 Agent。
 
 use crate::agents::{
-    CoreAgent, EpisodicAgent, MemoryAgent, ProceduralAgent, SemanticAgent, WorkingAgent,
+    CoreAgent, EpisodicAgent, MemoryAgent, ProceduralAgent, ResourceAgent, SemanticAgent,
+    WorkingAgent,
 };
 use crate::coordination::{TaskRequest, TaskResponse};
 use crate::types::MemoryType;
@@ -26,6 +27,8 @@ pub struct AgentRegistry {
     procedural_agent: Option<Arc<RwLock<ProceduralAgent>>>,
     /// 工作记忆 Agent
     working_agent: Option<Arc<RwLock<WorkingAgent>>>,
+    /// 资源记忆 Agent
+    resource_agent: Option<Arc<RwLock<ResourceAgent>>>,
     /// Agent 映射表（用于快速查找）
     agent_map: Arc<RwLock<HashMap<MemoryType, AgentType>>>,
 }
@@ -38,6 +41,7 @@ enum AgentType {
     Semantic,
     Procedural,
     Working,
+    Resource,
 }
 
 impl AgentRegistry {
@@ -49,6 +53,7 @@ impl AgentRegistry {
             semantic_agent: None,
             procedural_agent: None,
             working_agent: None,
+            resource_agent: None,
             agent_map: Arc::new(RwLock::new(HashMap::new())),
         }
     }
@@ -109,6 +114,16 @@ impl AgentRegistry {
             .write()
             .await
             .insert(MemoryType::Working, AgentType::Working);
+        Ok(())
+    }
+
+    /// 注册资源记忆 Agent
+    pub async fn register_resource_agent(&mut self, agent: Arc<RwLock<ResourceAgent>>) -> Result<()> {
+        self.resource_agent = Some(agent);
+        self.agent_map
+            .write()
+            .await
+            .insert(MemoryType::Resource, AgentType::Resource);
         Ok(())
     }
 
@@ -188,6 +203,19 @@ impl AgentRegistry {
                 } else {
                     Err(agent_mem_traits::AgentMemError::NotFound(
                         "Working agent not initialized".to_string(),
+                    ))
+                }
+            }
+            AgentType::Resource => {
+                if let Some(ref agent) = self.resource_agent {
+                    let mut agent_guard = agent.write().await;
+                    agent_guard
+                        .execute_task(task)
+                        .await
+                        .map_err(|e| agent_mem_traits::AgentMemError::MemoryError(e.to_string()))
+                } else {
+                    Err(agent_mem_traits::AgentMemError::NotFound(
+                        "Resource agent not initialized".to_string(),
                     ))
                 }
             }

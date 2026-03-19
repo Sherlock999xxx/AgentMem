@@ -2,6 +2,10 @@
 
 ## Patterns
 
+### mem-1773902836-1fc0
+> Phase B complete: Agent collaboration chain refactoring finished. All Phase B tasks closed. Verification standards met: (1) Resource-first routing works (2) Category-aware retrieval works (3) MemoryType no longer only routing key. 9 integration tests pass. Next: Phase C - Dual-surface entrypoints.
+<!-- tags: agentmem, phase-b, complete | created: 2026-03-19 -->
+
 ### mem-1773892066-eeb2
 > Phase B breakdown: The umbrella task is too large for single iteration. Break into 4 atomic tasks: B.1 (RouteBy enum), B.2 (ResourceAgent mount/extract), B.3 (Router file-centric), B.4 (Integration test). Execute in order B.1 → B.3 → B.2 → B.4.
 <!-- tags: agentmem, phase-b, task-breakdown | created: 2026-03-19 -->
@@ -77,6 +81,10 @@
 <!-- tags: agentmem, reform, architecture, planning | created: 2026-03-01 -->
 
 ## Fixes
+
+### mem-1773902735-446d
+> fix: cargo test with --target-dir requires a user-accessible path. Use ~/tmp/agentmem-tests instead of /var/tmp or /tmp when target directory is on shared workspace
+<!-- tags: cargo, testing | created: 2026-03-19 -->
 
 ### mem-1773885617-61a5
 > fix: agent-mem-memvid SearchHit API changed in memvid-core 2.0.135. Changed hit.snippet to hit.text, and hit.score from f32 to Option<f32>. Also fixed memory_to_item by extracting created_at/updated_at before moving mem.metadata to JSON.
@@ -259,6 +267,10 @@
 <!-- tags: tooling, error-handling, ralph | created: 2026-03-18 -->
 
 ## Context
+
+### mem-1773903150-729d
+> D0 contracts already frozen: 9 fixture files (resource/category/extraction/migration/proactive/error), OperationStatus enum (pending/running/succeeded/failed/cancelled), PlatformErrorCode enum (validation/category_not_found/resource_uri_conflict/migration_conflict/task_timeout/background_task_unavailable). Server/client models aligned. Ready for D1 Python/JS Beta.
+<!-- tags: agentmem, contracts, sdk | created: 2026-03-19 -->
 
 ### mem-1773883158-1fd4
 > file-centric penetration phases A/C complete: platform types exported, routes wired, tests pass. Clippy fails on pre-existing agent-mem-traits (45 deprecated MemoryItem errors) and agent-mem-extraction (16 lint issues) - not related to file-centric changes

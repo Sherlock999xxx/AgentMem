@@ -1,22 +1,60 @@
 # Scratchpad - AgentMem file-centric Penetration Plan 1.1.1
 
-## Current Session: Phase B - Agent Collaboration Chain Refactoring
+## Current Session: Phase D - SDK Migration
+
+### Phase Status Overview
+| Phase | Status | Evidence |
+|-------|--------|----------|
+| A: Public model unification | ✅ Complete | mem-1773883158-1fd4 |
+| B: Agent collaboration chain | ✅ Complete | All B.1-B.4 tasks closed, 9 tests pass |
+| C: Dual-surface entrypoints | ✅ Complete | mem-1773883158-1fd4 |
+| D: SDK migration | 🔄 Next | D0: Freeze contracts → D1: Python/JS Beta → D2: Go → D3: Cangjie |
+| E: Migration tools | ⏳ Pending | Depends on D |
+| F: Proactive as default | ⏳ Pending | Depends on E |
 
 ### Context
 - Plan: plan1.1.1.md - convert existing resource/category/extraction/proactive capabilities into default platform experience
-- Phase A (public models) and Phase C (dual-surface entrypoints) are complete per memory mem-1773883158-1fd4
-- Current task: task-1773891236-2473 - Phase B: Agent collaboration chain refactoring
+- Phases A/B/C complete - Rust platform has file-centric models and routes
+- Current phase: D - SDK migration with contract-first approach
 
-### Phase B Goals (from plan1.1.1)
-1. ResourceAgent upgrade - from parallel agent to resource mount and preprocessing entrypoint
-2. SemanticAgent/ProceduralAgent - consume extraction output and category context
-3. KnowledgeAgent/ContextualAgent - category-aware retrieval
-4. Retrieval router - from MemoryType mapping to resource/category-aware scheduling
+### Phase D Goals (from plan1.1.1)
+1. D0: Freeze cross-language contracts (DTO fields, long-task states, error codes, fixtures)
+2. D1: Python + JavaScript Beta (mount/get/extract/list/search/migrate/proactive)
+3. D2: Go stabilization (strong type validation, long-task semantics, migration reports)
+4. D3: Cangjie final alignment (HTTP contract consumption, minimal surface)
 
-### Verification Standards
-- At least one resource ingestion path defaults to `mount -> extract -> categorize -> store`
-- Search entry can explicitly consume category/resource context
-- MemoryType is no longer the only agent routing key
+## Phase D Progress (2026-03-19)
+
+### D0: Freeze cross-language contracts ✅
+- Contracts already frozen from previous work
+- 9 fixture files exist in docs/specs/file-centric-fixtures/
+- OperationStatus enum: pending/running/succeeded/failed/cancelled
+- PlatformErrorCode enum: validation/category_not_found/resource_uri_conflict/migration_conflict/task_timeout/background_task_unavailable
+- Task closed: task-1773903069-b646
+
+### D1: Python + JavaScript Beta (in progress)
+- **D1.1 Python types** ✅ task-1773903171-977e
+  - Added file-centric enums: ResourceStatus, CategoryStatus, OperationStatus, PlatformErrorCode
+  - Added dataclasses: ScopeDescriptor, ResourceMetadataDescriptor, CategoryMetadataDescriptor
+  - Added main types: ResourceDescriptor, CategoryDescriptor
+  - Added extraction types: ExtractionRequest, ExtractionResult, ExtractedEntity, ExtractedRelation
+  - Added migration types: MigrationPlan, MigrationReport
+  - Added proactive types: ProactiveTaskInfo, SchedulerStats
+  - Added error types: ErrorResponse + typed exceptions
+  - File: sdks/python/agentmem/types.py
+  - Verification: Python syntax check passed
+
+- **D1.2 Python client methods** ⏳ Pending
+  - Add mount_resource, get_resource, extract_resource methods to client.py
+  - Add list_categories, search_categories methods
+  - Add plan_legacy_migration, apply_legacy_migration, rollback_migration methods
+  - Add list_proactive_tasks, run_proactive_task, cancel_proactive_task, get_scheduler_stats methods
+
+- **D1.3 JavaScript types** ⏳ Pending
+  - Mirror Python types in sdks/javascript/src/types.ts
+
+- **D1.4 JavaScript client methods** ⏳ Pending
+  - Add file-centric methods to sdks/javascript/src/client.ts
 
 ## Analysis Notes
 
@@ -221,4 +259,33 @@ Phase C - Dual-surface entrypoints (server/client/Rust API)
 - Add file-centric routes to server
 - Add file-centric methods to Rust client
 - Maintain backward compatibility with legacy memory CRUD API
+
+
+## Phase B Complete (2026-03-19)
+
+**All Phase B tasks completed:**
+- ✅ B.1: RouteBy enum and dual routing (completed in previous iterations)
+- ✅ B.2: ResourceAgent mount/extract operations (already exists from Phase A work)
+- ✅ B.3: Router file-centric routing (task-1773892897-6ae1)
+- ✅ B.4: Integration tests (task-1773892909-60c4)
+
+**Verification Standards Met:**
+1. ✅ Resource-first routing routes to MemoryType::Resource
+2. ✅ Search can explicitly consume category/resource context
+3. ✅ MemoryType is no longer the only agent routing key
+
+**Files Modified:**
+- crates/agent-mem-core/src/retrieval/mod.rs - Added resource_id/category_path fields
+- crates/agent-mem-core/src/retrieval/router.rs - Extended RouteDecision and file-centric fields
+- crates/agent-mem-core/tests/resource_first_ingestion_test.rs - New integration test file
+
+**Commits:**
+- 7b2dd0b - feat(retrieval): add file-centric routing tests for Phase B
+
+**Next Phase:**
+Phase C - Dual-surface entrypoints (server/client/Rust API)
+- Create file-centric surface alongside legacy memory CRUD
+- Add server routes for resource operations
+- Add client methods for resource operations
+- Ensure backward compatibility
 

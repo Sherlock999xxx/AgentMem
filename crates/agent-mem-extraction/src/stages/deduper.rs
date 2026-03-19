@@ -2,7 +2,7 @@
 //!
 //! Removes duplicate and similar memory items
 
-use crate::error::{ExtractionError, Result};
+use crate::error::Result;
 use crate::models::{ExtractionContext, ExtractionInput, ExtractionOutput, MemoryItem};
 use crate::stage::{ExtractionStage, StagePriority};
 use async_trait::async_trait;
@@ -91,6 +91,7 @@ impl DedupeMerger {
     }
 
     /// Merge similar items
+    #[allow(clippy::needless_range_loop)]
     fn merge_similar(&self, items: Vec<MemoryItem>) -> Vec<MemoryItem> {
         let mut merged = Vec::new();
         let mut merged_indices = HashSet::new();

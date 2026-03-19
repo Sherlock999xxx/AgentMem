@@ -2,7 +2,7 @@
 //!
 //! Persists memory items and updates search indexes
 
-use crate::error::{ExtractionError, Result};
+use crate::error::Result;
 use crate::models::{ExtractionContext, ExtractionInput, ExtractionOutput};
 use crate::stage::{ExtractionStage, StagePriority};
 use async_trait::async_trait;

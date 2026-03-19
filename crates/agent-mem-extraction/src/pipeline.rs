@@ -157,7 +157,7 @@ impl ExtractionPipeline {
         output: &mut ExtractionOutput,
         context: &mut ExtractionContext,
     ) -> Result<()> {
-        let mut current_input = input;
+        let current_input = input;
 
         for stage in &self.stages {
             let stage_name = stage.name();
@@ -217,11 +217,12 @@ impl ExtractionPipeline {
     }
 
     /// Execute a stage with retry logic
+    #[allow(clippy::borrowed_box)]
     async fn execute_stage_with_retry(
         &self,
         stage: &Box<dyn ExtractionStage>,
         input: ExtractionInput,
-        mut output: ExtractionOutput,
+        output: ExtractionOutput,
         context: &mut ExtractionContext,
     ) -> Result<ExtractionOutput> {
         let mut retries = 0;

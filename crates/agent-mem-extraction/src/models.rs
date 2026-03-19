@@ -1,11 +1,9 @@
 //! Data models for extraction pipeline
 
-use crate::error::{ExtractionError, Result};
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fmt;
-use std::path::PathBuf;
 use uuid::Uuid;
 
 /// Unique identifier for extraction operations
@@ -279,7 +277,7 @@ impl MemoryItem {
 }
 
 /// Extraction execution metrics
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct ExtractionMetrics {
     /// Total execution time in milliseconds
     pub total_duration_ms: u64,
@@ -301,20 +299,6 @@ pub struct ExtractionMetrics {
 
     /// LLM tokens used
     pub llm_tokens_used: u64,
-}
-
-impl Default for ExtractionMetrics {
-    fn default() -> Self {
-        Self {
-            total_duration_ms: 0,
-            items_extracted: 0,
-            items_deduped: 0,
-            categories_created: 0,
-            stage_timings: HashMap::new(),
-            resource_size_bytes: 0,
-            llm_tokens_used: 0,
-        }
-    }
 }
 
 /// Extraction context passed between stages

@@ -29,7 +29,7 @@ impl ItemExtractor {
         // Simple extraction logic (in production, use LLM)
         let lines: Vec<&str> = text.lines().collect();
 
-        for (_i, line) in lines.iter().enumerate() {
+        for line in lines.iter() {
             let line = line.trim();
 
             // Skip empty lines

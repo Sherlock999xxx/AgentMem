@@ -1,9 +1,12 @@
 //! Memory provider trait definitions
 
+#![allow(deprecated)]
+
 use crate::{HistoryEntry, MemoryItem, Message, Result, Session};
 use async_trait::async_trait;
 
 /// Core trait for memory providers
+#[allow(deprecated)]
 #[async_trait]
 pub trait MemoryProvider: Send + Sync {
     /// Add new memories from messages

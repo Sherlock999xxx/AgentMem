@@ -693,6 +693,7 @@ pub struct RetrievalMetrics {
 // Backward Compatibility Helpers
 // ============================================================================
 
+#[allow(deprecated)]
 impl Memory {
     /// Create memory from old MemoryItem format
     pub fn from_legacy_item(item: &crate::types::MemoryItem) -> Self {

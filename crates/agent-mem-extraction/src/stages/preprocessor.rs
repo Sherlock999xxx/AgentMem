@@ -3,7 +3,7 @@
 //! Preprocesses different media types (text, images, audio, video)
 
 use crate::error::{ExtractionError, Result};
-use crate::models::{ExtractionContext, ExtractionInput, ExtractionOutput, ResourceContent};
+use crate::models::{ExtractionContext, ExtractionInput, ExtractionOutput};
 use crate::stage::{ExtractionStage, StagePriority};
 use async_trait::async_trait;
 use tracing::{debug, info};

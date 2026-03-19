@@ -877,6 +877,8 @@ impl MemvidStore {
     fn memory_to_item(&self, mem: Memory) -> MemoryItem {
         // 注意：MemoryItem 已被标记为 deprecated
         // 这里提供转换以保持向后兼容
+        let created_at = mem.metadata.created_at;
+        let updated_at = mem.metadata.updated_at;
         let metadata_map = if let Ok(value) = serde_json::to_value(mem.metadata) {
             if let Some(obj) = value.as_object() {
                 obj.into_iter()
@@ -895,8 +897,8 @@ impl MemvidStore {
             hash: None,
             metadata: metadata_map,
             score: None,
-            created_at: mem.metadata.created_at,
-            updated_at: Some(mem.metadata.updated_at),
+            created_at,
+            updated_at: Some(updated_at),
             session: Session::default(),
             memory_type: MemoryType::Semantic,
             entities: vec![],
@@ -921,12 +923,18 @@ impl MemvidStore {
             .unwrap_or(&hit.uri)
             .to_string();
 
+        // Calculate importance from optional score, defaulting to 0.5
+        let importance = hit
+            .score
+            .map(|s| s.max(0.0).min(1.0))
+            .unwrap_or(0.5);
+
         MemoryItem {
             id,
-            content: hit.snippet.unwrap_or_default(),
+            content: hit.text,
             hash: None,
             metadata: std::collections::HashMap::new(),
-            score: Some(hit.score),
+            score: hit.score,
             created_at: Utc::now(),
             updated_at: None,
             session: Session::default(),
@@ -935,7 +943,7 @@ impl MemvidStore {
             relations: vec![],
             agent_id: "memvid".to_string(),
             user_id: None,
-            importance: hit.score.max(0.0).min(1.0),
+            importance,
             embedding: None,
             last_accessed_at: Utc::now(),
             access_count: 0,

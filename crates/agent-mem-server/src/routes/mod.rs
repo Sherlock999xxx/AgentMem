@@ -146,8 +146,7 @@ pub async fn create_router(
     info!("File-centric state initialized");
 
     let mut app = Router::new()
-        // Memory management routes (✅ 使用Memory统一API)
-        // 🆕 Fix 1: 添加GET方法支持全局列表查询
+        // ========== 核心 Memory 路由 (6) ==========
         .route(
             "/api/v1/memories",
             get(memory::list_all_memories).post(memory::add_memory),
@@ -156,258 +155,42 @@ pub async fn create_router(
         .route("/api/v1/memories/:id", put(memory::update_memory))
         .route("/api/v1/memories/:id", delete(memory::delete_memory))
         .route("/api/v1/memories/search", post(memory::search_memories))
-        .route(
-            "/api/v1/memories/:id/history",
-            get(memory::get_memory_history),
-        )
-        // Batch operations
+        // ========== 批量操作 (3) ==========
         .route("/api/v1/memories/batch", post(memory::batch_add_memories))
-        .route(
-            "/api/v1/memories/batch/delete",
-            post(memory::batch_delete_memories),
-        )
-        .route(
-            "/api/v1/memories/search/batch",
-            post(memory::batch_search_memories),
-        )
-        .route(
-            "/api/v1/memories/search/stats",
-            get(memory::get_search_statistics),
-        )
-        .route("/api/v1/memories/cache/warmup", post(memory::warmup_cache))
-        .route(
-            "/api/v1/memories/performance/benchmark",
-            post(memory::performance_benchmark),
-        )
-        .route(
-            "/api/v1/memories/importance/update",
-            post(memory::batch_update_importance),
-        )
-        .route(
-            "/api/v1/memories/cleanup",
-            post(memory::cleanup_memories_endpoint),
-        )
-        .route("/api/v1/memories/export", get(memory::export_memories))
-        .route("/api/v1/memories/import", post(memory::import_memories))
-        .route(
-            "/api/v1/memories/deduplicate",
-            post(memory::deduplicate_memories),
-        )
-        .route(
-            "/api/v1/memories/batch/update",
-            post(memory::batch_update_memories),
-        )
-        // File-centric preview routes
-        .route("/api/v1/resources/mount", post(file_centric::mount_resource))
-        .route("/api/v1/resources/:resource_id", get(file_centric::get_resource))
-        .route("/api/v1/resources/extract", post(file_centric::extract_resource))
-        .route("/api/v1/categories/by-path", get(file_centric::get_category_by_path))
-        .route("/api/v1/categories/:category_id", get(file_centric::get_category))
-        .route("/api/v1/categories", get(file_centric::list_categories))
-        .route(
-            "/api/v1/categories/search",
-            post(file_centric::search_categories),
-        )
-        .route(
-            "/api/v1/migrations/plan",
-            post(file_centric::plan_legacy_migration),
-        )
-        .route(
-            "/api/v1/migrations/apply",
-            post(file_centric::apply_legacy_migration),
-        )
-        .route(
-            "/api/v1/migrations/rollback",
-            post(file_centric::rollback_legacy_migration),
-        )
-        .route(
-            "/api/v1/migrations/:migration_id",
-            get(file_centric::get_migration_status),
-        )
-        .route(
-            "/api/v1/proactive/tasks",
-            get(file_centric::list_proactive_tasks),
-        )
-        .route(
-            "/api/v1/proactive/tasks/:task_id",
-            get(file_centric::get_proactive_task),
-        )
-        .route(
-            "/api/v1/proactive/tasks/:task_id/run",
-            post(file_centric::run_proactive_task),
-        )
-        .route(
-            "/api/v1/proactive/tasks/:task_id/cancel",
-            post(file_centric::cancel_proactive_task),
-        )
-        .route(
-            "/api/v1/proactive/stats",
-            get(file_centric::get_scheduler_stats_canonical),
-        )
-        .route(
-            "/api/v1/proactive/scheduler/stats",
-            get(file_centric::get_scheduler_stats),
-        )
-        // Canonical file-centric surface and compatibility aliases for SDKs
+        .route("/api/v1/memories/batch/delete", post(memory::batch_delete_memories))
+        .route("/api/v1/memories/batch/search", post(memory::batch_search_memories))
+        // ========== File-centric 核心路由 (统一到 /api/v1/file-centric 前缀) ==========
+        // Resources
         .route(
             "/api/v1/file-centric/resources",
             get(file_centric::list_resources).post(file_centric::mount_resource_canonical),
         )
-        .route(
-            "/api/v1/file-centric/resources/:resource_id",
-            get(file_centric::get_resource_canonical),
-        )
-        .route(
-            "/api/v1/file-centric/resources/:resource_id/extract",
-            post(file_centric::extract_resource_canonical),
-        )
-        .route(
-            "/api/v1/file-centric/extraction",
-            post(file_centric::extract_resource_canonical),
-        )
-        .route(
-            "/api/v1/file-centric/extraction/extract",
-            post(file_centric::extract_resource_canonical),
-        )
-        .route(
-            "/api/v1/file-centric/extraction/:job_id",
-            get(file_centric::get_extraction_status),
-        )
-        .route(
-            "/api/v1/file-centric/extraction/jobs/:job_id",
-            get(file_centric::get_extraction_status),
-        )
-        .route(
-            "/api/v1/file-centric/extractions/:job_id",
-            get(file_centric::get_extraction_status),
-        )
-        .route(
-            "/api/v1/file-centric/categories/by-path",
-            get(file_centric::get_category_by_path),
-        )
-        .route(
-            "/api/v1/file-centric/categories/:category_id",
-            get(file_centric::get_category),
-        )
-        .route(
-            "/api/v1/file-centric/categories",
-            get(file_centric::list_categories_canonical),
-        )
-        .route(
-            "/api/v1/file-centric/categories/search",
-            post(file_centric::search_categories_canonical),
-        )
-        .route(
-            "/api/v1/file-centric/migration/plan",
-            post(file_centric::plan_legacy_migration_canonical),
-        )
-        .route(
-            "/api/v1/file-centric/migration/apply",
-            post(file_centric::apply_legacy_migration_canonical),
-        )
-        .route(
-            "/api/v1/file-centric/migration/:migration_id",
-            get(file_centric::get_migration_status),
-        )
-        .route(
-            "/api/v1/file-centric/migration/:migration_id/rollback",
-            post(file_centric::rollback_legacy_migration_canonical),
-        )
-        .route(
-            "/api/v1/file-centric/migration/migrations/:migration_id",
-            get(file_centric::get_migration_status),
-        )
-        .route(
-            "/api/v1/file-centric/migration/migrations/:migration_id/rollback",
-            post(file_centric::rollback_legacy_migration_canonical),
-        )
-        .route(
-            "/api/v1/file-centric/migrations/plan",
-            post(file_centric::plan_legacy_migration_canonical),
-        )
-        .route(
-            "/api/v1/file-centric/migrations/apply",
-            post(file_centric::apply_legacy_migration_canonical),
-        )
-        .route(
-            "/api/v1/file-centric/migrations/:migration_id",
-            get(file_centric::get_migration_status),
-        )
-        .route(
-            "/api/v1/file-centric/migrations/:migration_id/rollback",
-            post(file_centric::rollback_legacy_migration_canonical),
-        )
-        .route(
-            "/api/v1/file-centric/proactive/tasks",
-            get(file_centric::list_proactive_tasks_canonical),
-        )
-        .route(
-            "/api/v1/file-centric/proactive/tasks/:task_id",
-            get(file_centric::get_proactive_task),
-        )
-        .route(
-            "/api/v1/file-centric/proactive/tasks/:task_id/run",
-            post(file_centric::run_proactive_task_canonical),
-        )
-        .route(
-            "/api/v1/file-centric/proactive/tasks/:task_id/cancel",
-            post(file_centric::cancel_proactive_task_canonical),
-        )
-        .route(
-            "/api/v1/file-centric/proactive/stats",
-            get(file_centric::get_scheduler_stats_canonical),
-        )
-        .route(
-            "/api/v1/file-centric/proactive/scheduler/stats",
-            get(file_centric::get_scheduler_stats_canonical),
-        )
-        // Health and monitoring
+        .route("/api/v1/file-centric/resources/:resource_id", get(file_centric::get_resource_canonical))
+        .route("/api/v1/file-centric/resources/:resource_id/extract", post(file_centric::extract_resource_canonical))
+        .route("/api/v1/file-centric/extraction/:job_id", get(file_centric::get_extraction_status))
+        // Categories
+        .route("/api/v1/file-centric/categories", get(file_centric::list_categories_canonical))
+        .route("/api/v1/file-centric/categories/:category_id", get(file_centric::get_category))
+        .route("/api/v1/file-centric/categories/by-path", get(file_centric::get_category_by_path))
+        .route("/api/v1/file-centric/categories/search", post(file_centric::search_categories_canonical))
+        // Migration
+        .route("/api/v1/file-centric/migrations/plan", post(file_centric::plan_legacy_migration_canonical))
+        .route("/api/v1/file-centric/migrations/apply", post(file_centric::apply_legacy_migration_canonical))
+        .route("/api/v1/file-centric/migrations/:migration_id", get(file_centric::get_migration_status))
+        .route("/api/v1/file-centric/migrations/:migration_id/rollback", post(file_centric::rollback_legacy_migration_canonical))
+        // Proactive Tasks
+        .route("/api/v1/file-centric/proactive/tasks", get(file_centric::list_proactive_tasks_canonical))
+        .route("/api/v1/file-centric/proactive/tasks/:task_id", get(file_centric::get_proactive_task))
+        .route("/api/v1/file-centric/proactive/tasks/:task_id/run", post(file_centric::run_proactive_task_canonical))
+        .route("/api/v1/file-centric/proactive/tasks/:task_id/cancel", post(file_centric::cancel_proactive_task_canonical))
+        .route("/api/v1/file-centric/proactive/stats", get(file_centric::get_scheduler_stats_canonical))
+        // ========== Health & Monitoring (3) ==========
         .route("/health", get(health::health_check))
-        .route("/health/live", get(health::liveness_check))
-        .route("/health/ready", get(health::readiness_check))
         .route("/metrics", get(metrics::get_metrics))
-        .route("/metrics/prometheus", get(metrics::get_prometheus_metrics))
-        // Dashboard statistics
-        .route("/api/v1/stats/dashboard", get(stats::get_dashboard_stats))
-        .route(
-            "/api/v1/stats/memories/growth",
-            get(stats::get_memory_growth),
-        )
-        .route(
-            "/api/v1/stats/agents/activity",
-            get(stats::get_agent_activity_stats),
-        )
-        .route(
-            "/api/v1/stats/memory/quality",
-            get(stats::get_memory_quality_stats),
-        )
-        .route(
-            "/api/v1/stats/database/pool",
-            get(stats::get_database_pool_stats),
-        )
-        .route(
-            "/api/v1/stats/index/performance",
-            get(stats::get_index_performance_stats),
-        )
-        .route(
-            "/api/v1/stats/memory/usage",
-            get(stats::get_memory_usage_stats),
-        )
-        // 🆕 Phase 4.2: 日志聚合路由
+        // ========== Stats & Analytics (3) ==========
+        .route("/api/v1/stats", get(stats::get_dashboard_stats))
         .route("/api/v1/logs/stats", get(logs::get_log_stats))
-        .route("/api/v1/logs/query", get(logs::query_logs))
-        // 🆕 Phase 4.2: 请求追踪路由
-        .route("/api/v1/traces/:trace_id", get(logs::get_trace))
-        // 🆕 Phase 4.2: 性能分析路由
-        .route(
-            "/api/v1/performance/analysis",
-            get(performance::get_performance_analysis),
-        )
-        // 🆕 Phase 2.3: 记忆预测路由
-        .route(
-            "/api/v1/memories/predict",
-            post(predictor::predict_memories),
-        );
+        .route("/api/v1/performance", get(performance::get_performance_analysis));
 
     // Add all routes (now database-agnostic via Repository Traits)
     app = app

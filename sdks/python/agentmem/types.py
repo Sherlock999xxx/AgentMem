@@ -10,12 +10,75 @@ from dataclasses import dataclass
 from datetime import datetime
 
 
-class MemoryType(Enum):
-    """Memory type enumeration."""
+class MemoryType(str, Enum):
+    """记忆类型枚举 (4+4 架构)
+
+    基础认知记忆 (与 Rust 兼容):
+    - EPISODIC: 情景记忆 - 具体事件和经验
+    - SEMANTIC: 语义记忆 - 事实、概念和通用知识
+    - PROCEDURAL: 程序记忆 - 技能、流程和操作步骤
+    - WORKING: 工作记忆 - 临时信息和活跃上下文
+
+    高级认知记忆 (AgentMem 扩展):
+    - CORE: 核心记忆 - 持久身份、偏好和核心信念
+    - RESOURCE: 资源记忆 - 多媒体内容和外部资源
+    - KNOWLEDGE: 知识记忆 - 结构化知识图谱
+    - CONTEXTUAL: 上下文记忆 - 环境感知和情境信息
+    """
+    # 基础认知记忆 (原有 4 种)
     EPISODIC = "episodic"
     SEMANTIC = "semantic"
     PROCEDURAL = "procedural"
-    UNTYPED = "untyped"
+    WORKING = "working"
+
+    # 高级认知记忆 (新增 4 种)
+    CORE = "core"
+    RESOURCE = "resource"
+    KNOWLEDGE = "knowledge"
+    CONTEXTUAL = "contextual"
+
+    # 别名 (兼容旧格式)
+    UNTYPED = "working"  # UNTYPED 映射到 WORKING
+
+    @classmethod
+    def from_string(cls, s: str) -> "MemoryType":
+        """从字符串解析，支持各种格式"""
+        s = s.lower().strip()
+        mapping = {
+            "episodic": cls.EPISODIC,
+            "semantic": cls.SEMANTIC,
+            "procedural": cls.PROCEDURAL,
+            "working": cls.WORKING,
+            "untyped": cls.WORKING,
+            "core": cls.CORE,
+            "resource": cls.RESOURCE,
+            "knowledge": cls.KNOWLEDGE,
+            "contextual": cls.CONTEXTUAL,
+        }
+        return mapping.get(s, cls.EPISODIC)
+
+    @classmethod
+    def all_types(cls) -> List["MemoryType"]:
+        """获取所有类型"""
+        return [
+            cls.EPISODIC, cls.SEMANTIC, cls.PROCEDURAL, cls.WORKING,
+            cls.CORE, cls.RESOURCE, cls.KNOWLEDGE, cls.CONTEXTUAL
+        ]
+
+    @property
+    def description(self) -> str:
+        """获取类型描述"""
+        descriptions = {
+            self.EPISODIC: "Specific events and experiences",
+            self.SEMANTIC: "Facts, concepts, and general knowledge",
+            self.PROCEDURAL: "Skills, procedures, and how-to knowledge",
+            self.WORKING: "Temporary information processing",
+            self.CORE: "Persistent identity and preferences",
+            self.RESOURCE: "Multimedia content and documents",
+            self.KNOWLEDGE: "Structured knowledge graphs",
+            self.CONTEXTUAL: "Environment-aware information",
+        }
+        return descriptions.get(self, "")
 
 
 class ImportanceLevel(Enum):

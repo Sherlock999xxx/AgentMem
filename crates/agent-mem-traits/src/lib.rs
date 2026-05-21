@@ -13,6 +13,7 @@ pub mod llm;
 pub mod memory;
 pub mod memory_store;
 pub mod scheduler;
+pub mod scope;  // 统一 MemoryScope 定义
 pub mod session;
 pub mod storage;
 pub mod types;
@@ -39,6 +40,7 @@ pub use memory_store::{
     SemanticMemoryStore, SemanticQuery, WorkingMemoryItem, WorkingMemoryStore,
 };
 pub use scheduler::{MemoryScheduler, ScheduleConfig, ScheduleContext};
+pub use scope::MemoryScope;  // 统一导出 MemoryScope
 pub use session::SessionManager;
 pub use storage::{
     EmbeddingVectorStore, GraphResult, GraphStore, HistoryStore, KeyValueStore, LegacyVectorStore,

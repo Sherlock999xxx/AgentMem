@@ -233,48 +233,12 @@ pub async fn create_router(
             "/api/v1/agents/:id/messages",
             post(agents::send_message_to_agent),
         )
-        // ===== Chat routes (v1 - 推荐使用) =====
-        .route(
-            "/api/v1/agents/:agent_id/chat",
-            post(chat::send_chat_message),
-        )
-        .route(
-            "/api/v1/agents/:agent_id/chat/stream",
-            post(chat::send_chat_message_stream),
-        )
-        .route(
-            "/api/v1/agents/:agent_id/chat/history",
-            get(chat::get_chat_history),
-        )
-        // ===== ✅ Task 1.5: 兼容路由（向后兼容，解决404错误）=====
-        .route("/api/agents/:agent_id/chat", post(chat::send_chat_message))
-        .route(
-            "/api/agents/:agent_id/chat/stream",
-            post(chat::send_chat_message_stream),
-        )
-        .route(
-            "/api/agents/:agent_id/chat/history",
-            get(chat::get_chat_history),
-        )
-        // ===== LumosAI集成路由 (experimental) =====
-        // 注意：更具体的路径必须在前面，避免被通用路径匹配
-        .route(
-            "/api/v1/agents/:agent_id/chat/lumosai/stream",
-            post(chat_lumosai::send_chat_message_lumosai_stream),
-        )
-        .route(
-            "/api/v1/agents/:agent_id/chat/lumosai",
-            post(chat_lumosai::send_chat_message_lumosai),
-        )
-        // ===== ✅ Task 1.5: LumosAI 兼容路由 =====
-        .route(
-            "/api/agents/:agent_id/chat/lumosai/stream",
-            post(chat_lumosai::send_chat_message_lumosai_stream),
-        )
-        .route(
-            "/api/agents/:agent_id/chat/lumosai",
-            post(chat_lumosai::send_chat_message_lumosai),
-        )
+        // ===== Agent Chat routes (统一到 /api/v1/agents 前缀) =====
+        .route("/api/v1/agents/:agent_id/chat", post(chat::send_chat_message))
+        .route("/api/v1/agents/:agent_id/chat/stream", post(chat::send_chat_message_stream))
+        .route("/api/v1/agents/:agent_id/chat/history", get(chat::get_chat_history))
+        .route("/api/v1/agents/:agent_id/chat/lumosai", post(chat_lumosai::send_chat_message_lumosai))
+        .route("/api/v1/agents/:agent_id/chat/lumosai/stream", post(chat_lumosai::send_chat_message_lumosai_stream))
         // Agent state management routes
         .route(
             "/api/v1/agents/:agent_id/state",
@@ -307,30 +271,12 @@ pub async fn create_router(
         .route("/api/v1/mcp/tools/call", post(mcp::call_tool))
         .route("/api/v1/mcp/tools/:tool_name", get(mcp::get_tool))
         .route("/api/v1/mcp/health", get(mcp::health_check))
-        // Working Memory routes (session-based temporary context)
-        .route(
-            "/api/v1/working-memory",
-            post(working_memory::add_working_memory),
-        )
-        .route(
-            "/api/v1/working-memory",
-            get(working_memory::get_working_memory),
-        )
-        .route(
-            "/api/v1/working-memory/:item_id",
-            delete(working_memory::delete_working_memory_item),
-        )
-        .route(
-            "/api/v1/working-memory/sessions/:session_id",
-            delete(working_memory::clear_working_memory),
-        )
-        .route(
-            "/api/v1/working-memory/cleanup",
-            post(working_memory::cleanup_expired),
-        )
-        // 🆕 Plugin management routes
-        .route("/api/v1/plugins", get(plugins::list_plugins))
-        .route("/api/v1/plugins", post(plugins::register_plugin))
+        // ========== Working Memory (2) ==========
+        .route("/api/v1/working-memory", post(working_memory::add_working_memory).get(working_memory::get_working_memory))
+        .route("/api/v1/working-memory/:item_id", delete(working_memory::delete_working_memory_item))
+        .route("/api/v1/working-memory/cleanup", post(working_memory::cleanup_expired))
+        // ========== Plugins (1) ==========
+        .route("/api/v1/plugins", get(plugins::list_plugins).post(plugins::register_plugin))
         .route("/api/v1/plugins/:id", get(plugins::get_plugin));
 
     // Graph visualization routes (PostgreSQL only)

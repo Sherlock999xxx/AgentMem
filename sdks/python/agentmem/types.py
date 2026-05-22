@@ -756,3 +756,55 @@ class BackgroundTaskUnavailableError(AgentMemError):
     def __init__(self, response: Optional[ErrorResponse] = None):
         self.response = response
         super().__init__("Background task unavailable")
+
+
+# ============================================================================
+# Webhook Types 🆕 Gap vs Mem0/Letta
+# ============================================================================
+
+@dataclass
+class WebhookSubscription:
+    """Webhook subscription details."""
+    id: str
+    user_id: str
+    name: str
+    url: str
+    event_types: List[str]
+    is_active: bool
+    created_at: int
+    updated_at: int
+
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> "WebhookSubscription":
+        return cls(
+            id=data["id"],
+            user_id=data["user_id"],
+            name=data["name"],
+            url=data["url"],
+            event_types=data.get("event_types", []),
+            is_active=data.get("is_active", True),
+            created_at=data.get("created_at", 0),
+            updated_at=data.get("updated_at", 0),
+        )
+
+
+@dataclass
+class WebhookStats:
+    """Webhook delivery statistics."""
+    total: int
+    active: int
+    total_deliveries: int
+    successful_deliveries: int
+    failed_deliveries: int
+    success_rate: float
+
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> "WebhookStats":
+        return cls(
+            total=data.get("total", 0),
+            active=data.get("active", 0),
+            total_deliveries=data.get("total_deliveries", 0),
+            successful_deliveries=data.get("successful_deliveries", 0),
+            failed_deliveries=data.get("failed_deliveries", 0),
+            success_rate=data.get("success_rate", 0.0),
+        )

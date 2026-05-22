@@ -6,20 +6,33 @@
 use agent_mem_traits::{AgentMemError, Result, WorkingMemoryItem, WorkingMemoryStore};
 use async_trait::async_trait;
 use chrono::{DateTime, Utc};
-use libsql::{params, Connection, Row};
+use libsql::{params, Row};
 use std::sync::Arc;
-use tokio::sync::Mutex;
+
+// Re-export Database type from libsql
+pub use libsql::Database;
 
 /// LibSQL implementation of WorkingMemoryStore
 /// Uses the unified memories table with memory_type='working'
 pub struct LibSqlWorkingStore {
-    conn: Arc<Mutex<Connection>>,
+    db: Arc<Database>,
 }
 
 impl LibSqlWorkingStore {
     /// Create a new LibSQL working memory store
-    pub fn new(conn: Arc<Mutex<Connection>>) -> Self {
-        Self { conn }
+    pub fn new(db: Arc<Database>) -> Self {
+        Self { db }
+    }
+
+    /// Create from database connection string
+    #[allow(dead_code)]
+    pub async fn from_connection_string(conn_str: &str) -> Result<Self> {
+        // Use Builder for libsql 0.9 API
+        let db = libsql::Builder::new_local(conn_str)
+            .build()
+            .await
+            .map_err(|e| AgentMemError::storage_error(format!("Failed to open database: {e}")))?;
+        Ok(Self { db: Arc::new(db) })
     }
 }
 
@@ -88,7 +101,9 @@ fn row_to_item(row: &Row) -> Result<WorkingMemoryItem> {
 #[async_trait]
 impl WorkingMemoryStore for LibSqlWorkingStore {
     async fn add_item(&self, item: WorkingMemoryItem) -> Result<WorkingMemoryItem> {
-        let conn = self.conn.lock().await;
+        let conn = self.db.connect().map_err(|e| {
+            AgentMemError::storage_error(format!("Failed to connect to database: {e}"))
+        })?;
 
         let metadata_json = serde_json::to_string(&item.metadata).map_err(|e| {
             AgentMemError::storage_error(format!("Failed to serialize metadata: {e}"))
@@ -132,7 +147,9 @@ impl WorkingMemoryStore for LibSqlWorkingStore {
     }
 
     async fn get_session_items(&self, session_id: &str) -> Result<Vec<WorkingMemoryItem>> {
-        let conn = self.conn.lock().await;
+        let conn = self.db.connect().map_err(|e| {
+            AgentMemError::storage_error(format!("Failed to connect to database: {e}"))
+        })?;
 
         let now_ts = Utc::now().timestamp();
 
@@ -170,7 +187,9 @@ impl WorkingMemoryStore for LibSqlWorkingStore {
     }
 
     async fn remove_item(&self, item_id: &str) -> Result<bool> {
-        let conn = self.conn.lock().await;
+        let conn = self.db.connect().map_err(|e| {
+            AgentMemError::storage_error(format!("Failed to connect to database: {e}"))
+        })?;
 
         let result = conn
             .execute(
@@ -186,7 +205,9 @@ impl WorkingMemoryStore for LibSqlWorkingStore {
     }
 
     async fn clear_expired(&self) -> Result<i64> {
-        let conn = self.conn.lock().await;
+        let conn = self.db.connect().map_err(|e| {
+            AgentMemError::storage_error(format!("Failed to connect to database: {e}"))
+        })?;
 
         let now_ts = Utc::now().timestamp();
 
@@ -202,7 +223,9 @@ impl WorkingMemoryStore for LibSqlWorkingStore {
     }
 
     async fn clear_session(&self, session_id: &str) -> Result<i64> {
-        let conn = self.conn.lock().await;
+        let conn = self.db.connect().map_err(|e| {
+            AgentMemError::storage_error(format!("Failed to connect to database: {e}"))
+        })?;
 
         let result = conn
             .execute(
@@ -220,7 +243,9 @@ impl WorkingMemoryStore for LibSqlWorkingStore {
         session_id: &str,
         min_priority: i32,
     ) -> Result<Vec<WorkingMemoryItem>> {
-        let conn = self.conn.lock().await;
+        let conn = self.db.connect().map_err(|e| {
+            AgentMemError::storage_error(format!("Failed to connect to database: {e}"))
+        })?;
 
         let now_ts = Utc::now().timestamp();
 

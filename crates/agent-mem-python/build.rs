@@ -11,15 +11,14 @@ fn main() {
         {
             let flags = String::from_utf8_lossy(&output.stdout);
             for flag in flags.split_whitespace() {
-                if flag.starts_with("-L") {
-                    println!("cargo:rustc-link-search=native={}", &flag[2..]);
+                if let Some(path) = flag.strip_prefix("-L") {
+                    println!("cargo:rustc-link-search=native={}", path);
                 } else if let Some(lib_name) = flag.strip_prefix("-l") {
                     // Extract library name (e.g., -lpython3.14 -> python3.14)
                     println!("cargo:rustc-link-lib={lib_name}");
                 } else if flag == "-framework" {
                     // Framework linking is handled separately
-                } else if flag.starts_with("-framework") {
-                    let framework = &flag[11..];
+                } else if let Some(framework) = flag.strip_prefix("-framework=") {
                     println!("cargo:rustc-link-lib=framework={framework}");
                 }
             }
@@ -29,11 +28,12 @@ fn main() {
         {
             let flags = String::from_utf8_lossy(&output.stdout);
             for flag in flags.split_whitespace() {
-                if flag.starts_with("-L") {
-                    println!("cargo:rustc-link-search=native={}", &flag[2..]);
-                } else if flag.starts_with("-l") && flag.contains("python") {
-                    let lib_name = &flag[2..];
-                    println!("cargo:rustc-link-lib={lib_name}");
+                if let Some(path) = flag.strip_prefix("-L") {
+                    println!("cargo:rustc-link-search=native={}", path);
+                } else if let Some(lib_name) = flag.strip_prefix("-l") {
+                    if lib_name.contains("python") {
+                        println!("cargo:rustc-link-lib={lib_name}");
+                    }
                 }
             }
         }

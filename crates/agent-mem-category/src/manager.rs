@@ -257,7 +257,7 @@ impl CategoryManager for InMemoryCategoryManager {
                     && (c.name.to_lowercase().contains(&query_lower)
                         || c.summary
                             .as_ref()
-                            .map_or(false, |s| s.to_lowercase().contains(&query_lower)))
+                            .is_some_and(|s| s.to_lowercase().contains(&query_lower)))
             })
             .cloned()
             .collect();

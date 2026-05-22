@@ -11,6 +11,7 @@ use axum::{
     middleware::Next,
     response::Response,
 };
+use hyper::body::Body;
 use sha2::{Digest, Sha256};
 use std::sync::Arc;
 

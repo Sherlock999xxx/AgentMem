@@ -308,3 +308,4 @@ examples/data/
 *.prof
 *.trace
 .fastembed_cache/
+.gstack/

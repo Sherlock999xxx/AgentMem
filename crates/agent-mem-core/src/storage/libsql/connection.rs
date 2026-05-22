@@ -52,7 +52,7 @@ impl Default for LibSqlPoolConfig {
 
 /// LibSQL connection pool
 pub struct LibSqlConnectionPool {
-    db: Database,
+    db: Arc<Database>,
     config: LibSqlPoolConfig,
     /// Available connections (idle)
     idle_connections: Arc<Mutex<Vec<(Connection, Instant)>>>,
@@ -78,7 +78,7 @@ impl LibSqlConnectionPool {
         })?;
 
         let pool = Self {
-            db,
+            db: Arc::new(db),
             config: config.clone(),
             idle_connections: Arc::new(Mutex::new(Vec::new())),
             semaphore: Arc::new(Semaphore::new(config.max_connections)),
@@ -192,6 +192,12 @@ impl LibSqlConnectionPool {
         idle.push((conn, Instant::now()));
     }
 
+    /// Get the underlying Database instance
+    /// This is used by components that need direct database access (e.g., LibSqlWorkingStore)
+    pub fn get_db(&self) -> Arc<Database> {
+        self.db.clone()
+    }
+
     /// 🆕 Phase 1.3: 连接池健康检查
     /// 预期效果: 确保连接池中的连接都是健康的
     pub async fn health_check(&self) -> Result<()> {
@@ -266,7 +272,7 @@ pub struct LibSqlPoolStats {
 
 /// LibSQL connection manager (backward compatibility)
 pub struct LibSqlConnectionManager {
-    db: Database,
+    db: Arc<Database>,
 }
 
 impl LibSqlConnectionManager {
@@ -299,7 +305,7 @@ impl LibSqlConnectionManager {
             AgentMemError::StorageError(format!("Failed to open database at {path}: {e}"))
         })?;
 
-        Ok(Self { db })
+        Ok(Self { db: Arc::new(db) })
     }
 
     /// Get a connection from the pool (backward compatibility - creates new connection each time)

@@ -22,6 +22,7 @@ pub mod predictor;
 pub mod stats;
 pub mod tools;
 pub mod users;
+pub mod webhook; // 🆕 Webhook事件订阅支持
 pub mod working_memory; // ✅ Working Memory API：基于 WorkingMemoryStore trait // 🆕 Phase 2.3: 记忆预测功能
 
 use crate::config::ServerConfig;
@@ -145,6 +146,10 @@ pub async fn create_router(
     let file_centric_state = Arc::new(FileCentricState::new());
     info!("File-centric state initialized");
 
+    // 🆕 Initialize webhook state
+    let webhook_state = Arc::new(crate::routes::webhook::WebhookState::new());
+    info!("Webhook state initialized");
+
     let mut app = Router::new()
         // ========== 核心 Memory 路由 (6) ==========
         .route(
@@ -202,27 +207,10 @@ pub async fn create_router(
         .route("/api/v1/users/me", put(users::update_current_user))
         .route("/api/v1/users/me/password", post(users::change_password))
         .route("/api/v1/users/:user_id", get(users::get_user_by_id))
-        // Organization management routes
-        .route(
-            "/api/v1/organizations",
-            post(organizations::create_organization),
-        )
-        .route(
-            "/api/v1/organizations/:org_id",
-            get(organizations::get_organization),
-        )
-        .route(
-            "/api/v1/organizations/:org_id",
-            put(organizations::update_organization),
-        )
-        .route(
-            "/api/v1/organizations/:org_id",
-            delete(organizations::delete_organization),
-        )
-        .route(
-            "/api/v1/organizations/:org_id/members",
-            get(organizations::list_organization_members),
-        )
+        // Organization management routes (合并 CRUD 到单一路由)
+        .route("/api/v1/organizations", get(organizations::get_organization).post(organizations::create_organization))
+        .route("/api/v1/organizations/:org_id", get(organizations::get_organization).put(organizations::update_organization).delete(organizations::delete_organization))
+        .route("/api/v1/organizations/:org_id/members", get(organizations::list_organization_members))
         // Agent management routes
         .route("/api/v1/agents", post(agents::create_agent))
         .route("/api/v1/agents/:id", get(agents::get_agent))
@@ -233,51 +221,33 @@ pub async fn create_router(
             "/api/v1/agents/:id/messages",
             post(agents::send_message_to_agent),
         )
-        // ===== Agent Chat routes (统一到 /api/v1/agents 前缀) =====
-        .route("/api/v1/agents/:agent_id/chat", post(chat::send_chat_message))
+        // ===== Agent Chat routes (合并 GET + POST) =====
+        .route("/api/v1/agents/:agent_id/chat", get(chat::get_chat_history).post(chat::send_chat_message))
         .route("/api/v1/agents/:agent_id/chat/stream", post(chat::send_chat_message_stream))
-        .route("/api/v1/agents/:agent_id/chat/history", get(chat::get_chat_history))
         .route("/api/v1/agents/:agent_id/chat/lumosai", post(chat_lumosai::send_chat_message_lumosai))
         .route("/api/v1/agents/:agent_id/chat/lumosai/stream", post(chat_lumosai::send_chat_message_lumosai_stream))
-        // Agent state management routes
-        .route(
-            "/api/v1/agents/:agent_id/state",
-            get(agents::get_agent_state),
-        )
-        .route(
-            "/api/v1/agents/:agent_id/state",
-            put(agents::update_agent_state),
-        )
+        // Agent state management routes (合并 GET + PUT)
+        .route("/api/v1/agents/:agent_id/state", get(agents::get_agent_state).put(agents::update_agent_state))
         // Agent memories route
         .route(
             "/api/v1/agents/:agent_id/memories",
             get(memory::get_agent_memories),
         )
-        // Message management routes
-        .route("/api/v1/messages", post(messages::create_message))
-        .route("/api/v1/messages/:id", get(messages::get_message))
-        .route("/api/v1/messages", get(messages::list_messages))
-        .route("/api/v1/messages/:id", delete(messages::delete_message))
-        // Tool management routes
-        .route("/api/v1/tools", post(tools::register_tool))
-        .route("/api/v1/tools/:id", get(tools::get_tool))
-        .route("/api/v1/tools", get(tools::list_tools))
-        .route("/api/v1/tools/:id", put(tools::update_tool))
-        .route("/api/v1/tools/:id", delete(tools::delete_tool))
+        // Message management routes - 合到 Chat 历史中
+        .route("/api/v1/messages", post(messages::create_message).get(messages::list_messages))
+        .route("/api/v1/messages/:id", get(messages::get_message).delete(messages::delete_message))
+        // Tool management routes - 简化为 execute-only（MCP协议处理注册）
         .route("/api/v1/tools/:id/execute", post(tools::execute_tool))
-        // MCP server routes
-        .route("/api/v1/mcp/info", get(mcp::get_server_info))
-        .route("/api/v1/mcp/tools", get(mcp::list_tools))
-        .route("/api/v1/mcp/tools/call", post(mcp::call_tool))
-        .route("/api/v1/mcp/tools/:tool_name", get(mcp::get_tool))
-        .route("/api/v1/mcp/health", get(mcp::health_check))
-        // ========== Working Memory (2) ==========
+        // ========== Working Memory (1) - 合并到 GET ==========
         .route("/api/v1/working-memory", post(working_memory::add_working_memory).get(working_memory::get_working_memory))
-        .route("/api/v1/working-memory/:item_id", delete(working_memory::delete_working_memory_item))
         .route("/api/v1/working-memory/cleanup", post(working_memory::cleanup_expired))
         // ========== Plugins (1) ==========
         .route("/api/v1/plugins", get(plugins::list_plugins).post(plugins::register_plugin))
-        .route("/api/v1/plugins/:id", get(plugins::get_plugin));
+        // ========== Webhooks (5) 🆕 ==========
+        .route("/api/v1/webhooks", post(webhook::create_webhook).get(webhook::list_webhooks))
+        .route("/api/v1/webhooks/:id", get(webhook::get_webhook).put(webhook::update_webhook).delete(webhook::delete_webhook))
+        .route("/api/v1/webhooks/stats", get(webhook::get_webhook_stats))
+        .route("/api/v1/webhooks/:id/test", post(webhook::test_webhook));
 
     // Graph visualization routes (PostgreSQL only)
     #[cfg(feature = "postgres")]
@@ -332,6 +302,7 @@ pub async fn create_router(
         .layer(Extension(metrics_registry))
         .layer(Extension(memory_manager))
         .layer(Extension(file_centric_state)) // 🆕 File-centric resource/category managers
+        .layer(Extension(webhook_state)) // 🆕 Webhook state
         .layer(Extension(Arc::new(repositories)))
         .layer(Extension(Arc::new(QuotaManager::new()))); // ✅ API限流管理器
 
@@ -394,22 +365,18 @@ pub async fn create_router(
         messages::get_message,
         messages::list_messages,
         messages::delete_message,
-        tools::register_tool,
-        tools::get_tool,
-        tools::list_tools,
-        tools::update_tool,
-        tools::delete_tool,
-        tools::execute_tool,
-        mcp::get_server_info,
-        mcp::list_tools,
-        mcp::call_tool,
-        mcp::get_tool,
-        mcp::health_check,
+        tools::execute_tool,  // Only execute endpoint remains
         working_memory::add_working_memory,
         working_memory::get_working_memory,
-        working_memory::delete_working_memory_item,
-        working_memory::clear_working_memory,
-        working_memory::cleanup_expired,
+        working_memory::cleanup_expired,  // Only cleanup endpoint remains
+        // ========== Webhook routes 🆕 ==========
+        webhook::create_webhook,
+        webhook::list_webhooks,
+        webhook::get_webhook,
+        webhook::update_webhook,
+        webhook::delete_webhook,
+        webhook::get_webhook_stats,
+        webhook::test_webhook,
         // Note: graph routes are only available with postgres feature
         health::health_check,
         health::liveness_check,
@@ -508,6 +475,13 @@ pub async fn create_router(
             working_memory::AddWorkingMemoryRequest,
             working_memory::AddWorkingMemoryResponse,
             working_memory::ClearWorkingMemoryResponse,
+            webhook::WebhookSubscriptionResponse,
+            webhook::CreateWebhookRequest,
+            webhook::UpdateWebhookRequest,
+            webhook::ListWebhooksResponse,
+            webhook::WebhookStats,
+            webhook::WebhookEventType,
+            webhook::WebhookDeliveryStatus,
             working_memory::CleanupResponse,
             // Note: graph schemas are only available with postgres feature
         )

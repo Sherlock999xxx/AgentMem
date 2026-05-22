@@ -103,6 +103,12 @@ clap = { version = "4.0", features = ["derive"] }
 argon2 = "0.5.3"
 sha2.workspace = true
 
+# Webhook support (P1 gap vs Mem0/Letta)
+dashmap = "6.0"
+ring = "0.17"
+hex = "0.4"
+rand = "0.8"
+
 [features]
 default = ["libsql", "lancedb"]  # ✅ 添加lancedb到默认features
 plugins = ["agent-mem/plugins"]

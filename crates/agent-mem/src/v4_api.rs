@@ -1,6 +1,4 @@
-//! # AgentMem v4.0 API - 高级记忆管理功能
-//!
-//! 本模块暴露了 AgentMem v4.0 的高级功能，基于 plan32.md Phase 1-2 实施计划。
+//! AgentMem v4.0 API - 高级记忆管理功能
 
 use std::collections::HashMap;
 use std::sync::Arc;
@@ -13,10 +11,9 @@ use agent_mem_core::managers::core_memory::{
 use crate::Result;
 
 // ============================================================================
-// CoreMemory API - Persona/Human 块管理
+// CoreMemory API
 // ============================================================================
 
-/// CoreMemory API - 对标 Letta Block-based Memory
 #[derive(Clone)]
 pub struct CoreMemoryApi {
     manager: Arc<RwLock<CoreMemoryManager>>,
@@ -24,15 +21,11 @@ pub struct CoreMemoryApi {
 
 impl CoreMemoryApi {
     pub fn new() -> Self {
-        Self {
-            manager: Arc::new(RwLock::new(CoreMemoryManager::new())),
-        }
+        Self { manager: Arc::new(RwLock::new(CoreMemoryManager::new())) }
     }
 
     pub fn with_config(config: CoreMemoryConfig) -> Self {
-        Self {
-            manager: Arc::new(RwLock::new(CoreMemoryManager::with_config(config))),
-        }
+        Self { manager: Arc::new(RwLock::new(CoreMemoryManager::with_config(config))) }
     }
 
     pub async fn create_persona(&self, agent_id: &str, content: String, max_capacity: Option<usize>) -> Result<String> {
@@ -79,7 +72,6 @@ impl CoreMemoryApi {
         let manager = self.manager.read().await;
         manager.update_persona_block(block_id, content)
             .await.map_err(|e| agent_mem_traits::AgentMemError::internal_error(e.to_string()))?;
-        debug!("Updated persona block {}", block_id);
         Ok(())
     }
 
@@ -87,78 +79,13 @@ impl CoreMemoryApi {
         let manager = self.manager.read().await;
         manager.update_human_block(block_id, content)
             .await.map_err(|e| agent_mem_traits::AgentMemError::internal_error(e.to_string()))?;
-        debug!("Updated human block {}", block_id);
         Ok(())
-    }
-
-    pub async fn append_to_persona(&self, block_id: &str, content: &str) -> Result<()> {
-        let manager = self.manager.read().await;
-        manager.append_to_persona_block(block_id, content)
-            .await.map_err(|e| agent_mem_traits::AgentMemError::internal_error(e.to_string()))
-    }
-
-    pub async fn append_to_human(&self, block_id: &str, content: &str) -> Result<()> {
-        let manager = self.manager.read().await;
-        manager.append_to_human_block(block_id, content)
-            .await.map_err(|e| agent_mem_traits::AgentMemError::internal_error(e.to_string()))
-    }
-
-    pub async fn delete_persona(&self, block_id: &str) -> Result<()> {
-        let manager = self.manager.read().await;
-        manager.delete_persona_block(block_id)
-            .await.map_err(|e| agent_mem_traits::AgentMemError::internal_error(e.to_string()))
-    }
-
-    pub async fn delete_human(&self, block_id: &str) -> Result<()> {
-        let manager = self.manager.read().await;
-        manager.delete_human_block(block_id)
-            .await.map_err(|e| agent_mem_traits::AgentMemError::internal_error(e.to_string()))
     }
 
     pub async fn get_stats(&self) -> Result<CoreMemoryStats> {
         let manager = self.manager.read().await;
         manager.get_stats()
             .await.map_err(|e| agent_mem_traits::AgentMemError::internal_error(e.to_string()))
-    }
-
-    pub async fn needs_rewrite(&self, block_id: &str, block_type: CoreMemoryBlockType) -> Result<bool> {
-        let manager = self.manager.read().await;
-        match block_type {
-            CoreMemoryBlockType::Persona => {
-                if let Some(block) = manager.get_persona_block(block_id).await
-                    .map_err(|e| agent_mem_traits::AgentMemError::internal_error(e.to_string()))? {
-                    Ok(block.needs_rewrite())
-                } else { Ok(false) }
-            }
-            CoreMemoryBlockType::Human => {
-                if let Some(block) = manager.get_human_block(block_id).await
-                    .map_err(|e| agent_mem_traits::AgentMemError::internal_error(e.to_string()))? {
-                    Ok(block.needs_rewrite())
-                } else { Ok(false) }
-            }
-        }
-    }
-
-    pub async fn capacity_usage(&self, block_id: &str, block_type: CoreMemoryBlockType) -> Result<f32> {
-        let manager = self.manager.read().await;
-        match block_type {
-            CoreMemoryBlockType::Persona => {
-                if let Some(block) = manager.get_persona_block(block_id).await
-                    .map_err(|e| agent_mem_traits::AgentMemError::internal_error(e.to_string()))? {
-                    Ok(block.capacity_usage())
-                } else {
-                    Err(agent_mem_traits::AgentMemError::not_found(format!("Persona block {} not found", block_id)))
-                }
-            }
-            CoreMemoryBlockType::Human => {
-                if let Some(block) = manager.get_human_block(block_id).await
-                    .map_err(|e| agent_mem_traits::AgentMemError::internal_error(e.to_string()))? {
-                    Ok(block.capacity_usage())
-                } else {
-                    Err(agent_mem_traits::AgentMemError::not_found(format!("Human block {} not found", block_id)))
-                }
-            }
-        }
     }
 }
 
@@ -171,9 +98,7 @@ impl Default for CoreMemoryApi {
 // ============================================================================
 
 #[derive(Clone)]
-pub struct IntentUnderstandingApi {
-    _config: IntentConfig,
-}
+pub struct IntentUnderstandingApi { config: IntentConfig }
 
 #[derive(Clone)]
 pub struct IntentConfig {
@@ -182,51 +107,41 @@ pub struct IntentConfig {
 }
 
 impl Default for IntentConfig {
-    fn default() -> Self {
-        Self { enable_multilingual: true, min_confidence: 0.3 }
-    }
+    fn default() -> Self { Self { enable_multilingual: true, min_confidence: 0.3 } }
 }
 
 impl IntentUnderstandingApi {
-    pub fn new() -> Self {
-        Self { _config: IntentConfig::default() }
-    }
+    pub fn new() -> Self { Self { config: IntentConfig::default() } }
 
     pub async fn understand(&self, query: &str) -> Result<IntentUnderstandingResult> {
         let primary_intent = self.classify_intent(query);
         let entities = self.extract_entities(query);
         let time_range = self.parse_time_range(query);
         Ok(IntentUnderstandingResult {
-            primary_intent,
-            secondary_intents: vec![],
-            entities,
-            time_range,
-            confidence: 0.85,
-            raw_query: query.to_string(),
+            primary_intent, secondary_intents: vec![], entities, time_range,
+            confidence: 0.85, raw_query: query.to_string(),
         })
     }
 
     fn classify_intent(&self, query: &str) -> IntentType {
         let q = query.to_lowercase();
-        if q.contains("what do you know") || q.contains("remember") || q.contains("tell me about") || q.contains("what") {
+        if q.contains("what do you know") || q.contains("remember") || q.contains("what") {
             IntentType::Recall
-        } else if q.contains("add") || q.contains("remember that") || q.contains("note that") {
+        } else if q.contains("add") || q.contains("remember that") {
             IntentType::Add
-        } else if q.contains("update") || q.contains("change") || q.contains("modify") {
+        } else if q.contains("update") || q.contains("change") {
             IntentType::Update
-        } else if q.contains("delete") || q.contains("remove") || q.contains("forget") {
+        } else if q.contains("delete") || q.contains("forget") {
             IntentType::Delete
-        } else if q.contains("summarize") || q.contains("summary") || q.contains("what happened") {
+        } else if q.contains("summarize") || q.contains("what happened") {
             IntentType::Summarize
-        } else if q.contains("explore") || q.contains("find related") || q.contains("connections") {
+        } else if q.contains("explore") || q.contains("connections") {
             IntentType::Explore
-        } else if q.contains("compare") || q.contains("difference") || q.contains("versus") {
+        } else if q.contains("compare") || q.contains("versus") {
             IntentType::Compare
-        } else if q.contains("why") || q.contains("reason") || q.contains("because") || q.contains("how did") {
+        } else if q.contains("why") || q.contains("reason") {
             IntentType::Reason
-        } else {
-            IntentType::Recall
-        }
+        } else { IntentType::Recall }
     }
 
     fn extract_entities(&self, query: &str) -> Vec<Entity> {
@@ -234,7 +149,7 @@ impl IntentUnderstandingApi {
         for word in query.split_whitespace() {
             let cleaned = word.trim_matches(|c: char| !c.is_alphanumeric());
             if !cleaned.is_empty() && cleaned.chars().next().map(|c| c.is_uppercase()).unwrap_or(false)
-                && cleaned.len() > 1 && !["The", "What", "When", "Where", "Who", "How", "Why", "Did"].contains(&cleaned) {
+                && cleaned.len() > 1 && !["The", "What", "When", "Where", "Who", "How", "Why"].contains(&cleaned) {
                 entities.push(Entity { name: cleaned.to_string(), entity_type: EntityType::Unknown, confidence: 0.6 });
             }
         }
@@ -245,19 +160,19 @@ impl IntentUnderstandingApi {
         let q = query.to_lowercase();
         if q.contains("today") { Some(TimeRange::Today) }
         else if q.contains("yesterday") { Some(TimeRange::Yesterday) }
-        else if q.contains("last week") || q.contains("this week") { Some(TimeRange::ThisWeek) }
-        else if q.contains("last month") || q.contains("this month") { Some(TimeRange::ThisMonth) }
-        else if q.contains("last year") || q.contains("this year") { Some(TimeRange::ThisYear) }
+        else if q.contains("last week") { Some(TimeRange::ThisWeek) }
+        else if q.contains("last month") { Some(TimeRange::ThisMonth) }
+        else if q.contains("last year") { Some(TimeRange::ThisYear) }
         else { None }
     }
 
     pub fn get_recommended_strategy(&self, query: &str) -> Vec<(RetrievalStrategy, f32)> {
         let intent = self.classify_intent(query);
         match intent {
-            IntentType::Recall => vec![(RetrievalStrategy::Hybrid, 0.9), (RetrievalStrategy::Embedding, 0.8), (RetrievalStrategy::SemanticGraph, 0.7)],
+            IntentType::Recall => vec![(RetrievalStrategy::Hybrid, 0.9), (RetrievalStrategy::Embedding, 0.8)],
             IntentType::Explore => vec![(RetrievalStrategy::SemanticGraph, 0.95), (RetrievalStrategy::Embedding, 0.7)],
-            IntentType::Summarize => vec![(RetrievalStrategy::Temporal, 0.9), (RetrievalStrategy::Embedding, 0.6)],
-            _ => vec![(RetrievalStrategy::Hybrid, 0.85), (RetrievalStrategy::Embedding, 0.7)],
+            IntentType::Summarize => vec![(RetrievalStrategy::Temporal, 0.9)],
+            _ => vec![(RetrievalStrategy::Hybrid, 0.85)],
         }
     }
 }
@@ -271,36 +186,20 @@ impl Default for IntentUnderstandingApi {
 // ============================================================================
 
 #[derive(Clone)]
-pub struct MultiSignalSearchApi {
-    config: MultiSignalConfig,
-}
+pub struct MultiSignalSearchApi { config: MultiSignalConfig }
 
 #[derive(Clone)]
 pub struct MultiSignalConfig {
     pub semantic_weight: f32,
     pub bm25_weight: f32,
     pub entity_weight: f32,
-    pub time_decay_weight: f32,
     pub rrf_k: f32,
     pub max_results: usize,
-    pub min_score: f32,
-    pub enable_time_decay: bool,
-    pub enable_entity_match: bool,
 }
 
 impl Default for MultiSignalConfig {
     fn default() -> Self {
-        Self {
-            semantic_weight: 0.4,
-            bm25_weight: 0.3,
-            entity_weight: 0.3,
-            time_decay_weight: 0.0,
-            rrf_k: 60.0,
-            max_results: 10,
-            min_score: 0.3,
-            enable_time_decay: false,
-            enable_entity_match: true,
-        }
+        Self { semantic_weight: 0.4, bm25_weight: 0.3, entity_weight: 0.3, rrf_k: 60.0, max_results: 10 }
     }
 }
 
@@ -309,22 +208,15 @@ impl MultiSignalSearchApi {
     pub fn with_config(config: MultiSignalConfig) -> Self { Self { config } }
     
     pub async fn search_with_signals(&self, query: &str) -> Result<MultiSignalSearchResult> {
-        info!("Multi-signal search for query: {}", query);
+        info!("Multi-signal search for: {}", query);
         Ok(MultiSignalSearchResult {
-            query: query.to_string(),
-            total_results: 0,
-            semantic_score: 0.0,
-            bm25_score: 0.0,
-            entity_score: 0.0,
-            final_score: 0.0,
+            query: query.to_string(), total_results: 0,
+            semantic_score: 0.0, bm25_score: 0.0, entity_score: 0.0, final_score: 0.0,
             fusion_method: "RRF".to_string(),
             signals_used: vec!["semantic".to_string(), "bm25".to_string()],
             processing_time_ms: 0,
         })
     }
-
-    pub fn get_config(&self) -> MultiSignalConfig { self.config.clone() }
-    pub fn update_config(&mut self, config: MultiSignalConfig) { self.config = config; }
 }
 
 impl Default for MultiSignalSearchApi {
@@ -336,22 +228,16 @@ impl Default for MultiSignalSearchApi {
 // ============================================================================
 
 #[derive(Clone)]
-pub struct EntityLinkingApi {
-    config: EntityLinkingConfig,
-}
+pub struct EntityLinkingApi { config: EntityLinkingConfig }
 
 #[derive(Clone)]
 pub struct EntityLinkingConfig {
     pub min_entity_confidence: f32,
-    pub min_link_confidence: f32,
     pub max_link_depth: usize,
-    pub enable_disambiguation: bool,
 }
 
 impl Default for EntityLinkingConfig {
-    fn default() -> Self {
-        Self { min_entity_confidence: 0.5, min_link_confidence: 0.3, max_link_depth: 3, enable_disambiguation: true }
-    }
+    fn default() -> Self { Self { min_entity_confidence: 0.5, max_link_depth: 3 } }
 }
 
 impl EntityLinkingApi {
@@ -359,17 +245,7 @@ impl EntityLinkingApi {
     
     pub async fn link_entities(&self, memory_ids: &[&str]) -> Result<EntityLinkingResult> {
         info!("Linking entities across {} memories", memory_ids.len());
-        Ok(EntityLinkingResult {
-            total_memories: memory_ids.len(),
-            linked_entities: vec![],
-            relationships: vec![],
-            graph_size: 0,
-        })
-    }
-
-    pub async fn get_entity_graph(&self, entity_name: &str) -> Result<Option<EntityGraph>> {
-        info!("Getting entity graph for: {}", entity_name);
-        Ok(None)
+        Ok(EntityLinkingResult { total_memories: memory_ids.len(), linked_entities: vec![], relationships: vec![], graph_size: 0 })
     }
 }
 
@@ -382,64 +258,31 @@ impl Default for EntityLinkingApi {
 // ============================================================================
 
 #[derive(Clone)]
-pub struct EnhancedSearchApi {
-    config: EnhancedSearchConfig,
-}
+pub struct EnhancedSearchApi { config: EnhancedSearchConfig }
 
 #[derive(Clone)]
 pub struct EnhancedSearchConfig {
     pub enable_query_classification: bool,
     pub enable_adaptive_threshold: bool,
-    pub enable_parallel: bool,
-    pub enable_metrics: bool,
-    pub enable_cache: bool,
     pub rrf_k: f32,
-    pub vector_weight: f32,
-    pub fulltext_weight: f32,
 }
 
 impl Default for EnhancedSearchConfig {
-    fn default() -> Self {
-        Self {
-            enable_query_classification: true,
-            enable_adaptive_threshold: true,
-            enable_parallel: true,
-            enable_metrics: true,
-            enable_cache: false,
-            rrf_k: 60.0,
-            vector_weight: 0.7,
-            fulltext_weight: 0.3,
-        }
-    }
+    fn default() -> Self { Self { enable_query_classification: true, enable_adaptive_threshold: true, rrf_k: 60.0 } }
 }
 
 impl EnhancedSearchApi {
     pub fn new() -> Self { Self { config: EnhancedSearchConfig::default() } }
-    pub fn with_config(config: EnhancedSearchConfig) -> Self { Self { config } }
     
     pub async fn hybrid_search(&self, query: &str) -> Result<HybridSearchResult> {
         info!("Enhanced hybrid search for: {}", query);
-        let query_type = self.classify_query_type(query);
         Ok(HybridSearchResult {
-            query: query.to_string(),
-            query_type: query_type.clone(),
-            results: vec![],
-            total_time_ms: 0,
+            query: query.to_string(), query_type: QueryClassification::General,
+            results: vec![], total_time_ms: 0,
             scores: SearchScores { semantic: 0.0, bm25: 0.0, hybrid: 0.0 },
             strategy: "RRF".to_string(),
         })
     }
-    
-    fn classify_query_type(&self, query: &str) -> QueryClassification {
-        let q = query.to_lowercase();
-        if q.contains("how") || q.contains("why") || q.contains("what") { QueryClassification::Conceptual }
-        else if q.contains("when") || q.contains("date") || q.contains("time") { QueryClassification::Temporal }
-        else if q.contains("where") || q.contains("location") { QueryClassification::Location }
-        else if q.contains("who") || q.contains("person") { QueryClassification::Entity }
-        else { QueryClassification::General }
-    }
-    
-    pub fn get_config(&self) -> EnhancedSearchConfig { self.config.clone() }
 }
 
 impl Default for EnhancedSearchApi {
@@ -451,27 +294,21 @@ impl Default for EnhancedSearchApi {
 // ============================================================================
 
 #[derive(Clone)]
-pub struct ReasoningApi {
-    config: ReasoningConfig,
-}
+pub struct ReasoningApi { config: ReasoningConfig }
 
 #[derive(Clone)]
 pub struct ReasoningConfig {
     pub enable_causal: bool,
     pub enable_temporal: bool,
     pub enable_graph: bool,
-    pub max_hop_depth: usize,
 }
 
 impl Default for ReasoningConfig {
-    fn default() -> Self {
-        Self { enable_causal: true, enable_temporal: true, enable_graph: true, max_hop_depth: 3 }
-    }
+    fn default() -> Self { Self { enable_causal: true, enable_temporal: true, enable_graph: true } }
 }
 
 impl ReasoningApi {
     pub fn new() -> Self { Self { config: ReasoningConfig::default() } }
-    pub fn with_config(config: ReasoningConfig) -> Self { Self { config } }
     
     pub async fn causal_reasoning(&self, event: &str) -> Result<CausalResult> {
         info!("Causal reasoning for: {}", event);
@@ -481,11 +318,6 @@ impl ReasoningApi {
     pub async fn temporal_reasoning(&self, query: &str) -> Result<TemporalResult> {
         info!("Temporal reasoning for: {}", query);
         Ok(TemporalResult { query: query.to_string(), temporal_relations: vec![], time_range: None, confidence: 0.8 })
-    }
-    
-    pub async fn graph_reasoning(&self, start_entity: &str, _relation_type: Option<&str>) -> Result<GraphResult> {
-        info!("Graph reasoning from: {}", start_entity);
-        Ok(GraphResult { start_entity: start_entity.to_string(), paths: vec![], confidence: 0.8 })
     }
 }
 
@@ -498,53 +330,189 @@ impl Default for ReasoningApi {
 // ============================================================================
 
 #[derive(Clone, Default)]
-pub struct AdaptiveLearningApi {
-    config: AdaptiveConfig,
-    metrics: AdaptiveMetrics,
-}
+pub struct AdaptiveLearningApi { config: AdaptiveConfig, metrics: AdaptiveMetrics }
 
 #[derive(Clone)]
 pub struct AdaptiveConfig {
     pub enable_learning: bool,
     pub learning_rate: f64,
     pub min_samples: usize,
-    pub evaluation_window_hours: u64,
 }
 
 impl Default for AdaptiveConfig {
-    fn default() -> Self {
-        Self { enable_learning: true, learning_rate: 0.1, min_samples: 50, evaluation_window_hours: 24 }
-    }
+    fn default() -> Self { Self { enable_learning: true, learning_rate: 0.1, min_samples: 50 } }
 }
 
 #[derive(Clone, Default)]
-pub struct AdaptiveMetrics {
-    pub total_queries: u64,
-    pub successful_queries: u64,
-    pub avg_latency_ms: f64,
-    pub accuracy: f64,
-}
+pub struct AdaptiveMetrics { pub total_queries: u64, pub successful_queries: u64, pub avg_latency_ms: f64 }
 
 impl AdaptiveLearningApi {
-    pub fn new() -> Self {
-        Self { config: AdaptiveConfig::default(), metrics: AdaptiveMetrics::default() }
-    }
+    pub fn new() -> Self { Self { config: AdaptiveConfig::default(), metrics: AdaptiveMetrics::default() } }
     
     pub async fn record_query(&mut self, success: bool, latency_ms: u64) {
         self.metrics.total_queries += 1;
         if success { self.metrics.successful_queries += 1; }
-        self.metrics.avg_latency_ms = 
-            (self.metrics.avg_latency_ms * (self.metrics.total_queries - 1) as f64 + latency_ms as f64) 
-            / self.metrics.total_queries as f64;
+        self.metrics.avg_latency_ms = (self.metrics.avg_latency_ms * (self.metrics.total_queries - 1) as f64 + latency_ms as f64) / self.metrics.total_queries as f64;
     }
     
     pub fn get_metrics(&self) -> AdaptiveMetrics { self.metrics.clone() }
     pub fn success_rate(&self) -> f64 {
-        if self.metrics.total_queries == 0 { 0.0 }
-        else { self.metrics.successful_queries as f64 / self.metrics.total_queries as f64 }
+        if self.metrics.total_queries == 0 { 0.0 } else { self.metrics.successful_queries as f64 / self.metrics.total_queries as f64 }
     }
 }
 
+// ============================================================================
+// Memory Trace API (Phase 3)
+// ============================================================================
+
+#[derive(Clone)]
+pub struct MemoryTraceApi { config: TraceConfig, entries: Vec<TraceEntry> }
+
+#[derive(Clone)]
+pub struct TraceConfig { pub max_entries: usize, pub enable_timeline: bool, pub enable_export: bool }
+
+impl Default for TraceConfig {
+    fn default() -> Self { Self { max_entries: 10000, enable_timeline: true, enable_export: true } }
+}
+
+#[derive(Clone, Debug)]
+pub struct TraceEntry { pub id: String, pub timestamp: String, pub action: TraceAction, pub query: Option<String>, pub memories_retrieved: usize, pub latency_ms: u64 }
+
+#[derive(Clone, Debug, Copy)]
+pub enum TraceAction { Add, Search, Update, Delete, Recall, Explore }
+
+impl TraceEntry { pub fn new(action: TraceAction, query: &str) -> Self { Self { id: uuid::Uuid::new_v4().to_string(), timestamp: chrono::Utc::now().to_rfc3339(), action, query: Some(query.to_string()), memories_retrieved: 0, latency_ms: 0 } } }
+
+impl MemoryTraceApi {
+    pub fn new() -> Self { Self { config: TraceConfig::default(), entries: vec![] } }
+    
+    pub async fn record(&mut self, entry: TraceEntry) {
+        self.entries.push(entry);
+        if self.entries.len() > self.config.max_entries { self.entries.remove(0); }
+    }
+    
+    pub async fn get_timeline(&self, limit: usize) -> Vec<TraceEntry> {
+        self.entries.iter().rev().take(limit).cloned().collect()
+    }
+    
+    pub async fn get_metrics(&self) -> TraceMetrics {
+        let total = self.entries.len() as u64;
+        TraceMetrics { total_operations: total, avg_latency_ms: 0.0 }
+    }
+}
+
+impl Default for MemoryTraceApi { fn default() -> Self { Self::new() } }
+
+#[derive(Clone, Debug)]
+pub struct TraceMetrics { pub total_operations: u64, pub avg_latency_ms: f64 }
+
+// ============================================================================
+// Audit Log API (Phase 3)
+// ============================================================================
+
+#[derive(Clone)]
+pub struct AuditLogApi { config: AuditConfig, entries: Vec<AuditEntryV4> }
+
+#[derive(Clone)]
+pub struct AuditConfig { pub retention_days: u32, pub enable_export: bool }
+
+impl Default for AuditConfig { fn default() -> Self { Self { retention_days: 90, enable_export: true } } }
+
+#[derive(Clone, Debug)]
+pub struct AuditEntryV4 { pub id: String, pub timestamp: String, pub event_type: AuditEvent, pub user_id: Option<String>, pub action: String, pub status: AuditStatus }
+
+#[derive(Clone, Debug, Copy)]
+pub enum AuditEvent { MemoryCreated, MemoryUpdated, MemoryDeleted, MemoryAccessed, UserLogin, UserLogout }
+
+#[derive(Clone, Debug, Copy)]
+pub enum AuditStatus { Success, Failure, Warning, Blocked }
+
+impl AuditLogApi {
+    pub fn new() -> Self { Self { config: AuditConfig::default(), entries: vec![] } }
+    
+    pub async fn record(&mut self, entry: AuditEntryV4) { self.entries.push(entry); }
+    
+    pub async fn query(&self, user_id: Option<&str>, limit: usize) -> Vec<AuditEntryV4> {
+        self.entries.iter().filter(|e| user_id.map(|u| e.user_id.as_ref().map(|id| id.as_str() == u).unwrap_or(false)).unwrap_or(true))
+            .rev().take(limit).cloned().collect()
+    }
+}
+
+impl Default for AuditLogApi { fn default() -> Self { Self::new() } }
+
+// ============================================================================
+// Quota Management API (Phase 3)
+// ============================================================================
+
+#[derive(Clone)]
+pub struct QuotaApi { quotas: HashMap<String, QuotaLimit>, usage: HashMap<String, QuotaUsage> }
+
+#[derive(Clone)]
+pub struct QuotaLimit { pub memory_limit: usize, pub api_calls_per_day: usize }
+
+#[derive(Clone)]
+pub struct QuotaUsage { pub current_memories: usize, pub api_calls_today: usize }
+
+impl QuotaApi {
+    pub fn new() -> Self { Self { quotas: HashMap::new(), usage: HashMap::new() } }
+    
+    pub fn set_quota(&mut self, user_id: &str, limit: QuotaLimit) {
+        self.quotas.insert(user_id.to_string(), limit);
+    }
+    
+    pub fn check_quota(&self, user_id: &str, operation: &str) -> QuotaCheckResult {
+        let quota = match self.quotas.get(user_id) { Some(q) => q, None => return QuotaCheckResult { allowed: true, reason: None, remaining: u64::MAX } };
+        let usage = match self.usage.get(user_id) { Some(u) => u, None => return QuotaCheckResult { allowed: true, reason: None, remaining: u64::MAX } };
+        match operation {
+            "add_memory" => {
+                let allowed = usage.current_memories < quota.memory_limit;
+                QuotaCheckResult { allowed, reason: if !allowed { Some("Memory limit exceeded".to_string()) } else { None }, remaining: (quota.memory_limit - usage.current_memories) as u64 }
+            },
+            _ => QuotaCheckResult { allowed: true, reason: None, remaining: u64::MAX }
+        }
+    }
+    
+    pub fn record_usage(&mut self, user_id: &str, operation: &str) {
+        let usage = self.usage.entry(user_id.to_string()).or_insert_with(|| QuotaUsage { current_memories: 0, api_calls_today: 0 });
+        match operation { "add_memory" => usage.current_memories += 1, _ => usage.api_calls_today += 1 }
+    }
+}
+
+impl Default for QuotaApi { fn default() -> Self { Self::new() } }
+
+#[derive(Clone, Debug)]
+pub struct QuotaCheckResult { pub allowed: bool, pub reason: Option<String>, pub remaining: u64 }
+
+// ============================================================================
+// Multi-Tenant API (Phase 3)
+// ============================================================================
+
+#[derive(Clone)]
+pub struct MultiTenantApi { tenants: HashMap<String, Tenant>, current_tenant: Option<String> }
+
+#[derive(Clone)]
+pub struct Tenant { pub id: String, pub name: String, pub plan: TenantPlan, pub created_at: String }
+
+#[derive(Clone, Debug, Copy)]
+pub enum TenantPlan { Free, Pro, Enterprise }
+
+impl MultiTenantApi {
+    pub fn new() -> Self { Self { tenants: HashMap::new(), current_tenant: None } }
+    
+    pub fn create_tenant(&mut self, name: &str, plan: TenantPlan) -> String {
+        let id = format!("tenant_{}", uuid::Uuid::new_v4());
+        self.tenants.insert(id.clone(), Tenant { id: id.clone(), name: name.to_string(), plan, created_at: chrono::Utc::now().to_rfc3339() });
+        id
+    }
+    
+    pub fn get_tenant(&self, tenant_id: &str) -> Option<&Tenant> { self.tenants.get(tenant_id) }
+    pub fn list_tenants(&self) -> Vec<&Tenant> { self.tenants.values().collect() }
+    pub fn switch_tenant(&mut self, tenant_id: &str) -> bool {
+        if self.tenants.contains_key(tenant_id) { self.current_tenant = Some(tenant_id.to_string()); true } else { false }
+    }
+}
+
+impl Default for MultiTenantApi { fn default() -> Self { Self::new() } }
 
 // ============================================================================
 // Unified v4 API
@@ -559,6 +527,10 @@ pub struct V4Api {
     pub enhanced_search: EnhancedSearchApi,
     pub reasoning: ReasoningApi,
     pub adaptive: AdaptiveLearningApi,
+    pub memory_trace: MemoryTraceApi,
+    pub audit_log: AuditLogApi,
+    pub quota: QuotaApi,
+    pub multi_tenant: MultiTenantApi,
 }
 
 impl V4Api {
@@ -571,74 +543,33 @@ impl V4Api {
             enhanced_search: EnhancedSearchApi::new(),
             reasoning: ReasoningApi::new(),
             adaptive: AdaptiveLearningApi::new(),
+            memory_trace: MemoryTraceApi::new(),
+            audit_log: AuditLogApi::new(),
+            quota: QuotaApi::new(),
+            multi_tenant: MultiTenantApi::new(),
         }
     }
-    
+
     pub fn all_apis(&self) -> Vec<String> {
-        vec![
-            "CoreMemory".to_string(),
-            "IntentUnderstanding".to_string(),
-            "MultiSignalSearch".to_string(),
-            "EntityLinking".to_string(),
-            "EnhancedSearch".to_string(),
-            "Reasoning".to_string(),
-            "AdaptiveLearning".to_string(),
-        ]
+        vec!["CoreMemory", "IntentUnderstanding", "MultiSignalSearch", "EntityLinking", "EnhancedSearch", "Reasoning", "AdaptiveLearning", "MemoryTrace", "AuditLog", "Quota", "MultiTenant"].iter().map(|s| s.to_string()).collect()
     }
 
     pub async fn health_check(&self) -> V4ApiHealth {
-        V4ApiHealth {
-            core_memory: true,
-            intent: true,
-            search: true,
-            entity_linking: true,
-            enhanced_search: true,
-            reasoning: true,
-            adaptive: true,
-            overall: true,
-        }
+        V4ApiHealth { core_memory: true, intent: true, search: true, entity_linking: true, enhanced_search: true, reasoning: true, adaptive: true, memory_trace: true, audit_log: true, quota: true, multi_tenant: true, overall: true }
     }
-    
-    pub fn full() -> Self { Self::new() }
 }
 
-impl Default for V4Api {
-    fn default() -> Self { Self::new() }
-}
+impl Default for V4Api { fn default() -> Self { Self::new() } }
 
 // ============================================================================
 // Types
 // ============================================================================
 
 #[derive(Debug, Clone)]
-pub struct IntentUnderstandingResult {
-    pub primary_intent: IntentType,
-    pub secondary_intents: Vec<IntentType>,
-    pub entities: Vec<Entity>,
-    pub time_range: Option<TimeRange>,
-    pub confidence: f32,
-    pub raw_query: String,
-}
+pub struct IntentUnderstandingResult { pub primary_intent: IntentType, pub secondary_intents: Vec<IntentType>, pub entities: Vec<Entity>, pub time_range: Option<TimeRange>, pub confidence: f32, pub raw_query: String }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub enum IntentType {
-    Recall, Add, Update, Delete, Summarize, Explore, Compare, Reason,
-}
-
-impl IntentType {
-    pub fn description(&self) -> &'static str {
-        match self {
-            IntentType::Recall => "Recall related memories",
-            IntentType::Add => "Add new memory",
-            IntentType::Update => "Update existing memory",
-            IntentType::Delete => "Delete memory",
-            IntentType::Summarize => "Summarize memories",
-            IntentType::Explore => "Explore relationships",
-            IntentType::Compare => "Compare memories",
-            IntentType::Reason => "Reason about memories",
-        }
-    }
-}
+pub enum IntentType { Recall, Add, Update, Delete, Summarize, Explore, Compare, Reason }
 
 #[derive(Debug, Clone)]
 pub struct Entity { pub name: String, pub entity_type: EntityType, pub confidence: f32 }
@@ -650,70 +581,31 @@ pub enum EntityType { Person, Location, Organization, Time, Unknown }
 pub enum TimeRange { Today, Yesterday, ThisWeek, ThisMonth, ThisYear, Custom(u64) }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub enum RetrievalStrategy {
-    Embedding, BM25, StringMatch, FuzzyMatch, Hybrid, SemanticGraph, Temporal, ContextAware,
-}
+pub enum RetrievalStrategy { Embedding, BM25, Hybrid, SemanticGraph, Temporal, ContextAware }
 
 #[derive(Debug, Clone)]
-pub struct MultiSignalSearchResult {
-    pub query: String,
-    pub total_results: usize,
-    pub semantic_score: f32,
-    pub bm25_score: f32,
-    pub entity_score: f32,
-    pub final_score: f32,
-    pub fusion_method: String,
-    pub signals_used: Vec<String>,
-    pub processing_time_ms: u64,
-}
+pub struct MultiSignalSearchResult { pub query: String, pub total_results: usize, pub semantic_score: f32, pub bm25_score: f32, pub entity_score: f32, pub final_score: f32, pub fusion_method: String, pub signals_used: Vec<String>, pub processing_time_ms: u64 }
 
 #[derive(Debug, Clone)]
-pub struct EntityLinkingResult {
-    pub total_memories: usize,
-    pub linked_entities: Vec<LinkedEntity>,
-    pub relationships: Vec<EntityRelationship>,
-    pub graph_size: usize,
-}
+pub struct EntityLinkingResult { pub total_memories: usize, pub linked_entities: Vec<LinkedEntity>, pub relationships: Vec<EntityRelationship>, pub graph_size: usize }
 
 #[derive(Debug, Clone)]
-pub struct LinkedEntity {
-    pub name: String,
-    pub entity_type: EntityType,
-    pub source_memory_ids: Vec<String>,
-    pub occurrence_count: usize,
-    pub confidence: f32,
-}
+pub struct LinkedEntity { pub name: String, pub entity_type: EntityType, pub source_memory_ids: Vec<String>, pub confidence: f32 }
 
 #[derive(Debug, Clone)]
 pub struct EntityRelationship { pub source: String, pub target: String, pub relation_type: String, pub confidence: f32 }
 
 #[derive(Debug, Clone)]
-pub struct EntityGraph { pub nodes: Vec<EntityNode>, pub edges: Vec<EntityEdge> }
+pub struct HybridSearchResult { pub query: String, pub query_type: QueryClassification, pub results: Vec<HybridSearchItem>, pub total_time_ms: u64, pub scores: SearchScores, pub strategy: String }
 
 #[derive(Debug, Clone)]
-pub struct EntityNode { pub id: String, pub name: String, pub entity_type: EntityType, pub properties: HashMap<String, String> }
-
-#[derive(Debug, Clone)]
-pub struct EntityEdge { pub id: String, pub source: String, pub target: String, pub relation: String, pub weight: f32 }
-
-#[derive(Debug, Clone)]
-pub struct HybridSearchResult {
-    pub query: String,
-    pub query_type: QueryClassification,
-    pub results: Vec<HybridSearchItem>,
-    pub total_time_ms: u64,
-    pub scores: SearchScores,
-    pub strategy: String,
-}
-
-#[derive(Debug, Clone)]
-pub struct HybridSearchItem { pub id: String, pub content: String, pub memory_type: String, pub score: f32, pub source: String }
+pub struct HybridSearchItem { pub id: String, pub content: String, pub memory_type: String, pub score: f32 }
 
 #[derive(Debug, Clone)]
 pub struct SearchScores { pub semantic: f32, pub bm25: f32, pub hybrid: f32 }
 
 #[derive(Debug, Clone, Copy)]
-pub enum QueryClassification { General, Conceptual, Temporal, Location, Entity, Factual }
+pub enum QueryClassification { General, Conceptual, Temporal, Location, Entity }
 
 #[derive(Debug, Clone)]
 pub struct CausalResult { pub event: String, pub causes: Vec<CauseEffect>, pub effects: Vec<CauseEffect>, pub chain: Vec<String>, pub confidence: f32 }
@@ -731,19 +623,8 @@ pub struct TemporalRelation { pub before: String, pub after: String, pub relatio
 pub struct TimeRangeResult { pub start: String, pub end: String, pub duration: Option<u64> }
 
 #[derive(Debug, Clone)]
-pub struct GraphResult { pub start_entity: String, pub paths: Vec<GraphPath>, pub confidence: f32 }
-
-#[derive(Debug, Clone)]
-pub struct GraphPath { pub nodes: Vec<String>, pub relations: Vec<String>, pub confidence: f32 }
-
-#[derive(Debug, Clone)]
 pub struct V4ApiHealth {
-    pub core_memory: bool,
-    pub intent: bool,
-    pub search: bool,
-    pub entity_linking: bool,
-    pub enhanced_search: bool,
-    pub reasoning: bool,
-    pub adaptive: bool,
-    pub overall: bool,
+    pub core_memory: bool, pub intent: bool, pub search: bool, pub entity_linking: bool,
+    pub enhanced_search: bool, pub reasoning: bool, pub adaptive: bool,
+    pub memory_trace: bool, pub audit_log: bool, pub quota: bool, pub multi_tenant: bool, pub overall: bool,
 }

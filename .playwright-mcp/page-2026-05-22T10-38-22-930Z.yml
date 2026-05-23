@@ -1,0 +1,510 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - link "Skip to main content" [ref=e3] [cursor=pointer]:
+      - /url: "#content-area"
+    - generic [ref=e5]:
+      - generic [ref=e9]:
+        - generic [ref=e12]:
+          - link "Mem0 home page light logo" [ref=e14] [cursor=pointer]:
+            - /url: https://mem0.ai
+            - generic [ref=e15]: Mem0 home page
+            - img "light logo" [ref=e16]
+          - generic [ref=e17]:
+            - button "Open search" [ref=e18] [cursor=pointer]:
+              - generic [ref=e19]:
+                - img [ref=e20]
+                - generic [ref=e23]: Search...
+              - generic [ref=e24]: ⌘K
+            - button "Toggle assistant panel" [ref=e25] [cursor=pointer]:
+              - img [ref=e26]
+              - generic [ref=e29]: Ask AI
+          - generic [ref=e30]:
+            - navigation [ref=e32]:
+              - list [ref=e33]:
+                - listitem [ref=e34]:
+                  - link "Your Dashboard" [ref=e35] [cursor=pointer]:
+                    - /url: https://app.mem0.ai?utm_source=oss&utm_medium=docs-nav
+                    - generic [ref=e37]:
+                      - generic [ref=e38]: Your Dashboard
+                      - img [ref=e39]
+            - button "Toggle dark mode" [ref=e41] [cursor=pointer]:
+              - img [ref=e42]
+        - generic [ref=e50]:
+          - link "Welcome" [ref=e51] [cursor=pointer]:
+            - /url: /introduction
+            - text: Welcome
+          - link "Mem0 Platform" [ref=e53] [cursor=pointer]:
+            - /url: /platform/overview
+            - text: Mem0 Platform
+          - link "OpenClaw" [ref=e55] [cursor=pointer]:
+            - /url: /integrations/openclaw
+            - text: OpenClaw
+          - link "Open Source" [ref=e57] [cursor=pointer]:
+            - /url: /open-source/overview
+            - text: Open Source
+          - link "Cookbooks" [ref=e59] [cursor=pointer]:
+            - /url: /cookbooks/overview
+            - text: Cookbooks
+          - link "Integrations" [ref=e61] [cursor=pointer]:
+            - /url: /integrations
+            - text: Integrations
+          - link "Agent Plugins" [ref=e63] [cursor=pointer]:
+            - /url: /integrations/claude-code
+            - text: Agent Plugins
+          - link "API Reference" [ref=e65] [cursor=pointer]:
+            - /url: /api-reference
+            - text: API Reference
+          - link "Release Notes" [ref=e67] [cursor=pointer]:
+            - /url: /changelog/highlights
+            - text: Release Notes
+      - generic [ref=e69]:
+        - generic [ref=e72]:
+          - list [ref=e73]:
+            - listitem [ref=e74]:
+              - link "Documentation" [ref=e75] [cursor=pointer]:
+                - /url: /introduction
+                - img [ref=e76]
+                - generic [ref=e77]: Documentation
+          - generic [ref=e78]:
+            - generic [ref=e79]:
+              - img [ref=e80]
+              - heading "Getting Started" [level=5] [ref=e81]
+            - list [ref=e82]:
+              - listitem [ref=e83]:
+                - link "Overview" [ref=e84] [cursor=pointer]:
+                  - /url: /platform/overview
+                  - img [ref=e86]
+                  - generic [ref=e89]: Overview
+              - listitem [ref=e90]:
+                - link "Sign up as an agent" [ref=e91] [cursor=pointer]:
+                  - /url: /platform/agent-signup
+                  - img [ref=e93]
+                  - generic [ref=e96]: Sign up as an agent
+              - listitem [ref=e97]:
+                - link "Vibecoding" [ref=e98] [cursor=pointer]:
+                  - /url: /vibecoding
+                  - img [ref=e100]
+                  - generic [ref=e103]: Vibecoding
+              - listitem [ref=e104]:
+                - link "Mem0 MCP" [ref=e105] [cursor=pointer]:
+                  - /url: /platform/mem0-mcp
+                  - img [ref=e107]
+                  - generic [ref=e110]: Mem0 MCP
+              - listitem [ref=e111]:
+                - link "CLI" [ref=e112] [cursor=pointer]:
+                  - /url: /platform/cli
+                  - img [ref=e114]
+                  - generic [ref=e117]: CLI
+              - listitem [ref=e118]:
+                - link "Platform vs Open Source" [ref=e119] [cursor=pointer]:
+                  - /url: /platform/platform-vs-oss
+                  - img [ref=e121]
+                  - generic [ref=e124]: Platform vs Open Source
+              - listitem [ref=e125]:
+                - link "Quickstart" [ref=e126] [cursor=pointer]:
+                  - /url: /platform/quickstart
+                  - img [ref=e128]
+                  - generic [ref=e131]: Quickstart
+          - generic [ref=e134]:
+            - generic [ref=e135]:
+              - img [ref=e136]
+              - heading "Core Concepts" [level=5] [ref=e137]
+            - list [ref=e138]:
+              - listitem [ref=e139]:
+                - link "Memory Types" [ref=e140] [cursor=pointer]:
+                  - /url: /core-concepts/memory-types
+                  - img [ref=e142]
+                  - generic [ref=e145]: Memory Types
+              - listitem [ref=e146]:
+                - link "Add Memory" [ref=e147] [cursor=pointer]:
+                  - /url: /core-concepts/memory-operations/add
+                  - img [ref=e149]
+                  - generic [ref=e152]: Add Memory
+              - listitem [ref=e153]:
+                - link "Search Memory" [ref=e154] [cursor=pointer]:
+                  - /url: /core-concepts/memory-operations/search
+                  - img [ref=e156]
+                  - generic [ref=e159]: Search Memory
+              - listitem [ref=e160]:
+                - link "Update Memory" [ref=e161] [cursor=pointer]:
+                  - /url: /core-concepts/memory-operations/update
+                  - img [ref=e163]
+                  - generic [ref=e166]: Update Memory
+              - listitem [ref=e167]:
+                - link "Delete Memory" [ref=e168] [cursor=pointer]:
+                  - /url: /core-concepts/memory-operations/delete
+                  - img [ref=e170]
+                  - generic [ref=e173]: Delete Memory
+              - listitem [ref=e174]:
+                - link "Memory Evaluation" [ref=e175] [cursor=pointer]:
+                  - /url: /core-concepts/memory-evaluation
+                  - img [ref=e177]
+                  - generic [ref=e180]: Memory Evaluation
+          - generic [ref=e183]:
+            - generic [ref=e184]:
+              - img [ref=e185]
+              - heading "Platform Features" [level=5] [ref=e186]
+            - list [ref=e187]:
+              - listitem [ref=e188]:
+                - link "Overview" [ref=e189] [cursor=pointer]:
+                  - /url: /platform/features/platform-overview
+                  - img [ref=e191]
+                  - generic [ref=e194]: Overview
+              - listitem [ref=e195]:
+                - button "Toggle Essential Features section" [ref=e196] [cursor=pointer]:
+                  - img [ref=e198]
+                  - generic [ref=e200]: Essential Features
+                  - img [ref=e202]
+              - listitem [ref=e204]:
+                - button "Toggle Advanced Features section" [ref=e205] [cursor=pointer]:
+                  - img [ref=e207]
+                  - generic [ref=e209]: Advanced Features
+                  - img [ref=e211]
+              - listitem [ref=e213]:
+                - button "Toggle Data Management section" [ref=e214] [cursor=pointer]:
+                  - img [ref=e216]
+                  - generic [ref=e218]: Data Management
+                  - img [ref=e220]
+              - listitem [ref=e222]:
+                - button "Toggle Integration Features section" [ref=e223] [cursor=pointer]:
+                  - img [ref=e225]
+                  - generic [ref=e227]: Integration Features
+                  - img [ref=e229]
+          - generic [ref=e233]:
+            - generic [ref=e234]:
+              - img [ref=e235]
+              - heading "Support & Troubleshooting" [level=5] [ref=e236]
+            - list [ref=e237]:
+              - listitem [ref=e238]:
+                - link "FAQs" [ref=e239] [cursor=pointer]:
+                  - /url: /platform/faqs
+                  - img [ref=e241]
+                  - generic [ref=e244]: FAQs
+          - generic [ref=e247]:
+            - generic [ref=e248]:
+              - img [ref=e249]
+              - heading "Migration Guide" [level=5] [ref=e250]
+            - list [ref=e251]:
+              - listitem [ref=e252]:
+                - 'link "Platform: Migrating to the New Memory Algorithm" [ref=e253] [cursor=pointer]':
+                  - /url: /migration/platform-v2-to-v3
+                  - img [ref=e255]
+                  - generic [ref=e258]: "Platform: Migrating to the New Memory Algorithm"
+              - listitem [ref=e259]:
+                - link "Migrate from Open Source to Platform" [ref=e260] [cursor=pointer]:
+                  - /url: /migration/oss-to-platform
+                  - img [ref=e262]
+                  - generic [ref=e265]: Migrate from Open Source to Platform
+              - listitem [ref=e266]:
+                - link "API Reference Changes" [ref=e267] [cursor=pointer]:
+                  - /url: /migration/api-changes
+                  - img [ref=e269]
+                  - generic [ref=e272]: API Reference Changes
+          - generic [ref=e275]:
+            - generic [ref=e276]:
+              - img [ref=e277]
+              - heading "Contribute" [level=5] [ref=e278]
+            - list [ref=e279]:
+              - listitem [ref=e280]:
+                - link "Contribution Hub" [ref=e281] [cursor=pointer]:
+                  - /url: /platform/contribute
+                  - img [ref=e283]
+                  - generic [ref=e286]: Contribution Hub
+        - generic [ref=e289]:
+          - banner [ref=e290]:
+            - generic [ref=e291]:
+              - generic [ref=e292]: Core Concepts
+              - generic [ref=e293]:
+                - heading "Memory Types" [level=1] [ref=e294]
+                - generic [ref=e295]:
+                  - button "Copy page" [ref=e296] [cursor=pointer]:
+                    - generic [ref=e297]:
+                      - img [ref=e298]
+                      - generic [ref=e301]: Copy page
+                  - button "More actions" [ref=e302] [cursor=pointer]:
+                    - img [ref=e303]
+            - paragraph [ref=e306]: See how Mem0 layers conversation, session, and user memories to keep agents contextual.
+          - generic [ref=e307]:
+            - blockquote [ref=e308]:
+              - heading "Documentation Index" [level=2] [ref=e309]
+              - paragraph [ref=e310]:
+                - text: "Fetch the complete documentation index at:"
+                - link "https://docs.mem0.ai/llms.txt" [ref=e311] [cursor=pointer]:
+                  - /url: https://docs.mem0.ai/llms.txt
+              - paragraph [ref=e312]: Use this file to discover all available pages before exploring further.
+            - heading "Navigate to header How Mem0 Organizes Memory" [level=1] [ref=e313]:
+              - link "Navigate to header" [ref=e314] [cursor=pointer]:
+                - /url: "#how-mem0-organizes-memory"
+                - img [ref=e316]
+              - generic [ref=e318] [cursor=pointer]: How Mem0 Organizes Memory
+            - generic [ref=e319]: "Mem0 separates memory into layers so agents remember the right detail at the right time. Think of it like a notebook: a sticky note for the current task, a daily journal for the session, and an archive for everything a user has shared."
+            - generic [ref=e320]:
+              - img "Info" [ref=e322]
+              - generic [ref=e324]:
+                - strong [ref=e326]: Why it matters
+                - list [ref=e327]:
+                  - listitem [ref=e328]: Keeps conversations coherent without repeating instructions.
+                  - listitem [ref=e329]: Lets agents personalize responses based on long-term preferences.
+                  - listitem [ref=e330]: Avoids over-fetching data by scoping memory to the correct layer.
+            - heading "Navigate to header Key terms" [level=2] [ref=e331]:
+              - link "Navigate to header" [ref=e332] [cursor=pointer]:
+                - /url: "#key-terms"
+                - img [ref=e334]
+              - generic [ref=e336] [cursor=pointer]: Key terms
+            - list [ref=e337]:
+              - listitem [ref=e338]:
+                - strong [ref=e339]: Conversation memory
+                - text: – In-flight messages inside a single turn (what was just said).
+              - listitem [ref=e340]:
+                - strong [ref=e341]: Session memory
+                - text: – Short-lived facts that apply for the current task or channel.
+              - listitem [ref=e342]:
+                - strong [ref=e343]: User memory
+                - text: – Long-lived knowledge tied to a person, account, or workspace.
+              - listitem [ref=e344]:
+                - strong [ref=e345]: Organizational memory
+                - text: – Shared context available to multiple agents or teams.
+            - generic:
+              - img "Mermaid diagram"
+            - heading "Navigate to header Short-term vs long-term memory" [level=2] [ref=e346]:
+              - link "Navigate to header" [ref=e347] [cursor=pointer]:
+                - /url: "#short-term-vs-long-term-memory"
+                - img [ref=e349]
+              - generic [ref=e351] [cursor=pointer]: Short-term vs long-term memory
+            - generic [ref=e352]: "Short-term memory keeps the current conversation coherent. It includes:"
+            - list [ref=e353]:
+              - listitem [ref=e354]:
+                - strong [ref=e355]: Conversation history
+                - text: – recent turns in order so the agent remembers what was just said.
+              - listitem [ref=e356]:
+                - strong [ref=e357]: Working memory
+                - text: – temporary state such as tool outputs or intermediate calculations.
+              - listitem [ref=e358]:
+                - strong [ref=e359]: Attention context
+                - text: – the immediate focus of the assistant, similar to what a person holds in mind mid-sentence.
+            - generic [ref=e360]: "Long-term memory preserves knowledge across sessions. It captures:"
+            - list [ref=e361]:
+              - listitem [ref=e362]:
+                - strong [ref=e363]: Factual memory
+                - text: – user preferences, account details, and domain facts.
+              - listitem [ref=e364]:
+                - strong [ref=e365]: Episodic memory
+                - text: – summaries of past interactions or completed tasks.
+              - listitem [ref=e366]:
+                - strong [ref=e367]: Semantic memory
+                - text: – relationships between concepts so agents can reason about them later.
+            - generic [ref=e368]: Mem0 maps these classic categories onto its layered storage so you can decide what should fade quickly versus what should last for months.
+            - heading "Navigate to header How does it work?" [level=2] [ref=e369]:
+              - link "Navigate to header" [ref=e370] [cursor=pointer]:
+                - /url: "#how-does-it-work"
+                - img [ref=e372]
+              - generic [ref=e374] [cursor=pointer]: How does it work?
+            - generic [ref=e375]: "Mem0 stores each layer separately and merges them when you query:"
+            - list [ref=e376]:
+              - listitem [ref=e377]:
+                - strong [ref=e378]: Capture
+                - text: – Messages enter the conversation layer while the turn is active.
+              - listitem [ref=e379]:
+                - strong [ref=e380]: Promote
+                - text: – Relevant details persist to session or user memory based on your
+                - code [ref=e381]: user_id
+                - text: ","
+                - code [ref=e382]: run_id
+                - text: ", and metadata."
+              - listitem [ref=e383]:
+                - strong [ref=e384]: Retrieve
+                - text: – The search pipeline pulls from all layers, ranking user memories first, then session notes, then raw history.
+            - generic [ref=e385]:
+              - generic [ref=e386]:
+                - button "Copy the contents from the code block" [ref=e388] [cursor=pointer]:
+                  - img [ref=e389]
+                - button "Ask AI" [ref=e393] [cursor=pointer]:
+                  - img [ref=e394]
+              - code [ref=e400]:
+                - generic [ref=e401]: import os
+                - generic [ref=e402]: from mem0 import Memory
+                - generic [ref=e403]: memory = Memory(api_key=os.environ["MEM0_API_KEY"])
+                - generic [ref=e404]: "# Sticky note: conversation memory"
+                - generic [ref=e405]: memory.add(
+                - generic [ref=e406]: "[\"I'm Alex and I prefer boutique hotels.\"],"
+                - generic [ref=e407]: user_id="alex",
+                - generic [ref=e408]: run_id="trip-planning-2025",
+                - generic [ref=e409]: )
+                - generic [ref=e410]: "# Later in the session, pull long-term + session context"
+                - generic [ref=e411]: results = memory.search(
+                - generic [ref=e412]: "\"Any hotel preferences?\","
+                - generic [ref=e413]: user_id="alex",
+                - generic [ref=e414]: run_id="trip-planning-2025",
+                - generic [ref=e415]: )
+            - generic [ref=e416]:
+              - img "Tip" [ref=e418]
+              - generic [ref=e421]:
+                - text: Use
+                - code [ref=e422]: run_id
+                - text: when you want short-term context to expire automatically; rely on
+                - code [ref=e423]: user_id
+                - text: for lasting personalization.
+            - heading "Navigate to header When should you use each layer?" [level=2] [ref=e424]:
+              - link "Navigate to header" [ref=e425] [cursor=pointer]:
+                - /url: "#when-should-you-use-each-layer"
+                - img [ref=e427]
+              - generic [ref=e429] [cursor=pointer]: When should you use each layer?
+            - list [ref=e430]:
+              - listitem [ref=e431]:
+                - strong [ref=e432]: Conversation memory
+                - text: – Tool calls or chain-of-thought that only matter within the current turn.
+              - listitem [ref=e433]:
+                - strong [ref=e434]: Session memory
+                - text: – Multi-step tasks (onboarding flows, debugging sessions) that should reset once complete.
+              - listitem [ref=e435]:
+                - strong [ref=e436]: User memory
+                - text: – Personal preferences, account state, or compliance details that must persist across interactions.
+              - listitem [ref=e437]:
+                - strong [ref=e438]: Organizational memory
+                - text: – Shared FAQs, product catalogs, or policies that every agent should recall.
+            - heading "Navigate to header How it compares" [level=2] [ref=e439]:
+              - link "Navigate to header" [ref=e440] [cursor=pointer]:
+                - /url: "#how-it-compares"
+                - img [ref=e442]
+              - generic [ref=e444] [cursor=pointer]: How it compares
+            - table [ref=e447]:
+              - rowgroup [ref=e448]:
+                - row "Layer Lifetime Short or long term Best for Trade-offs" [ref=e449]:
+                  - columnheader "Layer" [ref=e450]
+                  - columnheader "Lifetime" [ref=e451]
+                  - columnheader "Short or long term" [ref=e452]
+                  - columnheader "Best for" [ref=e453]
+                  - columnheader "Trade-offs" [ref=e454]
+              - rowgroup [ref=e455]:
+                - row "Conversation Single response Short-term Tool execution detail Lost after the turn finishes" [ref=e456]:
+                  - cell "Conversation" [ref=e457]
+                  - cell "Single response" [ref=e458]
+                  - cell "Short-term" [ref=e459]
+                  - cell "Tool execution detail" [ref=e460]
+                  - cell "Lost after the turn finishes" [ref=e461]
+                - row "Session Minutes to hours Short-term Multi-step flows Clear it manually when done" [ref=e462]:
+                  - cell "Session" [ref=e463]
+                  - cell "Minutes to hours" [ref=e464]
+                  - cell "Short-term" [ref=e465]
+                  - cell "Multi-step flows" [ref=e466]
+                  - cell "Clear it manually when done" [ref=e467]
+                - row "User Weeks to forever Long-term Personalization Requires consent/governance" [ref=e468]:
+                  - cell "User" [ref=e469]
+                  - cell "Weeks to forever" [ref=e470]
+                  - cell "Long-term" [ref=e471]
+                  - cell "Personalization" [ref=e472]
+                  - cell "Requires consent/governance" [ref=e473]
+                - row "Org Configured globally Long-term Shared knowledge Needs owner to keep current" [ref=e474]:
+                  - cell "Org" [ref=e475]
+                  - cell "Configured globally" [ref=e476]
+                  - cell "Long-term" [ref=e477]
+                  - cell "Shared knowledge" [ref=e478]
+                  - cell "Needs owner to keep current" [ref=e479]
+            - generic [ref=e480]:
+              - img "Warning" [ref=e482]
+              - generic [ref=e485]: Avoid storing secrets or unredacted PII in user or org memories—Mem0 is retrievable by design. Encrypt or hash sensitive values first.
+            - heading "Navigate to header Put it into practice" [level=2] [ref=e486]:
+              - link "Navigate to header" [ref=e487] [cursor=pointer]:
+                - /url: "#put-it-into-practice"
+                - img [ref=e489]
+              - generic [ref=e491] [cursor=pointer]: Put it into practice
+            - list [ref=e492]:
+              - listitem [ref=e493]:
+                - text: Use the
+                - link "Add Memory" [ref=e494] [cursor=pointer]:
+                  - /url: /core-concepts/memory-operations/add
+                - text: guide to persist user preferences.
+              - listitem [ref=e495]:
+                - text: Follow
+                - link "Advanced Memory Operations" [ref=e496] [cursor=pointer]:
+                  - /url: /platform/advanced-memory-operations
+                - text: to tune metadata and graph writes.
+            - heading "Navigate to header See it live" [level=2] [ref=e497]:
+              - link "Navigate to header" [ref=e498] [cursor=pointer]:
+                - /url: "#see-it-live"
+                - img [ref=e500]
+              - generic [ref=e502] [cursor=pointer]: See it live
+            - list [ref=e503]:
+              - listitem [ref=e504]:
+                - link "AI Tutor with Mem0" [ref=e505] [cursor=pointer]:
+                  - /url: /cookbooks/companions/ai-tutor
+                - text: shows session vs user memories in action.
+              - listitem [ref=e506]:
+                - link "Support Inbox with Mem0" [ref=e507] [cursor=pointer]:
+                  - /url: /cookbooks/operations/support-inbox
+                - text: demonstrates shared org memory.
+            - generic [ref=e508]:
+              - link [ref=e509] [cursor=pointer]:
+                - link [ref=e511]:
+                  - /url: /core-concepts/memory-operations/add
+                  - img [ref=e513]
+                  - heading [level=2] [ref=e515]: Explore Memory Operations
+              - link [ref=e516] [cursor=pointer]:
+                - link [ref=e518]:
+                  - /url: /cookbooks/operations/support-inbox
+                  - img [ref=e520]
+                  - heading [level=2] [ref=e522]: See a Cookbook
+          - generic [ref=e524]:
+            - paragraph [ref=e525]: Was this page helpful?
+            - generic [ref=e526]:
+              - generic [ref=e527]:
+                - button "Yes" [ref=e528] [cursor=pointer]:
+                  - img [ref=e529]
+                  - generic [ref=e531]: "Yes"
+                - button "No" [ref=e532] [cursor=pointer]:
+                  - img [ref=e533]
+                  - generic [ref=e535]: "No"
+              - generic [ref=e536]:
+                - link "Suggest edits" [ref=e537] [cursor=pointer]:
+                  - /url: https://github.com/mem0ai/mem0/edit/main/docs/core-concepts/memory-types.mdx
+                  - img [ref=e538]
+                  - generic [ref=e540]: Suggest edits
+                - link "Raise issue" [ref=e541] [cursor=pointer]:
+                  - /url: "https://github.com/mem0ai/mem0/issues/new?title=Issue on docs&body=Path: /core-concepts/memory-types"
+                  - img [ref=e542]
+                  - generic [ref=e544]: Raise issue
+          - generic [ref=e545]:
+            - link "Quickstart Previous" [ref=e546] [cursor=pointer]:
+              - /url: /platform/quickstart
+              - generic [ref=e547]:
+                - generic [ref=e548]: Quickstart
+                - generic [ref=e549]:
+                  - img [ref=e550]
+                  - generic [ref=e552]: Previous
+            - link "Add Memory Next" [ref=e553] [cursor=pointer]:
+              - /url: /core-concepts/memory-operations/add
+              - generic [ref=e554]:
+                - generic [ref=e555]: Add Memory
+                - generic [ref=e556]:
+                  - img [ref=e557]
+                  - generic [ref=e559]: Next
+          - generic [ref=e561]:
+            - textbox "Ask a question..." [ref=e562]
+            - generic: ⌘I
+            - button "Send message" [disabled] [ref=e563]:
+              - img [ref=e564]
+          - contentinfo [ref=e566]:
+            - generic [ref=e567]:
+              - link "discord" [ref=e568] [cursor=pointer]:
+                - /url: https://mem0.dev/DiD
+                - generic [ref=e569]: discord
+                - img [ref=e570]
+              - link "x" [ref=e571] [cursor=pointer]:
+                - /url: https://x.com/mem0ai
+                - generic [ref=e572]: x
+                - img [ref=e573]
+              - link "github" [ref=e574] [cursor=pointer]:
+                - /url: https://github.com/mem0ai
+                - generic [ref=e575]: github
+                - img [ref=e576]
+              - link "linkedin" [ref=e577] [cursor=pointer]:
+                - /url: https://www.linkedin.com/company/mem0
+                - generic [ref=e578]: linkedin
+                - img [ref=e579]
+            - link "Powered by This documentation is built and hosted on Mintlify, a developer documentation platform" [ref=e582] [cursor=pointer]:
+              - /url: https://www.mintlify.com?utm_campaign=poweredBy&utm_medium=referral&utm_source=mem0
+              - generic [ref=e583]: Powered by
+              - img [ref=e584]
+              - generic [ref=e593]: This documentation is built and hosted on Mintlify, a developer documentation platform
+  - alert [ref=e594]
+  - img [ref=e597]

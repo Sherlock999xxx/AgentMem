@@ -114,11 +114,20 @@ pub use memory::Memory;
 // v4.0 API - 高级记忆管理功能
 // 基于 plan32.md Phase 1 实施
 pub use v4_api::{
-    CoreMemoryApi, EntityLinkingApi, EntityLinkingResult, EntityLinkingConfig,
-    EntityRelationship, LinkedEntity, EntityGraph, EntityNode, EntityEdge,
-    IntentUnderstandingApi, IntentUnderstandingResult, IntentType, Entity, EntityType, TimeRange,
-    MultiSignalSearchApi, MultiSignalConfig, MultiSignalSearchResult,
+    // Core APIs
+    CoreMemoryApi, IntentUnderstandingApi, MultiSignalSearchApi, EntityLinkingApi,
+    // Extended APIs
+    EnhancedSearchApi, ReasoningApi, AdaptiveLearningApi,
+    // Types
     V4Api, V4ApiHealth,
+    IntentUnderstandingResult, IntentType, Entity, EntityType, TimeRange,
+    MultiSignalSearchResult, MultiSignalConfig, RetrievalStrategy,
+    EntityLinkingResult, EntityLinkingConfig, LinkedEntity, EntityRelationship,
+    EntityGraph, EntityNode, EntityEdge,
+    HybridSearchResult, HybridSearchItem, SearchScores, QueryClassification,
+    ReasoningConfig, CausalResult, CauseEffect, TemporalResult, TemporalRelation,
+    TimeRangeResult, GraphResult, GraphPath,
+    AdaptiveConfig, AdaptiveMetrics,
 };
 pub use platform::{
     ApplyMigrationRequest, CancelProactiveTaskRequest, CategoryDescriptor,

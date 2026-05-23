@@ -1,0 +1,875 @@
+- generic [ref=e2]:
+  - generic [ref=e3]:
+    - link "Skip to content" [ref=e4] [cursor=pointer]:
+      - /url: "#start-of-content"
+    - banner [ref=e6]:
+      - heading "Navigation Menu" [level=2] [ref=e7]
+      - generic [ref=e8]:
+        - link "Homepage" [ref=e10] [cursor=pointer]:
+          - /url: /
+          - img [ref=e11]
+        - generic [ref=e13]:
+          - navigation "Global" [ref=e16]:
+            - list [ref=e17]:
+              - listitem [ref=e18]:
+                - button "Platform" [ref=e20] [cursor=pointer]:
+                  - text: Platform
+                  - img [ref=e21]
+              - listitem [ref=e23]:
+                - button "Solutions" [ref=e25] [cursor=pointer]:
+                  - text: Solutions
+                  - img [ref=e26]
+              - listitem [ref=e28]:
+                - button "Resources" [ref=e30] [cursor=pointer]:
+                  - text: Resources
+                  - img [ref=e31]
+              - listitem [ref=e33]:
+                - button "Open Source" [ref=e35] [cursor=pointer]:
+                  - text: Open Source
+                  - img [ref=e36]
+              - listitem [ref=e38]:
+                - button "Enterprise" [ref=e40] [cursor=pointer]:
+                  - text: Enterprise
+                  - img [ref=e41]
+              - listitem [ref=e43]:
+                - link "Pricing" [ref=e44] [cursor=pointer]:
+                  - /url: https://github.com/pricing
+                  - generic [ref=e45]: Pricing
+          - generic [ref=e46]:
+            - button "Search or jump to…" [ref=e49] [cursor=pointer]:
+              - img [ref=e51]
+            - link "Sign in" [ref=e54] [cursor=pointer]:
+              - /url: /login?return_to=https%3A%2F%2Fgithub.com%2Fletta-ai%2Fletta
+            - link "Sign up" [ref=e55] [cursor=pointer]:
+              - /url: /signup?ref_cta=Sign+up&ref_loc=header+logged+out&ref_page=%2F%3Cuser-name%3E%2F%3Crepo-name%3E&source=header-repo&source_repo=letta-ai%2Fletta
+            - button "Appearance settings" [ref=e58] [cursor=pointer]:
+              - img
+  - main [ref=e62]:
+    - generic [ref=e63]:
+      - generic [ref=e64]:
+        - generic [ref=e66]:
+          - img [ref=e67]
+          - link "letta-ai" [ref=e70] [cursor=pointer]:
+            - /url: /letta-ai
+          - generic [ref=e71]: /
+          - strong [ref=e72]:
+            - link "letta" [ref=e73] [cursor=pointer]:
+              - /url: /letta-ai/letta
+          - generic [ref=e74]: Public
+        - generic [ref=e75]:
+          - list:
+            - listitem [ref=e76]:
+              - link "You must be signed in to change notification settings" [ref=e77] [cursor=pointer]:
+                - /url: /login?return_to=%2Fletta-ai%2Fletta
+                - img [ref=e78]
+                - text: Notifications
+            - listitem [ref=e80]:
+              - link "Fork 2.4k" [ref=e81] [cursor=pointer]:
+                - /url: /login?return_to=%2Fletta-ai%2Fletta
+                - img [ref=e82]
+                - text: Fork
+                - generic "2,437" [ref=e84]: 2.4k
+            - listitem [ref=e85]:
+              - link "You must be signed in to star a repository" [ref=e87] [cursor=pointer]:
+                - /url: /login?return_to=%2Fletta-ai%2Fletta
+                - img [ref=e88]
+                - text: Star
+                - generic "22880 users starred this repository" [ref=e90]: 22.9k
+      - navigation "Repository" [ref=e91]:
+        - list [ref=e92]:
+          - listitem [ref=e93]:
+            - link "Code" [ref=e94] [cursor=pointer]:
+              - /url: /letta-ai/letta
+              - img [ref=e95]
+              - generic [ref=e97]: Code
+          - listitem [ref=e98]:
+            - link "Issues 33" [ref=e99] [cursor=pointer]:
+              - /url: /letta-ai/letta/issues
+              - img [ref=e100]
+              - generic [ref=e103]: Issues
+              - generic "33" [ref=e104]
+          - listitem [ref=e105]:
+            - link "Pull requests 28" [ref=e106] [cursor=pointer]:
+              - /url: /letta-ai/letta/pulls
+              - img [ref=e107]
+              - generic [ref=e109]: Pull requests
+              - generic "28" [ref=e110]
+          - listitem [ref=e111]:
+            - link "Actions" [ref=e112] [cursor=pointer]:
+              - /url: /letta-ai/letta/actions
+              - img [ref=e113]
+              - generic [ref=e115]: Actions
+          - listitem [ref=e116]:
+            - link "Security and quality" [ref=e117] [cursor=pointer]:
+              - /url: /letta-ai/letta/security
+              - img [ref=e118]
+              - generic [ref=e120]: Security and quality
+          - listitem [ref=e121]:
+            - link "Insights" [ref=e122] [cursor=pointer]:
+              - /url: /letta-ai/letta/pulse
+              - img [ref=e123]
+              - generic [ref=e125]: Insights
+    - generic [ref=e138]:
+      - heading "letta-ai/letta" [level=1] [ref=e140]
+      - generic [ref=e141]:
+        - generic [ref=e144]:
+          - generic [ref=e145]:
+            - generic [ref=e146]:
+              - button "main branch" [ref=e148] [cursor=pointer]:
+                - generic [ref=e149]:
+                  - generic [ref=e151]:
+                    - img [ref=e153]
+                    - generic [ref=e156]: main
+                  - generic:
+                    - img
+              - generic [ref=e157]:
+                - link "Branches" [ref=e158] [cursor=pointer]:
+                  - /url: /letta-ai/letta/branches
+                  - generic [ref=e159]:
+                    - generic:
+                      - img
+                    - generic [ref=e160]: Branches
+                - link "Tags" [ref=e161] [cursor=pointer]:
+                  - /url: /letta-ai/letta/tags
+                  - generic [ref=e162]:
+                    - generic:
+                      - img
+                    - generic [ref=e163]: Tags
+            - generic [ref=e164]:
+              - generic [ref=e168]:
+                - img [ref=e170]
+                - combobox "Go to file" [ref=e172]
+              - button "Code" [ref=e173] [cursor=pointer]:
+                - generic [ref=e174]:
+                  - generic:
+                    - img
+                  - generic [ref=e175]: Code
+                  - generic:
+                    - img
+          - generic [ref=e176]:
+            - generic [ref=e177]:
+              - heading "Folders and files" [level=2] [ref=e178]
+              - table "Folders and files" [ref=e179]:
+                - rowgroup:
+                  - row "Name Last commit message Last commit date":
+                    - columnheader "Name"
+                    - columnheader "Last commit message":
+                      - generic "Last commit message"
+                    - columnheader "Last commit date":
+                      - generic "Last commit date"
+                - rowgroup [ref=e180]:
+                  - row "Latest commit History 7,464 Commits" [ref=e181]:
+                    - cell "Latest commit History 7,464 Commits" [ref=e182]:
+                      - generic [ref=e183]:
+                        - heading "Latest commit" [level=2] [ref=e184]
+                        - generic [ref=e187]:
+                          - heading "History" [level=2] [ref=e188]
+                          - link "7,464 Commits" [ref=e189] [cursor=pointer]:
+                            - /url: /letta-ai/letta/commits/main/
+                            - generic [ref=e190]:
+                              - generic:
+                                - img
+                              - generic [ref=e191]: 7,464 Commits
+                  - row ".github, (Directory)" [ref=e192]:
+                    - cell ".github, (Directory)" [ref=e193]:
+                      - generic [ref=e194]:
+                        - img [ref=e195]
+                        - link ".github, (Directory)" [ref=e200] [cursor=pointer]:
+                          - /url: /letta-ai/letta/tree/main/.github
+                          - text: .github
+                    - cell [ref=e201]
+                    - cell [ref=e203]
+                  - row "alembic, (Directory)" [ref=e206]:
+                    - cell "alembic, (Directory)" [ref=e207]:
+                      - generic [ref=e208]:
+                        - img [ref=e209]
+                        - link "alembic, (Directory)" [ref=e214] [cursor=pointer]:
+                          - /url: /letta-ai/letta/tree/main/alembic
+                          - text: alembic
+                    - cell [ref=e215]
+                    - cell [ref=e217]
+                  - row "assets, (Directory)" [ref=e220]:
+                    - cell "assets, (Directory)" [ref=e221]:
+                      - generic [ref=e222]:
+                        - img [ref=e223]
+                        - link "assets, (Directory)" [ref=e228] [cursor=pointer]:
+                          - /url: /letta-ai/letta/tree/main/assets
+                          - text: assets
+                    - cell [ref=e229]
+                    - cell [ref=e231]
+                  - row "certs, (Directory)" [ref=e234]:
+                    - cell "certs, (Directory)" [ref=e235]:
+                      - generic [ref=e236]:
+                        - img [ref=e237]
+                        - link "certs, (Directory)" [ref=e242] [cursor=pointer]:
+                          - /url: /letta-ai/letta/tree/main/certs
+                          - text: certs
+                    - cell [ref=e243]
+                    - cell [ref=e245]
+                  - row "db, (Directory)" [ref=e248]:
+                    - cell "db, (Directory)" [ref=e249]:
+                      - generic [ref=e250]:
+                        - img [ref=e251]
+                        - link "db, (Directory)" [ref=e256] [cursor=pointer]:
+                          - /url: /letta-ai/letta/tree/main/db
+                          - text: db
+                    - cell [ref=e257]
+                    - cell [ref=e259]
+                  - row "examples/notebooks/data, (Directory)" [ref=e262]:
+                    - cell "examples/notebooks/data, (Directory)" [ref=e263]:
+                      - generic [ref=e264]:
+                        - img [ref=e265]
+                        - link "examples/notebooks/data, (Directory)" [ref=e270] [cursor=pointer]:
+                          - /url: /letta-ai/letta/tree/main/examples/notebooks/data
+                          - text: examples/notebooks/data
+                    - cell [ref=e271]
+                    - cell [ref=e273]
+                  - row "fern, (Directory)" [ref=e276]:
+                    - cell "fern, (Directory)" [ref=e277]:
+                      - generic [ref=e278]:
+                        - img [ref=e279]
+                        - link "fern, (Directory)" [ref=e284] [cursor=pointer]:
+                          - /url: /letta-ai/letta/tree/main/fern
+                          - text: fern
+                    - cell [ref=e285]
+                    - cell [ref=e287]
+                  - row "letta, (Directory)" [ref=e290]:
+                    - cell "letta, (Directory)" [ref=e291]:
+                      - generic [ref=e292]:
+                        - img [ref=e293]
+                        - link "letta, (Directory)" [ref=e298] [cursor=pointer]:
+                          - /url: /letta-ai/letta/tree/main/letta
+                          - text: letta
+                    - cell [ref=e299]
+                    - cell [ref=e301]
+                  - row "otel, (Directory)" [ref=e304]:
+                    - cell "otel, (Directory)" [ref=e305]:
+                      - generic [ref=e306]:
+                        - img [ref=e307]
+                        - link "otel, (Directory)" [ref=e312] [cursor=pointer]:
+                          - /url: /letta-ai/letta/tree/main/otel
+                          - text: otel
+                    - cell [ref=e313]
+                    - cell [ref=e315]
+                  - row "sandbox, (Directory)" [ref=e318]:
+                    - cell "sandbox, (Directory)" [ref=e319]:
+                      - generic [ref=e320]:
+                        - img [ref=e321]
+                        - link "sandbox, (Directory)" [ref=e326] [cursor=pointer]:
+                          - /url: /letta-ai/letta/tree/main/sandbox
+                          - text: sandbox
+                    - cell [ref=e327]
+                    - cell [ref=e329]
+                  - row "scripts, (Directory)" [ref=e332]:
+                    - cell "scripts, (Directory)" [ref=e333]:
+                      - generic [ref=e334]:
+                        - img [ref=e335]
+                        - link "scripts, (Directory)" [ref=e340] [cursor=pointer]:
+                          - /url: /letta-ai/letta/tree/main/scripts
+                          - text: scripts
+                    - cell [ref=e341]
+                    - cell [ref=e343]
+                  - row "tests, (Directory)" [ref=e346]:
+                    - cell "tests, (Directory)" [ref=e347]:
+                      - generic [ref=e348]:
+                        - img [ref=e349]
+                        - link "tests, (Directory)" [ref=e354] [cursor=pointer]:
+                          - /url: /letta-ai/letta/tree/main/tests
+                          - text: tests
+                    - cell [ref=e355]
+                    - cell [ref=e357]
+                  - row ".dockerignore, (File)" [ref=e360]:
+                    - cell ".dockerignore, (File)" [ref=e361]:
+                      - generic [ref=e362]:
+                        - img [ref=e363]
+                        - link ".dockerignore, (File)" [ref=e368] [cursor=pointer]:
+                          - /url: /letta-ai/letta/blob/main/.dockerignore
+                          - text: .dockerignore
+                    - cell [ref=e369]
+                    - cell [ref=e371]
+                  - row ".env.example, (File)" [ref=e374]:
+                    - cell ".env.example, (File)" [ref=e375]:
+                      - generic [ref=e376]:
+                        - img [ref=e377]
+                        - link ".env.example, (File)" [ref=e382] [cursor=pointer]:
+                          - /url: /letta-ai/letta/blob/main/.env.example
+                          - text: .env.example
+                    - cell [ref=e383]
+                    - cell [ref=e385]
+                  - row ".gitattributes, (File)" [ref=e388]:
+                    - cell ".gitattributes, (File)" [ref=e389]:
+                      - generic [ref=e390]:
+                        - img [ref=e391]
+                        - link ".gitattributes, (File)" [ref=e396] [cursor=pointer]:
+                          - /url: /letta-ai/letta/blob/main/.gitattributes
+                          - text: .gitattributes
+                    - cell [ref=e397]
+                    - cell [ref=e399]
+                  - row ".gitignore, (File)" [ref=e402]:
+                    - cell ".gitignore, (File)" [ref=e403]:
+                      - generic [ref=e404]:
+                        - img [ref=e405]
+                        - link ".gitignore, (File)" [ref=e410] [cursor=pointer]:
+                          - /url: /letta-ai/letta/blob/main/.gitignore
+                          - text: .gitignore
+                    - cell [ref=e411]
+                    - cell [ref=e413]
+                  - row ".pre-commit-config.yaml, (File)" [ref=e416]:
+                    - cell ".pre-commit-config.yaml, (File)" [ref=e417]:
+                      - generic [ref=e418]:
+                        - img [ref=e419]
+                        - link ".pre-commit-config.yaml, (File)" [ref=e424] [cursor=pointer]:
+                          - /url: /letta-ai/letta/blob/main/.pre-commit-config.yaml
+                          - text: .pre-commit-config.yaml
+                    - cell [ref=e425]
+                    - cell [ref=e427]
+                  - row ".python-version, (File)" [ref=e430]:
+                    - cell ".python-version, (File)" [ref=e431]:
+                      - generic [ref=e432]:
+                        - img [ref=e433]
+                        - link ".python-version, (File)" [ref=e438] [cursor=pointer]:
+                          - /url: /letta-ai/letta/blob/main/.python-version
+                          - text: .python-version
+                    - cell [ref=e439]
+                    - cell [ref=e441]
+                  - row "AI_POLICY.md, (File)" [ref=e444]:
+                    - cell "AI_POLICY.md, (File)" [ref=e445]:
+                      - generic [ref=e446]:
+                        - img [ref=e447]
+                        - link "AI_POLICY.md, (File)" [ref=e452] [cursor=pointer]:
+                          - /url: /letta-ai/letta/blob/main/AI_POLICY.md
+                          - text: AI_POLICY.md
+                    - cell [ref=e453]
+                    - cell [ref=e455]
+                  - row "CITATION.cff, (File)" [ref=e458]:
+                    - cell "CITATION.cff, (File)" [ref=e459]:
+                      - generic [ref=e460]:
+                        - img [ref=e461]
+                        - link "CITATION.cff, (File)" [ref=e466] [cursor=pointer]:
+                          - /url: /letta-ai/letta/blob/main/CITATION.cff
+                          - text: CITATION.cff
+                    - cell [ref=e467]
+                    - cell [ref=e469]
+                  - row "CONTRIBUTING.md, (File)" [ref=e472]:
+                    - cell "CONTRIBUTING.md, (File)" [ref=e473]:
+                      - generic [ref=e474]:
+                        - img [ref=e475]
+                        - link "CONTRIBUTING.md, (File)" [ref=e480] [cursor=pointer]:
+                          - /url: /letta-ai/letta/blob/main/CONTRIBUTING.md
+                          - text: CONTRIBUTING.md
+                    - cell [ref=e481]
+                    - cell [ref=e483]
+                  - row "Dockerfile, (File)" [ref=e486]:
+                    - cell "Dockerfile, (File)" [ref=e487]:
+                      - generic [ref=e488]:
+                        - img [ref=e489]
+                        - link "Dockerfile, (File)" [ref=e494] [cursor=pointer]:
+                          - /url: /letta-ai/letta/blob/main/Dockerfile
+                          - text: Dockerfile
+                    - cell [ref=e495]
+                    - cell [ref=e497]
+                  - row "LICENSE, (File)" [ref=e500]:
+                    - cell "LICENSE, (File)" [ref=e501]:
+                      - generic [ref=e502]:
+                        - img [ref=e503]
+                        - link "LICENSE, (File)" [ref=e508] [cursor=pointer]:
+                          - /url: /letta-ai/letta/blob/main/LICENSE
+                          - text: LICENSE
+                    - cell [ref=e509]
+                    - cell [ref=e511]
+                  - row "PRIVACY.md, (File)" [ref=e514]:
+                    - cell "PRIVACY.md, (File)" [ref=e515]:
+                      - generic [ref=e516]:
+                        - img [ref=e517]
+                        - link "PRIVACY.md, (File)" [ref=e522] [cursor=pointer]:
+                          - /url: /letta-ai/letta/blob/main/PRIVACY.md
+                          - text: PRIVACY.md
+                    - cell [ref=e523]
+                    - cell [ref=e525]
+                  - row "README.md, (File)" [ref=e528]:
+                    - cell "README.md, (File)" [ref=e529]:
+                      - generic [ref=e530]:
+                        - img [ref=e531]
+                        - link "README.md, (File)" [ref=e536] [cursor=pointer]:
+                          - /url: /letta-ai/letta/blob/main/README.md
+                          - text: README.md
+                    - cell [ref=e537]
+                    - cell [ref=e539]
+                  - row "SECURITY.md, (File)" [ref=e542]:
+                    - cell "SECURITY.md, (File)" [ref=e543]:
+                      - generic [ref=e544]:
+                        - img [ref=e545]
+                        - link "SECURITY.md, (File)" [ref=e550] [cursor=pointer]:
+                          - /url: /letta-ai/letta/blob/main/SECURITY.md
+                          - text: SECURITY.md
+                    - cell [ref=e551]
+                    - cell [ref=e553]
+                  - row "TERMS.md, (File)" [ref=e556]:
+                    - cell "TERMS.md, (File)" [ref=e557]:
+                      - generic [ref=e558]:
+                        - img [ref=e559]
+                        - link "TERMS.md, (File)" [ref=e564] [cursor=pointer]:
+                          - /url: /letta-ai/letta/blob/main/TERMS.md
+                          - text: TERMS.md
+                    - cell [ref=e565]
+                    - cell [ref=e567]
+                  - row "WEBHOOK_SETUP.md, (File)" [ref=e570]:
+                    - cell "WEBHOOK_SETUP.md, (File)" [ref=e571]:
+                      - generic [ref=e572]:
+                        - img [ref=e573]
+                        - link "WEBHOOK_SETUP.md, (File)" [ref=e578] [cursor=pointer]:
+                          - /url: /letta-ai/letta/blob/main/WEBHOOK_SETUP.md
+                          - text: WEBHOOK_SETUP.md
+                    - cell [ref=e579]
+                    - cell [ref=e581]
+                  - row "alembic.ini, (File)" [ref=e584]:
+                    - cell "alembic.ini, (File)" [ref=e585]:
+                      - generic [ref=e586]:
+                        - img [ref=e587]
+                        - link "alembic.ini, (File)" [ref=e592] [cursor=pointer]:
+                          - /url: /letta-ai/letta/blob/main/alembic.ini
+                          - text: alembic.ini
+                    - cell [ref=e593]
+                    - cell [ref=e595]
+                  - row "compose.yaml, (File)" [ref=e598]:
+                    - cell "compose.yaml, (File)" [ref=e599]:
+                      - generic [ref=e600]:
+                        - img [ref=e601]
+                        - link "compose.yaml, (File)" [ref=e606] [cursor=pointer]:
+                          - /url: /letta-ai/letta/blob/main/compose.yaml
+                          - text: compose.yaml
+                    - cell [ref=e607]
+                    - cell [ref=e609]
+                  - row "conf.yaml, (File)" [ref=e612]:
+                    - cell "conf.yaml, (File)" [ref=e613]:
+                      - generic [ref=e614]:
+                        - img [ref=e615]
+                        - link "conf.yaml, (File)" [ref=e620] [cursor=pointer]:
+                          - /url: /letta-ai/letta/blob/main/conf.yaml
+                          - text: conf.yaml
+                    - cell [ref=e621]
+                    - cell [ref=e623]
+                  - row "dev-compose.yaml, (File)" [ref=e626]:
+                    - cell "dev-compose.yaml, (File)" [ref=e627]:
+                      - generic [ref=e628]:
+                        - img [ref=e629]
+                        - link "dev-compose.yaml, (File)" [ref=e634] [cursor=pointer]:
+                          - /url: /letta-ai/letta/blob/main/dev-compose.yaml
+                          - text: dev-compose.yaml
+                    - cell [ref=e635]
+                    - cell [ref=e637]
+                  - row "development.compose.yml, (File)" [ref=e640]:
+                    - cell "development.compose.yml, (File)" [ref=e641]:
+                      - generic [ref=e642]:
+                        - img [ref=e643]
+                        - link "development.compose.yml, (File)" [ref=e648] [cursor=pointer]:
+                          - /url: /letta-ai/letta/blob/main/development.compose.yml
+                          - text: development.compose.yml
+                    - cell [ref=e649]
+                    - cell [ref=e651]
+                  - row "docker-compose-vllm.yaml, (File)" [ref=e654]:
+                    - cell "docker-compose-vllm.yaml, (File)" [ref=e655]:
+                      - generic [ref=e656]:
+                        - img [ref=e657]
+                        - link "docker-compose-vllm.yaml, (File)" [ref=e662] [cursor=pointer]:
+                          - /url: /letta-ai/letta/blob/main/docker-compose-vllm.yaml
+                          - text: docker-compose-vllm.yaml
+                    - cell [ref=e663]
+                    - cell [ref=e665]
+                  - row "init.sql, (File)" [ref=e668]:
+                    - cell "init.sql, (File)" [ref=e669]:
+                      - generic [ref=e670]:
+                        - img [ref=e671]
+                        - link "init.sql, (File)" [ref=e676] [cursor=pointer]:
+                          - /url: /letta-ai/letta/blob/main/init.sql
+                          - text: init.sql
+                    - cell [ref=e677]
+                    - cell [ref=e679]
+                  - row "nginx.conf, (File)" [ref=e682]:
+                    - cell "nginx.conf, (File)" [ref=e683]:
+                      - generic [ref=e684]:
+                        - img [ref=e685]
+                        - link "nginx.conf, (File)" [ref=e690] [cursor=pointer]:
+                          - /url: /letta-ai/letta/blob/main/nginx.conf
+                          - text: nginx.conf
+                    - cell [ref=e691]
+                    - cell [ref=e693]
+                  - row "package-lock.json, (File)" [ref=e696]:
+                    - cell "package-lock.json, (File)" [ref=e697]:
+                      - generic [ref=e698]:
+                        - img [ref=e699]
+                        - link "package-lock.json, (File)" [ref=e704] [cursor=pointer]:
+                          - /url: /letta-ai/letta/blob/main/package-lock.json
+                          - text: package-lock.json
+                    - cell [ref=e705]
+                    - cell [ref=e707]
+                  - row "project.json, (File)" [ref=e710]:
+                    - cell "project.json, (File)" [ref=e711]:
+                      - generic [ref=e712]:
+                        - img [ref=e713]
+                        - link "project.json, (File)" [ref=e718] [cursor=pointer]:
+                          - /url: /letta-ai/letta/blob/main/project.json
+                          - text: project.json
+                    - cell [ref=e719]
+                    - cell [ref=e721]
+                  - row "pyproject.toml, (File)" [ref=e724]:
+                    - cell "pyproject.toml, (File)" [ref=e725]:
+                      - generic [ref=e726]:
+                        - img [ref=e727]
+                        - link "pyproject.toml, (File)" [ref=e732] [cursor=pointer]:
+                          - /url: /letta-ai/letta/blob/main/pyproject.toml
+                          - text: pyproject.toml
+                    - cell [ref=e733]
+                    - cell [ref=e735]
+                  - row "test_watchdog_hang.py, (File)" [ref=e738]:
+                    - cell "test_watchdog_hang.py, (File)" [ref=e739]:
+                      - generic [ref=e740]:
+                        - img [ref=e741]
+                        - link "test_watchdog_hang.py, (File)" [ref=e746] [cursor=pointer]:
+                          - /url: /letta-ai/letta/blob/main/test_watchdog_hang.py
+                          - text: test_watchdog_hang.py
+                    - cell [ref=e747]
+                    - cell [ref=e749]
+                  - row "uv.lock, (File)" [ref=e752]:
+                    - cell "uv.lock, (File)" [ref=e753]:
+                      - generic [ref=e754]:
+                        - img [ref=e755]
+                        - link "uv.lock, (File)" [ref=e760] [cursor=pointer]:
+                          - /url: /letta-ai/letta/blob/main/uv.lock
+                          - text: uv.lock
+                    - cell [ref=e761]
+                    - cell [ref=e763]
+            - generic [ref=e767]:
+              - generic [ref=e768]:
+                - heading "Repository files navigation" [level=2] [ref=e769]
+                - navigation "Repository files" [ref=e770]:
+                  - list [ref=e771]:
+                    - listitem [ref=e772]:
+                      - link "README" [ref=e773] [cursor=pointer]:
+                        - /url: "#"
+                        - img [ref=e775]
+                        - generic [ref=e777]: README
+                    - listitem [ref=e778]:
+                      - link "Contributing" [ref=e779] [cursor=pointer]:
+                        - /url: "#"
+                        - img [ref=e781]
+                        - generic [ref=e783]: Contributing
+                    - listitem [ref=e784]:
+                      - link "Apache-2.0 license" [ref=e785] [cursor=pointer]:
+                        - /url: "#"
+                        - img [ref=e787]
+                        - generic [ref=e789]: Apache-2.0 license
+                    - listitem [ref=e790]:
+                      - link "Security" [ref=e791] [cursor=pointer]:
+                        - /url: "#"
+                        - img [ref=e793]
+                        - generic [ref=e795]: Security
+                - button "Outline" [ref=e796] [cursor=pointer]:
+                  - img [ref=e797]
+              - article [ref=e800]:
+                - generic [ref=e801]:
+                  - heading "Letta (formerly MemGPT)" [level=1] [ref=e802]
+                  - 'link "Permalink: Letta (formerly MemGPT)" [ref=e803] [cursor=pointer]':
+                    - /url: "#letta-formerly-memgpt"
+                    - img [ref=e804]
+                - paragraph [ref=e806]: Build AI with advanced memory that can learn and self-improve over time.
+                - list [ref=e807]:
+                  - listitem [ref=e808]:
+                    - link "Letta Code" [ref=e809] [cursor=pointer]:
+                      - /url: https://docs.letta.com/letta-code
+                    - text: ": run agents locally in your terminal"
+                  - listitem [ref=e810]:
+                    - link "Letta API" [ref=e811] [cursor=pointer]:
+                      - /url: https://docs.letta.com/quickstart/
+                    - text: ": build agents into your applications"
+                - generic [ref=e812]:
+                  - heading "Get started in the CLI" [level=2] [ref=e813]
+                  - 'link "Permalink: Get started in the CLI" [ref=e814] [cursor=pointer]':
+                    - /url: "#get-started-in-the-cli"
+                    - img [ref=e815]
+                - paragraph [ref=e817]:
+                  - text: Requires
+                  - link "Node.js 18+" [ref=e818] [cursor=pointer]:
+                    - /url: https://nodejs.org/en/download
+                - list [ref=e819]:
+                  - listitem [ref=e820]:
+                    - text: Install the
+                    - link "Letta Code" [ref=e821] [cursor=pointer]:
+                      - /url: https://github.com/letta-ai/letta-code
+                    - text: "CLI tool:"
+                    - code [ref=e822]: npm install -g @letta-ai/letta-code
+                  - listitem [ref=e823]:
+                    - text: Run
+                    - code [ref=e824]: letta
+                    - text: in your terminal to launch an agent with memory running on your local computer
+                - paragraph [ref=e825]: When running the CLI tool, your agent help you code and do any task you can do on your computer.
+                - paragraph [ref=e826]:
+                  - text: Letta Code supports
+                  - link "skills" [ref=e827] [cursor=pointer]:
+                    - /url: https://docs.letta.com/letta-code/skills
+                  - text: and
+                  - link "subagents" [ref=e828] [cursor=pointer]:
+                    - /url: https://docs.letta.com/letta-code/subagents
+                  - text: ", and bundles pre-built skills/subagents for advanced memory and continual learning. Letta is fully model-agnostic, though we recommend Opus 4.5 and GPT-5.2 for best performance (see our"
+                  - link "model leaderboard" [ref=e829] [cursor=pointer]:
+                    - /url: https://leaderboard.letta.com/
+                  - text: for our rankings).
+                - generic [ref=e830]:
+                  - heading "Get started with the Letta API" [level=2] [ref=e831]
+                  - 'link "Permalink: Get started with the Letta API" [ref=e832] [cursor=pointer]':
+                    - /url: "#get-started-with-the-letta-api"
+                    - img [ref=e833]
+                - paragraph [ref=e835]:
+                  - text: Use the Letta API to integrate stateful agents into your own applications. Letta has a full-featured agents API, and a Python and Typescript SDK (view our
+                  - link "API reference" [ref=e836] [cursor=pointer]:
+                    - /url: https://docs.letta.com/api
+                  - text: ).
+                - generic [ref=e837]:
+                  - heading "Installation" [level=3] [ref=e838]
+                  - 'link "Permalink: Installation" [ref=e839] [cursor=pointer]':
+                    - /url: "#installation"
+                    - img [ref=e840]
+                - paragraph [ref=e842]: "TypeScript / Node.js:"
+                - generic [ref=e843]:
+                  - generic [ref=e844]: npm install @letta-ai/letta-client
+                  - button "Copy code to clipboard" [ref=e846] [cursor=pointer]:
+                    - img [ref=e847]
+                - paragraph [ref=e850]: "Python:"
+                - generic [ref=e851]:
+                  - generic [ref=e852]: pip install letta-client
+                  - button "Copy code to clipboard" [ref=e854] [cursor=pointer]:
+                    - img [ref=e855]
+                - generic [ref=e858]:
+                  - heading "Hello World example" [level=3] [ref=e859]
+                  - 'link "Permalink: Hello World example" [ref=e860] [cursor=pointer]':
+                    - /url: "#hello-world-example"
+                    - img [ref=e861]
+                - paragraph [ref=e863]:
+                  - text: Below is a quick example of creating a stateful agent and sending it a message (requires a
+                  - link "Letta API key" [ref=e864] [cursor=pointer]:
+                    - /url: https://app.letta.com
+                  - text: ). See the full
+                  - link "quickstart guide" [ref=e865] [cursor=pointer]:
+                    - /url: https://docs.letta.com/quickstart
+                  - text: for complete documentation.
+                - paragraph [ref=e866]: "TypeScript:"
+                - generic [ref=e867]:
+                  - generic [ref=e868]: "import Letta from \"@letta-ai/letta-client\"; const client = new Letta({ apiKey: process.env.LETTA_API_KEY }); // Create your agent const agentState = await client.agents.create({ model: \"openai/gpt-5.2\", memory_blocks: [ { label: \"human\", value: \"Name: Timber. Status: dog. Occupation: building Letta, infrastructure to democratize self-improving superintelligence\", }, { label: \"persona\", value: \"I am a self-improving superintelligence. Timber is my best friend and collaborator.\", }, ], tools: [\"web_search\", \"fetch_webpage\"], }); console.log(\"Agent created with ID:\", agentState.id); // Send your agent a message const response = await client.agents.messages.create(agentState.id, { input: \"What do you know about me?\", }); for (const message of response.messages) { console.log(message); }"
+                  - button "Copy code to clipboard" [ref=e870] [cursor=pointer]:
+                    - img [ref=e871]
+                - paragraph [ref=e874]: "Python:"
+                - generic [ref=e875]:
+                  - generic [ref=e876]:
+                    - text: "from letta_client import Letta import os client = Letta(api_key=os.getenv(\"LETTA_API_KEY\")) # Create your agent agent_state = client.agents.create( model=\"openai/gpt-5.2\", memory_blocks=[ { \"label\": \"human\", \"value\": \"Name: Timber. Status: dog. Occupation: building Letta, infrastructure to democratize self-improving superintelligence\" }, { \"label\": \"persona\", \"value\": \"I am a self-improving superintelligence. Timber is my best friend and collaborator.\" } ], tools=[\"web_search\", \"fetch_webpage\"] ) print("
+                    - generic [ref=e877]:
+                      - text: "f\"Agent created with ID:"
+                      - generic [ref=e878]: "{agent_state.id}"
+                      - text: "\""
+                    - text: ") # Send your agent a message response = client.agents.messages.create( agent_id=agent_state.id, input=\"What do you know about me?\" ) for message in response.messages: print(message)"
+                  - button "Copy code to clipboard" [ref=e880] [cursor=pointer]:
+                    - img [ref=e881]
+                - generic [ref=e884]:
+                  - heading "Contributing" [level=2] [ref=e885]
+                  - 'link "Permalink: Contributing" [ref=e886] [cursor=pointer]':
+                    - /url: "#contributing"
+                    - img [ref=e887]
+                - paragraph [ref=e889]: Letta is an open source project built by over a hundred contributors from around the world. There are many ways to get involved in the Letta OSS project!
+                - list [ref=e890]:
+                  - listitem [ref=e891]:
+                    - link "Join the Discord" [ref=e892] [cursor=pointer]:
+                      - /url: https://discord.gg/letta
+                      - strong [ref=e893]: Join the Discord
+                    - text: ": Chat with the Letta devs and other AI developers."
+                  - listitem [ref=e894]:
+                    - link "Chat on our forum" [ref=e895] [cursor=pointer]:
+                      - /url: https://forum.letta.com/
+                      - strong [ref=e896]: Chat on our forum
+                    - text: ": If you're not into Discord, check out our developer forum."
+                  - listitem [ref=e897]:
+                    - strong [ref=e898]: Follow our socials
+                    - text: ":"
+                    - link "Twitter/X" [ref=e899] [cursor=pointer]:
+                      - /url: https://twitter.com/Letta_AI
+                    - text: ","
+                    - link "LinkedIn" [ref=e900] [cursor=pointer]:
+                      - /url: https://www.linkedin.com/in/letta
+                    - text: ","
+                    - link "YouTube" [ref=e901] [cursor=pointer]:
+                      - /url: https://www.youtube.com/@letta-ai
+                - separator [ref=e902]
+                - paragraph [ref=e903]:
+                  - emphasis [ref=e904]:
+                    - strong [ref=e905]: Legal notices
+                    - text: ": By using Letta and related Letta services (such as the Letta endpoint or hosted service), you are agreeing to our"
+                    - link "privacy policy" [ref=e906] [cursor=pointer]:
+                      - /url: https://www.letta.com/privacy-policy
+                    - text: and
+                    - link "terms of service" [ref=e907] [cursor=pointer]:
+                      - /url: https://www.letta.com/terms-of-service
+                    - text: .
+        - generic [ref=e911]:
+          - generic [ref=e914]:
+            - heading "About" [level=2] [ref=e915]
+            - paragraph [ref=e916]: "Letta is the platform for building stateful agents: AI with advanced memory that can learn and self-improve over time."
+            - generic [ref=e917]:
+              - img [ref=e918]
+              - link "docs.letta.com/" [ref=e921] [cursor=pointer]:
+                - /url: https://docs.letta.com/
+            - heading "Topics" [level=3] [ref=e922]
+            - generic [ref=e924]:
+              - link "ai" [ref=e925] [cursor=pointer]:
+                - /url: /topics/ai
+              - link "ai-agents" [ref=e926] [cursor=pointer]:
+                - /url: /topics/ai-agents
+              - link "llm" [ref=e927] [cursor=pointer]:
+                - /url: /topics/llm
+              - link "llm-agent" [ref=e928] [cursor=pointer]:
+                - /url: /topics/llm-agent
+            - heading "Resources" [level=3] [ref=e929]
+            - link "Readme" [ref=e931] [cursor=pointer]:
+              - /url: "#readme-ov-file"
+              - img [ref=e932]
+              - text: Readme
+            - heading "License" [level=3] [ref=e934]
+            - link "Apache-2.0 license" [ref=e936] [cursor=pointer]:
+              - /url: "#Apache-2.0-1-ov-file"
+              - img [ref=e937]
+              - text: Apache-2.0 license
+            - heading "Contributing" [level=3] [ref=e939]
+            - link "Contributing" [ref=e941] [cursor=pointer]:
+              - /url: "#contributing-ov-file"
+              - img [ref=e942]
+              - text: Contributing
+            - heading "Security policy" [level=3] [ref=e944]
+            - link "Security policy" [ref=e946] [cursor=pointer]:
+              - /url: "#security-ov-file"
+              - img [ref=e947]
+              - text: Security policy
+            - link "Activity" [ref=e950] [cursor=pointer]:
+              - /url: /letta-ai/letta/activity
+              - img [ref=e951]
+              - text: Activity
+            - link "Custom properties" [ref=e954] [cursor=pointer]:
+              - /url: /letta-ai/letta/custom-properties
+              - img [ref=e955]
+              - text: Custom properties
+            - heading "Stars" [level=3] [ref=e957]
+            - link "22.9k stars" [ref=e959] [cursor=pointer]:
+              - /url: /letta-ai/letta/stargazers
+              - img [ref=e960]
+              - strong [ref=e962]: 22.9k
+              - text: stars
+            - heading "Watchers" [level=3] [ref=e963]
+            - link "136 watching" [ref=e965] [cursor=pointer]:
+              - /url: /letta-ai/letta/watchers
+              - img [ref=e966]
+              - strong [ref=e968]: "136"
+              - text: watching
+            - heading "Forks" [level=3] [ref=e969]
+            - link "2.4k forks" [ref=e971] [cursor=pointer]:
+              - /url: /letta-ai/letta/forks
+              - img [ref=e972]
+              - strong [ref=e974]: 2.4k
+              - text: forks
+            - link "Report repository" [ref=e976] [cursor=pointer]:
+              - /url: /contact/report-content?content_url=https%3A%2F%2Fgithub.com%2Fletta-ai%2Fletta&report=letta-ai+%28user%29
+          - generic [ref=e978]:
+            - heading "Releases 177" [level=2] [ref=e979]:
+              - link "Releases 177" [ref=e980] [cursor=pointer]:
+                - /url: /letta-ai/letta/releases
+                - text: Releases
+                - generic "177" [ref=e981]
+            - link "v0.16.8 Latest May 14, 2026last week" [ref=e982] [cursor=pointer]:
+              - /url: /letta-ai/letta/releases/tag/0.16.8
+              - img [ref=e983]
+              - generic [ref=e985]:
+                - generic [ref=e986]:
+                  - generic [ref=e987]: v0.16.8
+                  - 'generic "Label: Latest" [ref=e988]': Latest
+                - generic [ref=e989]: May 14, 2026last week
+            - link "+ 176 releases" [ref=e991] [cursor=pointer]:
+              - /url: /letta-ai/letta/releases
+          - generic "Loading contributors" [ref=e994]:
+            - generic:
+              - heading "Contributors" [level=2] [ref=e995]:
+                - link "Contributors" [ref=e996] [cursor=pointer]:
+                  - /url: /letta-ai/letta/graphs/contributors
+              - list [ref=e997]:
+                - listitem [ref=e998]
+                - listitem [ref=e1000]
+                - listitem [ref=e1002]
+          - generic [ref=e1005]:
+            - heading "Languages" [level=2] [ref=e1006]
+            - list [ref=e1015]:
+              - listitem [ref=e1016]:
+                - link "Python 99.5%" [ref=e1017] [cursor=pointer]:
+                  - /url: /letta-ai/letta/search?l=python
+                  - img [ref=e1018]
+                  - generic [ref=e1020]: Python
+                  - generic [ref=e1021]: 99.5%
+              - listitem [ref=e1022]:
+                - link "Go 0.1%" [ref=e1023] [cursor=pointer]:
+                  - /url: /letta-ai/letta/search?l=go
+                  - img [ref=e1024]
+                  - generic [ref=e1026]: Go
+                  - generic [ref=e1027]: 0.1%
+              - listitem [ref=e1028]:
+                - link "Shell 0.1%" [ref=e1029] [cursor=pointer]:
+                  - /url: /letta-ai/letta/search?l=shell
+                  - img [ref=e1030]
+                  - generic [ref=e1032]: Shell
+                  - generic [ref=e1033]: 0.1%
+              - listitem [ref=e1034]:
+                - link "C++ 0.1%" [ref=e1035] [cursor=pointer]:
+                  - /url: /letta-ai/letta/search?l=c%2B%2B
+                  - img [ref=e1036]
+                  - generic [ref=e1038]: C++
+                  - generic [ref=e1039]: 0.1%
+              - listitem [ref=e1040]:
+                - link "Jinja 0.1%" [ref=e1041] [cursor=pointer]:
+                  - /url: /letta-ai/letta/search?l=jinja
+                  - img [ref=e1042]
+                  - generic [ref=e1044]: Jinja
+                  - generic [ref=e1045]: 0.1%
+              - listitem [ref=e1046]:
+                - link "Java 0.1%" [ref=e1047] [cursor=pointer]:
+                  - /url: /letta-ai/letta/search?l=java
+                  - img [ref=e1048]
+                  - generic [ref=e1050]: Java
+                  - generic [ref=e1051]: 0.1%
+  - contentinfo [ref=e1053]:
+    - heading "Footer" [level=2] [ref=e1054]
+    - generic [ref=e1055]:
+      - generic [ref=e1056]:
+        - link "GitHub Homepage" [ref=e1057] [cursor=pointer]:
+          - /url: https://github.com
+          - img [ref=e1058]
+        - generic [ref=e1060]: © 2026 GitHub, Inc.
+      - navigation "Footer" [ref=e1061]:
+        - heading "Footer navigation" [level=3] [ref=e1062]
+        - list "Footer navigation" [ref=e1063]:
+          - listitem [ref=e1064]:
+            - link "Terms" [ref=e1065] [cursor=pointer]:
+              - /url: https://docs.github.com/site-policy/github-terms/github-terms-of-service
+          - listitem [ref=e1066]:
+            - link "Privacy" [ref=e1067] [cursor=pointer]:
+              - /url: https://docs.github.com/site-policy/privacy-policies/github-privacy-statement
+          - listitem [ref=e1068]:
+            - link "Security" [ref=e1069] [cursor=pointer]:
+              - /url: https://github.com/security
+          - listitem [ref=e1070]:
+            - link "Status" [ref=e1071] [cursor=pointer]:
+              - /url: https://www.githubstatus.com/
+          - listitem [ref=e1072]:
+            - link "Community" [ref=e1073] [cursor=pointer]:
+              - /url: https://github.community/
+          - listitem [ref=e1074]:
+            - link "Docs" [ref=e1075] [cursor=pointer]:
+              - /url: https://docs.github.com/
+          - listitem [ref=e1076]:
+            - link "Contact" [ref=e1077] [cursor=pointer]:
+              - /url: https://support.github.com?tags=dotcom-footer
+          - listitem [ref=e1078]:
+            - button "Manage cookies" [ref=e1080] [cursor=pointer]
+          - listitem [ref=e1081]:
+            - button "Do not share my personal information" [ref=e1083] [cursor=pointer]

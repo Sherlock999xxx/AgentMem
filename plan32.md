@@ -1139,7 +1139,24 @@ team = AgentTeam(
 
 ## 实现状态 (Implementation Status)
 
-### Phase 1: 发掘激活 (Week 1-4) - ✅ 已完成
+### 总体进度: Phase 1-2 实施中 (约 60% 完成)
+
+| 阶段 | 任务 | 状态 | 实现位置 |
+|------|------|------|----------|
+| **Phase 1** | CoreMemory API | ✅ 完成 | `v4_api.rs` |
+| **Phase 1** | Intent Understanding API | ✅ 完成 | `v4_api.rs` |
+| **Phase 1** | Multi-Signal Search API | ✅ 完成 | `v4_api.rs` |
+| **Phase 1** | Entity Linking API | ✅ 完成 | `v4_api.rs` |
+| **Phase 2** | Enhanced Search API | ✅ 完成 | `v4_api.rs` |
+| **Phase 2** | Reasoning API | ✅ 完成 | `v4_api.rs` |
+| **Phase 2** | Adaptive Learning API | ✅ 完成 | `v4_api.rs` |
+| **Phase 2** | Unified V4Api | ✅ 完成 | `v4_api.rs` |
+| **Phase 3** | 可视化记忆轨迹 | 🔄 待实施 | - |
+| **Phase 3** | 审计日志增强 | 🔄 待实施 | - |
+| **Phase 4** | 代码执行沙箱 | 🔄 待实施 | - |
+| **Phase 4** | Multi-Agent 协作 | 🔄 待实施 | - |
+
+### Phase 1-2: 发掘激活 + API 暴露 (Week 1-8) - ✅ 已完成
 
 | 任务 | 状态 | 实现位置 | 完成日期 |
 |------|------|---------|----------|

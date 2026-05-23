@@ -94,6 +94,7 @@
 //! 详细迁移指南请参见：`docs/migration/v3_to_v4.md`
 
 pub mod api_simplification;
+pub mod v4_api;
 pub mod auto_config;
 pub mod builder;
 pub mod cache;
@@ -109,6 +110,16 @@ pub mod visualization;
 pub use api_simplification::{EnhancedError, ErrorEnhancer, FluentMemory, SmartDefaults};
 pub use builder::MemoryBuilder;
 pub use memory::Memory;
+
+// v4.0 API - 高级记忆管理功能
+// 基于 plan32.md Phase 1 实施
+pub use v4_api::{
+    CoreMemoryApi, EntityLinkingApi, EntityLinkingResult, EntityLinkingConfig,
+    EntityRelationship, LinkedEntity, EntityGraph, EntityNode, EntityEdge,
+    IntentUnderstandingApi, IntentUnderstandingResult, IntentType, Entity, EntityType, TimeRange,
+    MultiSignalSearchApi, MultiSignalConfig, MultiSignalSearchResult,
+    V4Api, V4ApiHealth,
+};
 pub use platform::{
     ApplyMigrationRequest, CancelProactiveTaskRequest, CategoryDescriptor,
     CategoryMetadataDescriptor, CategoryStatus, ExtractedEntity, ExtractedRelation,

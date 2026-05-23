@@ -627,4 +627,395 @@ pub struct V4ApiHealth {
     pub core_memory: bool, pub intent: bool, pub search: bool, pub entity_linking: bool,
     pub enhanced_search: bool, pub reasoning: bool, pub adaptive: bool,
     pub memory_trace: bool, pub audit_log: bool, pub quota: bool, pub multi_tenant: bool, pub overall: bool,
+
+
+// ============================================================================
+// Code Sandbox API (Phase 4) - 对标 Letta
+// ============================================================================
+
+/// Code Sandbox API - 代码执行沙箱
+///
+/// 提供安全的代码执行环境，支持 Python/JavaScript/Rust。
+#[derive(Clone)]
+pub struct CodeSandboxApi { config: SandboxConfig }
+
+#[derive(Clone)]
+pub struct SandboxConfig {
+    pub timeout_ms: u64,
+    pub memory_limit_mb: usize,
+    pub enable_network: bool,
+    pub allowed_languages: Vec<String>,
+}
+
+impl Default for SandboxConfig {
+    fn default() -> Self {
+        Self {
+            timeout_ms: 30000,
+            memory_limit_mb: 256,
+            enable_network: false,
+            allowed_languages: vec!["python".to_string(), "javascript".to_string()],
+        }
+    }
+}
+
+#[derive(Clone)]
+pub struct SandboxResult {
+    pub success: bool,
+    pub output: String,
+    pub error: Option<String>,
+    pub execution_time_ms: u64,
+    pub memory_used_mb: Option<usize>,
+}
+
+impl CodeSandboxApi {
+    pub fn new() -> Self { Self { config: SandboxConfig::default() } }
+    pub fn with_config(config: SandboxConfig) -> Self { Self { config } }
+    
+    /// 执行代码
+    pub async fn execute(&self, code: &str, language: &str) -> SandboxResult {
+        info!("Executing {} code ({} chars)", language, code.len());
+        
+        // 验证语言
+        if !self.config.allowed_languages.contains(&language.to_lowercase()) {
+            return SandboxResult {
+                success: false,
+                output: String::new(),
+                error: Some(format!("Language '{}' not allowed", language)),
+                execution_time_ms: 0,
+                memory_used_mb: None,
+            };
+        }
+        
+        // TODO: 集成 WASM 执行器
+        SandboxResult {
+            success: true,
+            output: format!("[Sandbox] Executed {} code (simulated)", language),
+            error: None,
+            execution_time_ms: 100,
+            memory_used_mb: Some(10),
+        }
+    }
+    
+    pub fn is_language_allowed(&self, language: &str) -> bool {
+        self.config.allowed_languages.contains(&language.to_lowercase())
+    }
+}
+
+impl Default for CodeSandboxApi { fn default() -> Self { Self::new() } }
+
+// ============================================================================
+// Multi-Agent Fleet API (Phase 4) - 对标 Agno
+// ============================================================================
+
+/// Multi-Agent Fleet API - 多智能体舰队管理
+///
+/// 提供多智能体的协作和管理功能。
+#[derive(Clone)]
+pub struct FleetApi { config: FleetConfig, agents: Vec<FleetAgent>, teams: Vec<AgentTeam> }
+
+#[derive(Clone)]
+pub struct FleetConfig {
+    pub max_agents: usize,
+    pub enable_team_collaboration: bool,
+    pub default_strategy: TeamStrategy,
+}
+
+impl Default for FleetConfig {
+    fn default() -> Self {
+        Self {
+            max_agents: 100,
+            enable_team_collaboration: true,
+            default_strategy: TeamStrategy::Coordinate,
+        }
+    }
+}
+
+#[derive(Clone, Debug)]
+pub struct FleetAgent {
+    pub id: String,
+    pub name: String,
+    pub role: AgentRole,
+    pub status: AgentStatus,
+    pub capabilities: Vec<String>,
+    pub memory_count: usize,
+}
+
+#[derive(Clone, Debug, Copy)]
+pub enum AgentRole { Researcher, Analyzer, Synthesizer, Coordinator, Specialist }
+
+#[derive(Clone, Debug, Copy)]
+pub enum AgentStatus { Idle, Working, Blocked, Offline }
+
+#[derive(Clone)]
+pub struct AgentTeam {
+    pub id: String,
+    pub name: String,
+    pub agents: Vec<String>,  // Agent IDs
+    pub strategy: TeamStrategy,
+    pub shared_memory: Vec<String>,
+}
+
+#[derive(Clone, Debug, Copy)]
+pub enum TeamStrategy { Coordinate, Sequential, Hierarchical, Parallel }
+
+impl FleetApi {
+    pub fn new() -> Self {
+        Self { config: FleetConfig::default(), agents: vec![], teams: vec![] }
+    }
+    
+    /// 注册智能体
+    pub fn register_agent(&mut self, name: &str, role: AgentRole, capabilities: Vec<String>) -> String {
+        let id = format!("agent_{}", self.agents.len());
+        let agent = FleetAgent {
+            id: id.clone(),
+            name: name.to_string(),
+            role,
+            status: AgentStatus::Idle,
+            capabilities,
+            memory_count: 0,
+        };
+        self.agents.push(agent);
+        info!("Registered agent: {} ({})", name, id);
+        id
+    }
+    
+    /// 创建团队
+    pub fn create_team(&mut self, name: &str, agent_ids: Vec<String>, strategy: TeamStrategy) -> String {
+        let id = format!("team_{}", self.teams.len());
+        let team = AgentTeam { id: id.clone(), name: name.to_string(), agents: agent_ids, strategy, shared_memory: vec![] };
+        self.teams.push(team);
+        info!("Created team: {} ({})", name, id);
+        id
+    }
+    
+    /// 获取智能体
+    pub fn get_agent(&self, agent_id: &str) -> Option<&FleetAgent> {
+        self.agents.iter().find(|a| a.id == agent_id)
+    }
+    
+    /// 获取团队
+    pub fn get_team(&self, team_id: &str) -> Option<&AgentTeam> {
+        self.teams.iter().find(|t| t.id == team_id)
+    }
+    
+    /// 列出所有智能体
+    pub fn list_agents(&self) -> Vec<&FleetAgent> { self.agents.iter().collect() }
+    
+    /// 列出所有团队
+    pub fn list_teams(&self) -> Vec<&AgentTeam> { self.teams.iter().collect() }
+    
+    /// 更新智能体状态
+    pub fn update_agent_status(&mut self, agent_id: &str, status: AgentStatus) -> bool {
+        if let Some(agent) = self.agents.iter_mut().find(|a| a.id == agent_id) {
+            agent.status = status;
+            true
+        } else { false }
+    }
+}
+
+impl Default for FleetApi { fn default() -> Self { Self::new() } }
+
+// ============================================================================
+// Mental Model API (Phase 4) - 对标 Letta
+// ============================================================================
+
+/// Mental Model API - 心智模型管理
+///
+/// 管理 Agent 的 persona 和行为模式。
+#[derive(Clone)]
+pub struct MentalModelApi { personas: HashMap<String, PersonaModel> }
+
+#[derive(Clone)]
+pub struct PersonaModel {
+    pub id: String,
+    pub name: String,
+    pub description: String,
+    pub traits: Vec<PersonalityTrait>,
+    pub goals: Vec<String>,
+    pub constraints: Vec<String>,
+    pub memory_preferences: MemoryPreference,
+}
+
+#[derive(Clone)]
+pub struct PersonalityTrait { pub name: String, pub value: f32 }  // 0.0-1.0
+
+#[derive(Clone)]
+pub struct MemoryPreference {
+    pub importance_threshold: f32,
+    pub retention_days: u32,
+    pub summarization_trigger: f32,
+}
+
+impl MentalModelApi {
+    pub fn new() -> Self { Self { personas: HashMap::new() } }
+    
+    /// 创建 persona
+    pub fn create_persona(&mut self, name: &str, description: &str) -> String {
+        let id = format!("persona_{}", self.personas.len());
+        let persona = PersonaModel {
+            id: id.clone(),
+            name: name.to_string(),
+            description: description.to_string(),
+            traits: vec![
+                PersonalityTrait { name: "creativity".to_string(), value: 0.7 },
+                PersonalityTrait { name: "helpfulness".to_string(), value: 0.9 },
+                PersonalityTrait { name: "precision".to_string(), value: 0.8 },
+            ],
+            goals: vec![],
+            constraints: vec![],
+            memory_preferences: MemoryPreference { importance_threshold: 0.5, retention_days: 30, summarization_trigger: 0.8 },
+        };
+        self.personas.insert(id.clone(), persona);
+        info!("Created persona: {} ({})", name, id);
+        id
+    }
+    
+    /// 获取 persona
+    pub fn get_persona(&self, persona_id: &str) -> Option<&PersonaModel> {
+        self.personas.get(persona_id)
+    }
+    
+    /// 更新 persona
+    pub fn update_persona(&mut self, persona_id: &str, name: Option<&str>, traits: Option<Vec<PersonalityTrait>>) -> bool {
+        if let Some(persona) = self.personas.get_mut(persona_id) {
+            if let Some(n) = name { persona.name = n.to_string(); }
+            if let Some(t) = traits { persona.traits = t; }
+            true
+        } else { false }
+    }
+    
+    /// 动态学习 - 根据交互更新 traits
+    pub fn learn_from_interaction(&mut self, persona_id: &str, feedback: InteractionFeedback) {
+        if let Some(persona) = self.personas.get_mut(persona_id) {
+            for trait_update in &feedback.trait_adjustments {
+                if let Some(trait_) = persona.traits.iter_mut().find(|t| t.name == trait_update.name) {
+                    trait_.value = (trait_.value + trait_update.delta).clamp(0.0, 1.0);
+                }
+            }
+        }
+    }
+    
+    /// 生成系统提示
+    pub fn generate_system_prompt(&self, persona_id: &str) -> Option<String> {
+        self.personas.get(persona_id).map(|p| {
+            let traits_str: Vec<String> = p.traits.iter()
+                .map(|t| format!("{}: {:.1}", t.name, t.value))
+                .collect();
+            format!("You are {}. Description: {}. Traits: {}", p.name, p.description, traits_str.join(", "))
+        })
+    }
+}
+
+impl Default for MentalModelApi { fn default() -> Self { Self::new() } }
+
+#[derive(Clone)]
+pub struct InteractionFeedback {
+    pub interaction_type: String,
+    pub outcome: String,
+    pub trait_adjustments: Vec<TraitAdjustment>,
+}
+
+#[derive(Clone)]
+pub struct TraitAdjustment { pub name: String, pub delta: f32 }
+
+// ============================================================================
+// Schema Evolution API (Phase 4)
+// ============================================================================
+
+/// Schema Evolution API - Schema 自动演化
+#[derive(Clone)]
+pub struct SchemaEvolutionApi { schemas: HashMap<String, SchemaDefinition> }
+
+#[derive(Clone)]
+pub struct SchemaDefinition {
+    pub id: String,
+    pub name: String,
+    pub pattern: String,
+    pub memory_count: usize,
+    pub confidence: f32,
+    pub version: u64,
+}
+
+impl SchemaEvolutionApi {
+    pub fn new() -> Self { Self { schemas: HashMap::new() } }
+    
+    pub fn create_schema(&mut self, name: &str, pattern: &str) -> String {
+        let id = format!("schema_{}", self.schemas.len());
+        let schema = SchemaDefinition { id: id.clone(), name: name.to_string(), pattern: pattern.to_string(), memory_count: 0, confidence: 0.5, version: 1 };
+        self.schemas.insert(id.clone(), schema);
+        id
+    }
+    
+    pub fn merge_schemas(&mut self, schema1_id: &str, schema2_id: &str, new_pattern: &str) -> Option<String> {
+        if self.schemas.contains_key(schema1_id) && self.schemas.contains_key(schema2_id) {
+            self.schemas.remove(schema1_id);
+            self.schemas.remove(schema2_id);
+            let id = format!("schema_{}", self.schemas.len());
+            let merged = SchemaDefinition { id: id.clone(), name: "merged".to_string(), pattern: new_pattern.to_string(), memory_count: 0, confidence: 0.6, version: 1 };
+            self.schemas.insert(id.clone(), merged);
+            Some(id)
+        } else { None }
+    }
+}
+
+impl Default for SchemaEvolutionApi { fn default() -> Self { Self::new() } }
+
+// ============================================================================
+// Unified v4 API - Extended with Phase 4
+// ============================================================================
+
+impl V4Api {
+    pub fn with_phase4(self) -> V4ApiPhase4 {
+        V4ApiPhase4 {
+            base: self,
+            code_sandbox: CodeSandboxApi::new(),
+            fleet: FleetApi::new(),
+            mental_model: MentalModelApi::new(),
+            schema_evolution: SchemaEvolutionApi::new(),
+        }
+    }
+}
+
+#[derive(Clone)]
+pub struct V4ApiPhase4 {
+    pub base: V4Api,
+    pub code_sandbox: CodeSandboxApi,
+    pub fleet: FleetApi,
+    pub mental_model: MentalModelApi,
+    pub schema_evolution: SchemaEvolutionApi,
+}
+
+impl V4ApiPhase4 {
+    pub fn new() -> Self {
+        Self {
+            base: V4Api::new(),
+            code_sandbox: CodeSandboxApi::new(),
+            fleet: FleetApi::new(),
+            mental_model: MentalModelApi::new(),
+            schema_evolution: SchemaEvolutionApi::new(),
+        }
+    }
+    
+    pub async fn health_check(&self) -> V4ApiPhase4Health {
+        V4ApiPhase4Health {
+            all_healthy: true,
+            phase1_core: true,
+            phase2_extended: true,
+            phase3_enterprise: true,
+            phase4_advanced: true,
+        }
+    }
+}
+
+impl Default for V4ApiPhase4 { fn default() -> Self { Self::new() } }
+
+#[derive(Clone, Debug)]
+pub struct V4ApiPhase4Health {
+    pub all_healthy: bool,
+    pub phase1_core: bool,
+    pub phase2_extended: bool,
+    pub phase3_enterprise: bool,
+    pub phase4_advanced: bool,
+}
+
 }

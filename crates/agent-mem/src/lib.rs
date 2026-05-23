@@ -15,12 +15,20 @@ pub use api_simplification::{EnhancedError, ErrorEnhancer, FluentMemory, SmartDe
 pub use builder::MemoryBuilder;
 pub use memory::Memory;
 
+// v4.0 API - 高级记忆管理功能 (Phase 1-4)
 pub use v4_api::{
-    // Core APIs
+    // Core APIs (Phase 1)
     CoreMemoryApi, IntentUnderstandingApi, MultiSignalSearchApi, EntityLinkingApi,
+    // Extended APIs (Phase 2)
     EnhancedSearchApi, ReasoningApi, AdaptiveLearningApi,
-    // Enterprise APIs
+    // Enterprise APIs (Phase 3)
     MemoryTraceApi, AuditLogApi, QuotaApi, MultiTenantApi,
+    // Advanced APIs (Phase 4)
+    CodeSandboxApi, SandboxConfig, SandboxResult,
+    FleetApi, FleetAgent, AgentTeam, AgentRole, AgentStatus, TeamStrategy,
+    MentalModelApi, PersonaModel, PersonalityTrait, InteractionFeedback,
+    SchemaEvolutionApi, SchemaDefinition,
+    V4ApiPhase4, V4ApiPhase4Health,
     // Unified API
     V4Api, V4ApiHealth,
     // Types

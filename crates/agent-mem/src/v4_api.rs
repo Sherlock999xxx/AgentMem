@@ -8,6 +8,10 @@ use tracing::{debug, info};
 use agent_mem_core::managers::core_memory::{
     CoreMemoryBlock, CoreMemoryBlockType, CoreMemoryConfig, CoreMemoryManager, CoreMemoryStats,
 };
+use agent_mem_core::decentralized_architecture::{
+    DecentralizedConfig, DecentralizedManager, DistributedNode, 
+    ConflictResolutionStrategy, NetworkOptimizationConfig,
+};
 use crate::Result;
 
 // ============================================================================
@@ -514,6 +518,113 @@ impl MultiTenantApi {
 
 impl Default for MultiTenantApi { fn default() -> Self { Self::new() } }
 
+
+// ============================================================================
+// DecentralizedArchitecture API (Phase 5)
+// ============================================================================
+
+#[derive(Clone)]
+pub struct DecentralizedArchitectureApi {
+    manager: Arc<RwLock<agent_mem_core::decentralized_architecture::DecentralizedManager>>,
+}
+
+impl DecentralizedArchitectureApi {
+    pub fn new() -> Self {
+        Self { 
+            manager: Arc::new(RwLock::new(
+                agent_mem_core::decentralized_architecture::DecentralizedManager::with_defaults()
+            ))
+        }
+    }
+
+    pub fn with_config(config: agent_mem_core::decentralized_architecture::DecentralizedConfig) -> Self {
+        Self { 
+            manager: Arc::new(RwLock::new(
+                agent_mem_core::decentralized_architecture::DecentralizedManager::new(config)
+            ))
+        }
+    }
+
+    pub async fn register_node(&self, address: &str, port: u16, status: agent_mem_core::decentralized_architecture::NodeStatus) -> Result<String> {
+        let node_id = uuid::Uuid::new_v4().to_string();
+        let node = agent_mem_core::decentralized_architecture::DistributedNode {
+            node_id: node_id.clone(),
+            address: address.to_string(),
+            port,
+            status,
+            last_heartbeat: chrono::Utc::now(),
+            capabilities: vec!["sync".to_string()],
+        };
+        let manager = self.manager.write().await;
+        manager.register_node(node).await
+            .map_err(|e| agent_mem_traits::AgentMemError::internal_error(e.to_string()))?;
+        Ok(node_id)
+    }
+
+    pub async fn list_nodes(&self) -> Result<Vec<agent_mem_core::decentralized_architecture::DistributedNode>> {
+        let manager = self.manager.read().await;
+        Ok(manager.get_known_nodes().await)
+    }
+
+    pub async fn get_sync_state(&self) -> Result<agent_mem_core::decentralized_architecture::SyncState> {
+        let manager = self.manager.read().await;
+        Ok(manager.get_sync_state().await)
+    }
+
+    pub async fn get_sync_status(&self) -> SyncStatus {
+        let manager = self.manager.read().await;
+        let state = manager.get_sync_state().await;
+        let nodes = manager.get_known_nodes().await;
+        SyncStatus {
+            is_enabled: true,
+            node_count: nodes.len(),
+            synced_nodes: nodes.iter().filter(|n| n.status == agent_mem_core::decentralized_architecture::NodeStatus::Online).count(),
+            pending_syncs: state.pending_operations,
+            conflicts: state.pending_conflicts,
+        }
+    }
+
+    pub async fn sync_data(&self, key: &str, value: Vec<u8>, operation_type: agent_mem_core::decentralized_architecture::SyncOperationType) -> Result<()> {
+        let operation = agent_mem_core::decentralized_architecture::SyncOperation {
+            operation_id: uuid::Uuid::new_v4().to_string(),
+            key: key.to_string(),
+            value,
+            operation_type,
+            version: 1,
+            timestamp: chrono::Utc::now(),
+            node_id: "local".to_string(),
+        };
+        let manager = self.manager.write().await;
+        manager.sync_to_nodes(operation).await
+            .map_err(|e| agent_mem_traits::AgentMemError::internal_error(e.to_string()))?;
+        Ok(())
+    }
+
+    pub async fn get_conflicts(&self, resolved: Option<bool>) -> Result<Vec<agent_mem_core::decentralized_architecture::ConflictRecord>> {
+        let manager = self.manager.read().await;
+        Ok(manager.get_conflicts(resolved).await)
+    }
+
+    pub async fn is_enabled(&self) -> bool {
+        true // Decentralized mode is always available
+    }
+}
+
+impl Default for DecentralizedArchitectureApi {
+    fn default() -> Self { Self::new() }
+}
+
+/// Sync status information
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+pub struct SyncStatus {
+    pub is_enabled: bool,
+    pub node_count: usize,
+    pub synced_nodes: usize,
+    pub pending_syncs: usize,
+    pub conflicts: usize,
+}
+
+
 // ============================================================================
 // Unified v4 API
 // ============================================================================
@@ -531,6 +642,7 @@ pub struct V4Api {
     pub audit_log: AuditLogApi,
     pub quota: QuotaApi,
     pub multi_tenant: MultiTenantApi,
+    pub decentralized: DecentralizedArchitectureApi,
 }
 
 impl V4Api {
@@ -547,6 +659,7 @@ impl V4Api {
             audit_log: AuditLogApi::new(),
             quota: QuotaApi::new(),
             multi_tenant: MultiTenantApi::new(),
+            decentralized: DecentralizedArchitectureApi::new(),
         }
     }
 
@@ -555,7 +668,22 @@ impl V4Api {
     }
 
     pub async fn health_check(&self) -> V4ApiHealth {
-        V4ApiHealth { core_memory: true, intent: true, search: true, entity_linking: true, enhanced_search: true, reasoning: true, adaptive: true, memory_trace: true, audit_log: true, quota: true, multi_tenant: true, overall: true }
+        let decentralized_healthy = self.decentralized.is_enabled().await;
+        V4ApiHealth { 
+            core_memory: true, 
+            intent: true, 
+            search: true, 
+            entity_linking: true, 
+            enhanced_search: true, 
+            reasoning: true, 
+            adaptive: true, 
+            memory_trace: true, 
+            audit_log: true, 
+            quota: true, 
+            multi_tenant: true,
+            decentralized: decentralized_healthy,
+            overall: true 
+        }
     }
 }
 
@@ -626,8 +754,9 @@ pub struct TimeRangeResult { pub start: String, pub end: String, pub duration: O
 pub struct V4ApiHealth {
     pub core_memory: bool, pub intent: bool, pub search: bool, pub entity_linking: bool,
     pub enhanced_search: bool, pub reasoning: bool, pub adaptive: bool,
-    pub memory_trace: bool, pub audit_log: bool, pub quota: bool, pub multi_tenant: bool, pub overall: bool,
-
+    pub memory_trace: bool, pub audit_log: bool, pub quota: bool, pub multi_tenant: bool,
+    pub decentralized: bool, pub overall: bool,
+}
 
 // ============================================================================
 // Code Sandbox API (Phase 4) - 对标 Letta
@@ -1016,6 +1145,4 @@ pub struct V4ApiPhase4Health {
     pub phase2_extended: bool,
     pub phase3_enterprise: bool,
     pub phase4_advanced: bool,
-}
-
 }

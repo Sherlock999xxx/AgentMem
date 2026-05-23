@@ -23,6 +23,8 @@ pub use v4_api::{
     EnhancedSearchApi, ReasoningApi, AdaptiveLearningApi,
     // Enterprise APIs (Phase 3)
     MemoryTraceApi, AuditLogApi, QuotaApi, MultiTenantApi,
+    // Distributed API (Phase 5)
+    DecentralizedArchitectureApi, SyncStatus,
     // Advanced APIs (Phase 4)
     CodeSandboxApi, SandboxConfig, SandboxResult,
     FleetApi, FleetAgent, AgentTeam, AgentRole, AgentStatus, TeamStrategy,

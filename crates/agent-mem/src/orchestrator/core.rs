@@ -351,7 +351,7 @@ impl MemoryOrchestrator {
             })
         };
         #[cfg(not(feature = "postgres"))]
-        let (hybrid_search_engine, vector_search_engine, fulltext_search_engine) =
+        let (_hybrid_search_engine, _vector_search_engine, _fulltext_search_engine) =
             (None::<Arc<()>>, None::<Arc<()>>, None::<Arc<()>>);
 
         // ========== Step 8.5: 创建重排序器 ==========
@@ -447,8 +447,8 @@ impl MemoryOrchestrator {
 
             // 尝试提取 CachedEmbedder 引用（如果启用了缓存）
             cached_embedder: {
-                use agent_mem_embeddings::CachedEmbedder;
-                if let Some(emb) = &embedder {
+                
+                if let Some(_emb) = &embedder {
                     // 尝试通过内部方法获取 CachedEmbedder 引用
                     // 注意：这里使用一个技巧 - 我们知道启用缓存时会包装为 CachedEmbedder
                     // 由于 Rust 的 trait 对象限制，我们需要在初始化时保存引用
@@ -741,7 +741,7 @@ impl MemoryOrchestrator {
 
     /// 获取统计信息 - 内部方法
     #[allow(dead_code)]
-    pub(crate) async fn get_stats(&self, user_id: Option<String>) -> Result<MemoryStats> {
+    pub(crate) async fn get_stats(&self, _user_id: Option<String>) -> Result<MemoryStats> {
         let total_memories = 0;
         let memories_by_type: HashMap<String, usize> = HashMap::new();
         let total_importance = 0.0;
@@ -753,7 +753,7 @@ impl MemoryOrchestrator {
         // 这里暂时跳过，返回默认统计
 
         // 从向量存储获取统计（如果可用）
-        if let Some(vector_store) = &self.vector_store {
+        if let Some(_vector_store) = &self.vector_store {
             // 向量存储可能不直接提供统计，这里使用估算
             // 实际实现可能需要根据具体的向量存储 API 调整
         }
@@ -778,7 +778,7 @@ impl MemoryOrchestrator {
     pub(crate) async fn get_all_memories(
         &self,
         agent_id: String,
-        user_id: Option<String>,
+        _user_id: Option<String>,
     ) -> Result<Vec<MemoryItem>> {
         let mut all_memories = Vec::new();
 
@@ -809,7 +809,7 @@ impl MemoryOrchestrator {
         &self,
         agent_id: String,
         user_id: Option<String>,
-        run_id: Option<String>,
+        _run_id: Option<String>,
         limit: Option<usize>,
     ) -> Result<Vec<MemoryItem>> {
         let mut memories = self.get_all_memories(agent_id, user_id).await?;
@@ -852,7 +852,7 @@ impl MemoryOrchestrator {
         info!("重置 MemoryOrchestrator");
 
         // 1. 删除所有记忆（通过 MemoryManager）
-        if let Some(manager) = &self.memory_manager {
+        if let Some(_manager) = &self.memory_manager {
             // 获取所有记忆并删除
             // 注意：这里使用默认 agent_id，实际可能需要遍历所有 agent
             let default_agent_id = "default".to_string();
@@ -878,7 +878,7 @@ impl MemoryOrchestrator {
         }
 
         // 4. 清空 CoreMemoryManager（如果存在）
-        if let Some(core_manager) = &self.core_manager {
+        if let Some(_core_manager) = &self.core_manager {
             // CoreMemoryManager 是内存存储，通常不需要显式清空
             // 但如果需要，可以在这里添加清空逻辑
             info!("✅ CoreMemoryManager 已处理");
@@ -1294,7 +1294,7 @@ impl MemoryOrchestrator {
         limit: usize,
         enable_hybrid: bool,
         enable_rerank: bool,
-        threshold: Option<f32>,
+        _threshold: Option<f32>,
         time_range: Option<(i64, i64)>,
     ) -> Result<Vec<MemoryItem>> {
         // 执行搜索
@@ -1426,9 +1426,9 @@ impl MemoryOrchestrator {
     pub async fn get_embedder_cache_stats(
         &self,
     ) -> Result<Option<agent_mem_intelligence::caching::CacheStats>> {
-        use agent_mem_embeddings::cached_embedder::CachedEmbedder;
+        
 
-        if let Some(embedder) = &self.embedder {
+        if let Some(_embedder) = &self.embedder {
             // 尝试将 embedder downcast 为 CachedEmbedder
             // 注意: 由于使用了 Arc 和 trait 对象,我们需要通过其他方式访问
 
@@ -1470,7 +1470,7 @@ impl MemoryOrchestrator {
     /// # }
     /// ```
     pub async fn clear_embedder_cache(&self) -> Result<()> {
-        use agent_mem_embeddings::cached_embedder::CachedEmbedder;
+        
 
         if let Some(_embedder) = &self.embedder {
             // TODO: 实现,需要在 Embedder trait 中添加 clear_cache() 方法
@@ -1904,7 +1904,7 @@ impl<'a> BatchBuilder<'a> {
         // 创建并发任务流
         let results = stream::iter(chunks)
             .map(move |chunk| {
-                let orch = orchestrator.clone();
+                let orch = orchestrator;
                 let agent_id = agent_id.clone();
                 let user_id = user_id.clone();
                 let memory_type = memory_type;

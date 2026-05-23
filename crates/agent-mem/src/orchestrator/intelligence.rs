@@ -429,7 +429,7 @@ impl IntelligenceModule {
         existing_memories: &[ExistingMemory],
         importance_evaluations: &[ImportanceEvaluation],
         conflicts: &[ConflictDetection],
-        agent_id: &str,
+        _agent_id: &str,
         _user_id: Option<String>,
     ) -> Result<Vec<MemoryDecision>> {
         if let Some(engine) = &orchestrator.enhanced_decision_engine {

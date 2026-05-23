@@ -20,7 +20,7 @@ impl RetrievalModule {
     pub async fn search_memories(
         orchestrator: &MemoryOrchestrator,
         query: String,
-        agent_id: String,
+        _agent_id: String,
         user_id: Option<String>,
         limit: usize,
         _memory_type: Option<agent_mem_core::types::MemoryType>,
@@ -347,7 +347,7 @@ impl RetrievalModule {
 
     /// 上下文感知重排序
     pub async fn context_aware_rerank(
-        orchestrator: &MemoryOrchestrator,
+        _orchestrator: &MemoryOrchestrator,
         memories: Vec<MemoryItem>,
         query: &str,
         user_id: &str,

@@ -3,14 +3,10 @@
 use std::collections::HashMap;
 use std::sync::Arc;
 use tokio::sync::RwLock;
-use tracing::{debug, info};
+use tracing::info;
 
 use agent_mem_core::managers::core_memory::{
-    CoreMemoryBlock, CoreMemoryBlockType, CoreMemoryConfig, CoreMemoryManager, CoreMemoryStats,
-};
-use agent_mem_core::decentralized_architecture::{
-    DecentralizedConfig, DecentralizedManager, DistributedNode, 
-    ConflictResolutionStrategy, NetworkOptimizationConfig,
+    CoreMemoryBlock, CoreMemoryConfig, CoreMemoryManager, CoreMemoryStats,
 };
 use crate::Result;
 

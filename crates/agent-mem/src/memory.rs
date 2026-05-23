@@ -881,9 +881,9 @@ impl Memory {
         let orchestrator = self.orchestrator.read().await;
 
         // 尝试获取 embedder 的缓存统计
-        if let Some(embedder) = &orchestrator.embedder {
+        if let Some(_embedder) = &orchestrator.embedder {
             // 检查是否是 CachedEmbedder
-            use agent_mem_embeddings::cached_embedder::CachedEmbedder;
+            
 
             // 使用 Any downcast 尝试转换为 CachedEmbedder
             // 注意: 这里需要通过内部 API 或者添加 trait 方法

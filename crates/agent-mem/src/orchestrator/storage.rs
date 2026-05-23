@@ -434,7 +434,7 @@ impl StorageModule {
         }
 
         // 降级：从向量存储获取
-        if let Some(vector_store) = &orchestrator.vector_store {
+        if let Some(_vector_store) = &orchestrator.vector_store {
             // 尝试通过 ID 搜索（如果向量存储支持）
             // 这里假设可以通过 metadata 中的 ID 字段来查找
             // 实际实现可能需要根据具体的向量存储 API 调整
@@ -452,7 +452,7 @@ impl StorageModule {
         content: String,
         agent_id: String,
         user_id: Option<String>,
-        run_id: Option<String>,
+        _run_id: Option<String>,
         metadata: Option<HashMap<String, serde_json::Value>>,
         infer: bool,
         memory_type: Option<String>,

@@ -3,7 +3,7 @@
 //! 负责所有批量操作，包括批量添加、批量处理等
 
 use std::collections::HashMap;
-use tracing::{debug, error, info, warn};
+use tracing::{error, info, warn};
 
 use agent_mem_core::types::MemoryType;
 use agent_mem_traits::Result;

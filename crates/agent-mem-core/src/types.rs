@@ -997,7 +997,7 @@ impl Memory {
     /// 获取memory_type（向后兼容）
     pub fn memory_type(&self) -> MemoryType {
         self.attributes
-            .get(&AttributeKey::system("memory_type"))
+            .get(&AttributeKey::core("memory_type"))
             .and_then(|v| v.as_string())
             .and_then(|s| s.parse::<MemoryType>().ok())
             .unwrap_or(MemoryType::Semantic)
@@ -1046,7 +1046,7 @@ impl Memory {
         }
 
         attributes.set(
-            AttributeKey::system("memory_type"),
+            AttributeKey::core("memory_type"),
             AttributeValue::String(old.memory_type.as_str().to_string()),
         );
 
@@ -2210,7 +2210,7 @@ impl From<Memory> for MemoryItem {
 
         let memory_type_str = memory
             .attributes
-            .get(&AttributeKey::system("memory_type"))
+            .get(&AttributeKey::core("memory_type"))
             .and_then(|v| v.as_string())
             .unwrap_or("semantic");
 
@@ -2353,7 +2353,7 @@ impl TryFrom<MemoryItem> for Memory {
         }
 
         attributes.set(
-            AttributeKey::system("memory_type"),
+            AttributeKey::core("memory_type"),
             AttributeValue::String(item.memory_type.as_str().to_string()),
         );
 
@@ -2735,7 +2735,7 @@ mod tests {
         assert_eq!(
             memory
                 .attributes
-                .get(&AttributeKey::system("memory_type"))
+                .get(&AttributeKey::core("memory_type"))
                 .unwrap()
                 .as_string(),
             Some("semantic")

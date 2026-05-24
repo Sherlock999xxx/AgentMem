@@ -27,7 +27,7 @@ fn create_test_memory(content: &str, memory_type: MemoryType, score: Option<f32>
             AttributeValue::String("test-user".to_string()),
         )
         .attribute(
-            AttributeKey::system("memory_type"),
+            AttributeKey::core("memory_type"),
             AttributeValue::String(memory_type.as_str().to_string()),
         )
         .attribute(

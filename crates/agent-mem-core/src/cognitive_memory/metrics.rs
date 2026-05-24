@@ -205,3 +205,70 @@ mod tests {
         assert!(timer.elapsed().as_micros() >= 100);
     }
 }
+
+/// Cache statistics for memory operations
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CacheStats {
+    /// Cache hits
+    pub hits: u64,
+    /// Cache misses
+    pub misses: u64,
+    /// Cache evictions
+    pub evictions: u64,
+    /// Current cache size
+    pub current_size: usize,
+}
+
+impl CacheStats {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn record_hit(&mut self) {
+        self.hits += 1;
+    }
+
+    pub fn record_miss(&mut self) {
+        self.misses += 1;
+    }
+
+    pub fn record_eviction(&mut self) {
+        self.evictions += 1;
+    }
+
+    pub fn update_size(&mut self, size: usize) {
+        self.current_size = size;
+    }
+
+    /// Get hit rate (0.0 to 1.0)
+    pub fn hit_rate(&self) -> f64 {
+        let total = self.hits + self.misses;
+        if total == 0 {
+            0.0
+        } else {
+            self.hits as f64 / total as f64
+        }
+    }
+}
+
+#[cfg(test)]
+mod cache_tests {
+    use super::*;
+
+    #[test]
+    fn test_cache_stats() {
+        let mut stats = CacheStats::new();
+        stats.record_hit();
+        stats.record_hit();
+        stats.record_miss();
+        assert_eq!(stats.hits, 2);
+        assert_eq!(stats.misses, 1);
+        assert_eq!(stats.hit_rate(), 2.0 / 3.0);
+    }
+
+    #[test]
+    fn test_cache_stats_empty() {
+        let stats = CacheStats::new();
+        assert_eq!(stats.hit_rate(), 0.0);
+    }
+}

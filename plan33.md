@@ -274,7 +274,7 @@ let categories = category_engine.search_categories("programming", scope, 10).awa
 ### 4.3 Week 3: 可选高级功能
 
 ```
-Day 1-2: GraphMemory集成
+✅ Day 1-2: GraphMemory集成 (已完成)
 ├── [ ] 集成GraphMemoryEngine
 ├── [ ] 添加图推理支持
 └── [ ] 测试验证

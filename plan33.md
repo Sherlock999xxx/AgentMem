@@ -1,503 +1,461 @@
-# AgentMem 离顶级 AI Agent 记忆平台深度分析与发展计划 v5.0
+# AgentMem 核心AI记忆融合架构与发展计划 v6.0
 
-**日期**: 2026-05-24 (全面更新)
-**版本**: v5.0
-**目标**: 打造全球顶级 AI Agent 记忆平台，对标 Mem0/Letta/Agno
-
----
-
-## 一、项目现状全景分析
-
-### 1.1 代码规模
-
-```
-┌────────────────────────────────────────────────────────────────────────┐
-│                          AgentMem 代码规模                              │
-├────────────────────────────────────────────────────────────────────────┤
-│  Rust 源文件:    822 个                                              │
-│  总代码行数:     ~314,595 行                                         │
-│  Crate 数量:     31 个                                               │
-│  API 端点:       175+ 个                                              │
-│  测试文件:        206 个                                               │
-│  文档:            150+ 个 MD 文件                                      │
-└────────────────────────────────────────────────────────────────────────┘
-```
-
-### 1.2 模块架构全景
-
-```
-┌─────────────────────────────────────────────────────────────────────────────────────────┐
-│                              AgentMem 31 Crates 全景                                      │
-├─────────────────────────────────────────────────────────────────────────────────────────┤
-│                                                                                         │
-│  ┌───────────────────────────────────────────────────────────────────────────────┐       │
-│  │ 核心层 (agent-mem-core) - ~68个源文件, ~100K+行                            │       │
-│  │                                                                               │       │
-│  │  ┌────────────┐ ┌────────────┐ ┌────────────┐ ┌────────────┐           │       │
-│  │  │ managers/  │ │  search/   │ │  storage/  │ │  pipeline/ │           │       │
-│  │  │ 15个管理器 │ │ 27个搜索   │ │ 34个存储   │ │  管道处理  │           │       │
-│  │  └────────────┘ └────────────┘ └────────────┘ └────────────┘           │       │
-│  │                                                                               │       │
-│  │  ┌────────────┐ ┌────────────┐ ┌────────────┐ ┌────────────┐           │       │
-│  │  │ 8种认知记忆│ │ 因果推理   │ │ 时序推理   │ │ 语义层次   │           │       │
-│  │  │ 完整实现   │ │ 完整实现   │ │ 完整实现   │ │ 未激活     │           │       │
-│  │  └────────────┘ └────────────┘ └────────────┘ └────────────┘           │       │
-│  │                                                                               │       │
-│  │  ┌────────────┐ ┌────────────┐ ┌────────────┐ ┌────────────┐           │       │
-│  │  │ 自适应学习 │ │ 元认知     │ │ 遗忘机制   │ │ 知识保险库 │           │       │
-│  │  │ 未激活     │ │ 未激活     │ │ 未激活     │ │ 未激活     │           │       │
-│  │  └────────────┘ └────────────┘ └────────────┘ └────────────┘           │       │
-│  └───────────────────────────────────────────────────────────────────────────────┘       │
-│                                                                                         │
-│  ┌───────────────────────────────────────────────────────────────────────────────┐       │
-│  │ 支撑层                                                                          │       │
-│  │  agent-mem-llm (20+ Provider) │ agent-mem-embeddings │ agent-mem-storage  │       │
-│  │  agent-mem-traits (核心Trait) │ agent-mem-config │ agent-mem-tools           │       │
-│  └───────────────────────────────────────────────────────────────────────────────┘       │
-│                                                                                         │
-│  ┌───────────────────────────────────────────────────────────────────────────────┐       │
-│  │ 应用层                                                                          │       │
-│  │  agent-mem (统一API) │ agent-mem-server (REST API) │ agent-mem-client      │       │
-│  │  agent-mem-plugins (WASM) │ agent-mem-deployment │ agent-mem-observability  │       │
-│  └───────────────────────────────────────────────────────────────────────────────┘       │
-│                                                                                         │
-└─────────────────────────────────────────────────────────────────────────────────────────┘
-```
+**日期**: 2026-05-24
+**版本**: v6.0 (聚焦版)
+**目标**: 打造精简高效的AI Agent记忆平台，保持高内聚低耦合
 
 ---
 
-## 二、隐藏能力深度发掘
+## 一、核心融合架构
 
-### 2.1 已实现但未激活的功能
+### 1.1 架构设计原则
 
-| 功能 | 模块 | 实现程度 | 激活状态 | 潜力 |
-|------|------|---------|---------|------|
-| **CoreMemory Manager** | `managers/core_memory.rs` | 95% | ⚠️ 部分 | ⭐⭐⭐⭐⭐ |
-| **Knowledge Vault** | `managers/knowledge_vault.rs` | 90% | ❌ 未激活 | ⭐⭐⭐⭐⭐ |
-| **Entity Extraction** | `extraction/entity_extractor.rs` | 85% | ⚠️ 部分 | ⭐⭐⭐⭐ |
-| **Causal Reasoning** | `causal_reasoning.rs` | 85% | ✅ 完整 | ⭐⭐⭐⭐⭐ |
-| **Temporal Reasoning** | `temporal_reasoning.rs` | 90% | ✅ 完整 | ⭐⭐⭐⭐ |
-| **Semantic Hierarchy** | `semantic_hierarchy.rs` | 75% | ❌ 未激活 | ⭐⭐⭐⭐ |
-| **Graph Memory** | `graph_memory.rs` | 80% | ⚠️ 部分 | ⭐⭐⭐⭐⭐ |
-| **Forgetting Mechanism** | `agent-mem-forgetting` | 90% | ❌ 未激活 | ⭐⭐⭐⭐ |
-| **Metacognition** | `agent-mem-metacognition` | 85% | ❌ 未激活 | ⭐⭐⭐⭐⭐ |
-| **Adaptive Learning** | `adaptive_learning.rs` | 80% | ⚠️ 部分 | ⭐⭐⭐⭐⭐ |
-| **Context Analyzer** | `context.rs` | 75% | ⚠️ 部分 | ⭐⭐⭐ |
-
-### 2.2 核心管理器深度分析
-
-#### CoreMemory Manager (48K+ 行)
-```rust
-// ✅ 完整功能实现
-pub struct CoreMemoryBlock {
-    pub id: String,
-    pub block_type: CoreMemoryBlockType,  // Persona / Human
-    pub content: String,
-    pub importance: f32,
-    pub max_capacity: usize,
-    pub current_size: usize,
-    // ...
-}
-
-// 亮点功能
-impl CoreMemoryBlock {
-    pub fn needs_rewrite(&self) -> bool { ... }  // 容量检测
-    pub fn capacity_usage(&self) -> f32 { ... }  // 使用率
-    pub fn record_access(&mut self) { ... }       // 访问追踪
-}
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    核心设计原则                                   │
+├─────────────────────────────────────────────────────────────────┤
+│ 1. 高内聚: 每个模块职责单一，聚焦核心功能                       │
+│ 2. 低耦合: 模块间通过Trait接口交互                             │
+│ 3. 可组合: 核心模块可灵活组合                                  │
+│ 4. 可测试: 每个模块独立可测试                                   │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
-#### Knowledge Vault (加密存储)
-```rust
-// ✅ 企业级安全功能
-pub struct KnowledgeVault {
-    encryption: Aes256Gcm,        // AES-256-GCM 加密
-    sensitivity_levels: SensitivityLevel,  // 4级敏感度
-    access_control: AccessControl,         // 访问控制
-    audit_log: AuditLog,                // 完整审计
-}
+### 1.2 核心模块融合
+
+```
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│                         AgentMem 核心融合架构 (精简版)                                   │
+├────────────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                        │
+│  ┌──────────────────────────────────────────────────────────────────────────────┐      │
+│  │                          对话入口 (ChatRequest)                            │      │
+│  │                          Orchestrator                                       │      │
+│  │                          ┌─────────────────────────────────────────┐        │      │
+│  │                          │ Memory Integration (记忆融合)              │        │      │
+│  │                          │ ┌───────────┬───────────┬───────────┐ │        │      │
+│  │                          │ │  CoreMem │ Contextual│  Episodic│ │        │      │
+│  │                          │ │  (身份)   │  (上下文)  │  (事件)  │ │        │      │
+│  │                          │ └───────────┴───────────┴───────────┘ │        │      │
+│  │                          │ ┌───────────┬───────────┬───────────┐ │        │      │
+│  │                          │ │SemanticMem│Procedural│ Resource │ │        │      │
+│  │                          │ │  (语义)   │  (程序)   │  (资源)   │ │        │      │
+│  │                          │ └───────────┴───────────┴───────────┘ │        │      │
+│  │                          └─────────────────────────────────────────┘        │      │
+│  └──────────────────────────────────────────────────────────────────────────────┘      │
+│                                          │                                            │
+│                                          ▼                                            │
+│  ┌──────────────────────────────────────────────────────────────────────────────┐      │
+│  │                         搜索融合层 (Search Fusion)                            │      │
+│  │                         EnhancedHybridSearchEngineV2                            │      │
+│  │                         ┌───────────┬───────────┬───────────┐                 │      │
+│  │                         │  Vector   │   BM25    │   RRF    │                 │      │
+│  │                         │  (语义)    │  (关键词) │  (融合)  │                 │      │
+│  │                         └───────────┴───────────┴───────────┘                 │      │
+│  └──────────────────────────────────────────────────────────────────────────────┘      │
+│                                          │                                            │
+│                                          ▼                                            │
+│  ┌──────────────────────────────────────────────────────────────────────────────┐      │
+│  │                         存储层 (Storage)                                    │      │
+│  │                         UnifiedStorageCoordinator                             │      │
+│  │                         ┌───────────────┬───────────────┐                    │      │
+│  │                         │    LibSQL     │   LanceDB     │                    │      │
+│  │                         │  (结构化)      │   (向量)       │                    │      │
+│  │                         └───────────────┴───────────────┘                    │      │
+│  └──────────────────────────────────────────────────────────────────────────────┘      │
+│                                                                                        │
+└────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
-#### 8种认知记忆管理器
+### 1.3 核心模块职责
+
+| 模块 | 职责 | 内聚度 | 耦合度 |
+|------|------|--------|--------|
+| **Orchestrator** | 对话编排，记忆提取，响应生成 | ⭐⭐⭐⭐⭐ | 低 |
+| **MemoryEngine** | 记忆管理，生命周期，层级管理 | ⭐⭐⭐⭐⭐ | 低 |
+| **8 Cognitive Agents** | 分类型处理记忆 (Core/Contextual/Episodic等) | ⭐⭐⭐⭐⭐ | 中 |
+| **EnhancedSearchV2** | 混合搜索，Query分类，自适应阈值 | ⭐⭐⭐⭐ | 中 |
+| **StorageCoordinator** | SQL+向量存储，多级缓存 | ⭐⭐⭐⭐ | 低 |
+
+---
+
+## 二、当前架构问题
+
+### 2.1 模块耦合问题
+
 ```
-┌────────────────────────────────────────────────────────────────┐
-│ 8种认知记忆管理器 (总计 ~180K+ 行)                              │
-├────────────────────────────────────────────────────────────────┤
-│ episodic_memory.rs      (28K)  - 事件记忆                     │
-│ semantic_memory.rs      (26K)  - 语义记忆                     │
-│ procedural_memory.rs     (23K)  - 程序记忆                     │
-│ contextual_memory.rs     (48K)  - 上下文记忆                   │
-│ core_memory.rs          (25K)  - 核心记忆                     │
-│ resource_memory.rs       (43K)  - 资源记忆                     │
-│ knowledge_vault.rs      (48K)  - 知识保险库                   │
-│ tool_manager.rs         (10K)  - 工具管理器                   │
-└────────────────────────────────────────────────────────────────┘
-```
+问题1: MemoryEngine 耦合过重
+├── 包含 hierarchy_manager
+├── 包含 importance_scorer
+├── 包含 conflict_resolver
+├── 包含 memory_repository
+└── 包含 enhanced_search_engine
 
-### 2.3 推理引擎分析
-
-#### Causal Reasoning Engine
-```rust
-// ✅ 完整因果推理实现
-pub struct CausalReasoningEngine {
-    causal_graph: CausalKnowledgeGraph,
-    chains: Vec<CausalChain>,
-    explanations: Vec<CausalExplanation>,
-}
-
-pub enum CausalNodeType { Event, State, Action, Condition }
-pub enum CausalRelationType { 
-    Direct,           // 直接因果
-    Indirect,         // 间接因果
-    Necessary,        // 必要条件
-    Sufficient,       // 充分条件
-    Facilitating,     // 促进因素
-    Inhibiting        // 抑制因素
-}
+问题2: 8种记忆Agent分散
+├── episodic_memory.rs
+├── semantic_memory.rs
+├── procedural_memory.rs
+├── contextual_memory.rs
+├── core_memory.rs
+├── resource_memory.rs
+└── knowledge_vault.rs
 ```
 
-#### Temporal Reasoning Engine
-```rust
-// ✅ 完整时序推理实现
-pub enum TemporalReasoningType {
-    TemporalLogic,      // 时序逻辑
-    Causal,            // 因果推理
-    MultiHop,          // 多跳推理
-    Counterfactual,     // 反事实推理
-    Predictive,         // 预测性推理
-}
+### 2.2 需要精简的模块
 
-pub struct TemporalPattern {
-    pattern_type: PatternType,  // Periodic/Sequential/Concurrent
-    frequency: usize,
-    confidence: f32,
-}
+| 模块 | 问题 | 优先级 |
+|------|------|--------|
+| agents/ 模块 | 分散且功能重复 | P0 |
+| managers/ 模块 | 大且复杂 | P0 |
+| search/ 模块 | 27个子模块过多 | P1 |
+| graph_memory | 未激活但存在 | P1 |
+| causal_reasoning | 独立未集成 | P2 |
+| temporal_reasoning | 独立未集成 | P2 |
+
+---
+
+## 三、精简融合方案
+
+### 3.1 核心融合架构 (目标)
+
+```
+目标架构:
+
+Orchestrator
+    │
+    ├── MemoryEngine (核心引擎)
+    │       │
+    │       ├── HierarchyManager (层级管理)
+    │       ├── ImportanceScorer (重要性评分)
+    │       └── ConflictResolver (冲突解决)
+    │
+    ├── CognitiveMemoryManager (认知记忆融合)
+    │       │
+    │       ├── CoreMemory (身份/偏好)
+    │       ├── ContextualMemory (上下文)
+    │       ├── EpisodicMemory (事件)
+    │       ├── SemanticMemory (语义)
+    │       ├── ProceduralMemory (程序)
+    │       └── ResourceMemory (资源)
+    │
+    ├── EnhancedSearchEngine (增强搜索)
+    │       │
+    │       ├── VectorSearch (向量)
+    │       ├── BM25Search (关键词)
+    │       └── RRFusion (融合)
+    │
+    └── StorageCoordinator (统一存储)
+            │
+            ├── LibSQLRepository (结构化)
+            └── VectorStore (向量)
 ```
 
-#### Graph Memory Engine
-```rust
-// ✅ 完整图引擎实现
-pub struct GraphMemoryEngine {
-    nodes: Arc<RwLock<HashMap<MemoryId, GraphNode>>>,
-    edges: Arc<RwLock<HashMap<Uuid, GraphEdge>>>,
-    adjacency_list: Arc<RwLock<HashMap<MemoryId, Vec<Uuid>>>>,
-}
+### 3.2 融合步骤
 
-pub enum NodeType { Entity, Concept, Event, Relation, Context }
-pub enum RelationType { 
-    IsA, PartOf, RelatedTo, CausedBy, Leads, 
-    SimilarTo, OppositeOf, TemporalNext, Spatial 
-}
-pub enum ReasoningType { 
-    Deductive, Inductive, Abductive, Analogical, Causal 
-}
+#### Phase 1: 核心融合 (1周)
+
+```
+任务:
+├── [ ] 融合 CognitiveMemoryManager
+│       └── 将8个Manager合并为1个统一管理器
+│
+├── [ ] 简化 MemoryEngine
+│       ├── 提取公共接口
+│       └── 减少依赖
+│
+└── [ ] 清理 Agents 模块
+        ├── 保留 BaseAgent Trait
+        └── 移除重复实现
 ```
 
-### 2.4 企业级功能
+#### Phase 2: 搜索优化 (1周)
 
-#### Knowledge Vault 安全功能
-```rust
-// 4级敏感度
-pub enum SensitivityLevel {
-    Public,        // 公开
-    Internal,      // 内部
-    Confidential,  // 机密
-    TopSecret,     // 绝密
-}
-
-// 访问控制
-pub enum AccessPermission { Read, Write, Delete, Admin }
-
-// 审计日志
-pub struct AuditLogEntry {
-    user_id: String,
-    action: String,
-    resource: String,
-    timestamp: DateTime<Utc>,
-    ip_address: Option<String>,
-}
+```
+任务:
+├── [ ] 精简 EnhancedHybridSearchEngineV2
+│       ├── 移除未使用的子模块
+│       └── 保留核心: Vector + BM25 + RRF
+│
+├── [ ] 集成 CausalReasoning
+│       └── 作为可选的增强模块
+│
+└── [ ] 集成 TemporalReasoning
+        └── 作为可选的增强模块
 ```
 
-#### Forgetting Mechanism (遗忘机制)
-```rust
-// 基于艾宾浩斯遗忘曲线
-pub mod curve { EbbinghausCurve, ForgettingCurve }
-pub mod protection { MemoryProtection, ProtectionLevel }
-pub mod scheduler { ForgettingScheduler, ForgettingConfig }
+#### Phase 3: 存储优化 (1周)
 
-// 保护级别
-pub enum ProtectionLevel { 
-    Protected,    // 受保护
-    Normal,       // 正常
-    Temporary,    // 临时
-    Discardable   // 可丢弃
-}
 ```
-
-#### Metacognition (元认知)
-```rust
-// 自动记忆整合
-pub mod consolidation { AutoConsolidationConfig, AutoConsolidationTrigger }
-
-// 记忆健康监控
-pub mod metacognition { 
-    MetacognitionService, 
-    MetacognitionReport 
-}
-
-// 智能推荐
-pub mod recommendations { 
-    Recommendation, 
-    RecommendationEngine,
-    RecommendationType 
-}
+任务:
+├── [ ] 简化 StorageCoordinator
+│       ├── 统一接口
+│       └── 移除冗余缓存
+│
+├── [ ] 集成 KnowledgeVault
+│       └── 作为安全存储模块
+│
+└── [ ] 集成 Forgetting
+        └── 作为自动清理模块
 ```
 
 ---
 
-## 三、架构设计评估
+## 四、精简后的架构
 
-### 3.1 优点 ✅
+### 4.1 核心模块清单
 
-1. **模块化设计优秀**: 31个独立Crate，清晰分层
-2. **Trait抽象完善**: 依赖注入，解耦设计
-3. **8种认知记忆**: 完整实现，领先竞品
-4. **推理引擎**: 因果+时序+图推理完善
-5. **企业级安全**: Knowledge Vault + 加密存储
-6. **遗忘机制**: 基于认知科学的Ebbinghaus曲线
-7. **多存储后端**: LibSQL/PostgreSQL/LanceDB/Qdrant
+| 模块 | 行数 | 职责 | 状态 |
+|------|------|------|------|
+| **Orchestrator** | ~1K | 对话编排 | ✅ 保留 |
+| **MemoryEngine** | ~500 | 核心引擎 | 🔄 精简 |
+| **CognitiveMemory** | ~2K | 8种记忆融合 | 🆕 新建 |
+| **EnhancedSearch** | ~500 | 混合搜索 | 🔄 精简 |
+| **StorageCoordinator** | ~300 | 统一存储 | 🔄 精简 |
+| **CoreMemory** | ~25K | 核心记忆 | ✅ 保留 |
+| **ContextualMemory** | ~48K | 上下文 | ✅ 保留 |
 
-### 3.2 问题 ⚠️
+### 4.2 移除/合并的模块
 
-1. **功能碎片化**: 大量功能未激活
-2. **配置复杂**: 31个Crate配置困难
-3. **文档缺失**: API文档覆盖率低
-4. **测试不足**: 覆盖率约60%
-5. **性能待优化**: P95延迟200ms
-6. **SDK基础**: Python SDK功能有限
-7. **API不一致**: 存在lib_old.rs遗留
+| 模块 | 操作 | 原因 |
+|------|------|------|
+| agents/ | 合并到CognitiveMemory | 职责重叠 |
+| managers/ episodic | 合并到CognitiveMemory | 功能重复 |
+| managers/ semantic | 合并到CognitiveMemory | 功能重复 |
+| managers/ procedural | 合并到CognitiveMemory | 功能重复 |
+| managers/ knowledge_vault | 保留为独立模块 | 安全相关 |
+| managers/ resource | 合并到CognitiveMemory | 功能重复 |
+| search/ adaptive_router | 移除 | 未使用 |
+| search/ cached_adaptive | 移除 | 未使用 |
+| search/ learning | 合并到AdaptiveSearch | 功能重叠 |
 
 ---
 
-## 四、与顶级平台深度对比
+## 五、融合后的接口设计
 
-### 4.1 功能矩阵
+### 5.1 CognitiveMemory Trait
 
-| 功能 | AgentMem | Mem0 | Letta | Agno | 评估 |
-|------|----------|-------|-------|------|------|
-| **记忆类型** | 8种 | 4种 | 3种 | 5种 | **领先** |
-| **因果推理** | ✅ | ❌ | ❌ | ❌ | **独有** |
-| **时序推理** | ✅ | ❌ | ❌ | ❌ | **独有** |
-| **图记忆** | ✅ | ⚠️ | ❌ | ⚠️ | **领先** |
-| **遗忘机制** | ✅ | ❌ | ❌ | ❌ | **独有** |
-| **元认知** | ✅ | ❌ | ❌ | ❌ | **独有** |
-| **知识保险库** | ✅ | ❌ | ❌ | ❌ | **独有** |
-| **语义搜索** | 基础 | 高级 | 基础 | 基础 | 差距 |
-| **流式处理** | ❌ | ✅ | ✅ | ⚠️ | 差距 |
-| **多Agent** | 基础 | ❌ | ✅ | 高级 | 差距 |
-| **Embedding微调** | ❌ | ✅ | ❌ | ❌ | 差距 |
-
-### 4.2 核心差距分析
-
-#### 差距1: 语义搜索质量
-```
-AgentMem:
-├── 向量搜索 (FastEmbed/BGE)
-├── BM25全文搜索
-├── RRF融合
-└── 问题: 无Embedding微调
-
-Mem0:
-├── 自定义Embedding模型
-├── 多语言优化
-├── 领域自适应
-└── Reranker集成
+```rust
+/// 认知记忆融合管理器
+pub trait CognitiveMemory: Send + Sync {
+    /// 添加记忆
+    async fn add(&self, memory: Memory) -> Result<String>;
+    
+    /// 获取记忆
+    async fn get(&self, id: &str) -> Result<Option<Memory>>;
+    
+    /// 更新记忆
+    async fn update(&self, memory: Memory) -> Result<Memory>;
+    
+    /// 删除记忆
+    async fn delete(&self, id: &str) -> Result<bool>;
+    
+    /// 搜索记忆
+    async fn search(&self, query: &str, limit: usize) -> Result<Vec<Memory>>;
+    
+    /// 获取特定类型记忆
+    async fn get_by_type(&self, memory_type: MemoryType) -> Result<Vec<Memory>>;
+}
 ```
 
-#### 差距2: 流式处理
-```
-AgentMem: ❌ 完全缺失
+### 5.2 MemoryEngine 接口
 
-Mem0:
-├── Streaming API
-├── WebSocket支持
-└── 实时推送
+```rust
+/// 精简后的核心引擎
+pub struct MemoryEngine {
+    cognitive_memory: Arc<dyn CognitiveMemory>,
+    hierarchy_manager: Arc<dyn HierarchyManager>,
+    importance_scorer: Arc<dyn ImportanceScorer>,
+    search_engine: Arc<dyn EnhancedSearch>,
+    storage: Arc<StorageCoordinator>,
+}
 
-Letta:
-├── SSE流式响应
-├── Agent心跳
-└── 状态同步
-```
-
-#### 差距3: 多Agent框架
-```
-AgentMem: ⚠️ 基础协作
-├── collaboration.rs (基础)
-├── message_queue.rs
-└── 问题: 无Fleet管理
-
-Agno: ✅ Fleet管理
-├── Team/Agent
-├── 任务分解
-└── 协调机制
+impl MemoryEngine {
+    /// 创建引擎
+    pub fn new(config: EngineConfig) -> Self { ... }
+    
+    /// 添加记忆 (自动分类到合适类型)
+    pub async fn add(&self, content: &str) -> Result<String> { ... }
+    
+    /// 智能搜索 (融合所有记忆类型)
+    pub async fn search(&self, query: &str) -> Result<SearchResponse> { ... }
+    
+    /// 获取记忆上下文 (为Agent提供上下文)
+    pub async fn get_context(&self, session_id: &str) -> Result<AgentContext> { ... }
+}
 ```
 
 ---
 
-## 五、激活计划与优先级
+## 六、实施计划
 
-### 5.1 P0 - 立即激活 (1-2周)
-
-| 功能 | 模块 | 工作量 | 价值 |
-|------|------|--------|------|
-| **CoreMemory** | `managers/core_memory.rs` | 1天 | ⭐⭐⭐⭐⭐ |
-| **Knowledge Vault** | `managers/knowledge_vault.rs` | 2天 | ⭐⭐⭐⭐⭐ |
-| **Forgetting** | `agent-mem-forgetting` | 3天 | ⭐⭐⭐⭐ |
-| **Metacognition** | `agent-mem-metacognition` | 3天 | ⭐⭐⭐⭐⭐ |
-| **Entity Extraction** | `extraction/` | 2天 | ⭐⭐⭐⭐ |
-
-### 5.2 P1 - 短期激活 (1个月)
-
-| 功能 | 模块 | 工作量 | 价值 |
-|------|------|--------|------|
-| **Semantic Hierarchy** | `semantic_hierarchy.rs` | 5天 | ⭐⭐⭐⭐ |
-| **Graph Memory** | `graph_memory.rs` | 5天 | ⭐⭐⭐⭐⭐ |
-| **Adaptive Learning** | `adaptive_learning.rs` | 5天 | ⭐⭐⭐⭐⭐ |
-| **Context Analyzer** | `context.rs` | 3天 | ⭐⭐⭐ |
-
-### 5.3 P2 - 中期开发 (2-3个月)
-
-| 功能 | 优先级 | 工作量 | 说明 |
-|------|--------|--------|------|
-| **Streaming API** | P1 | 2周 | 对标Mem0 |
-| **Cohere Reranker** | P1 | 1周 | 提升检索质量 |
-| **Fleet Manager** | P2 | 3周 | 对标Agno |
-| **Embedding微调** | P2 | 3周 | 对标Mem0 |
-
----
-
-## 六、发展路线图
-
-### Phase 1: 激活隐藏能力 (2周)
+### 6.1 Week 1: 核心融合
 
 ```
-Week 1:
-├── [ ] 激活 CoreMemory Manager
-├── [ ] 激活 Knowledge Vault
-├── [ ] 激活 Forgetting Mechanism
-└── [ ] 激活 Metacognition
+Day 1-2:
+├── [ ] 设计 CognitiveMemory Trait
+├── [ ] 实现 CognitiveMemoryManager
+└── [ ] 迁移 CoreMemory 功能
 
-Week 2:
-├── [ ] 激活 Entity Extraction
-├── [ ] 完善 Graph Memory
-├── [ ] 完善 Context Analyzer
-└── [ ] 补充测试
+Day 3-4:
+├── [ ] 迁移 ContextualMemory 功能
+├── [ ] 迁移 EpisodicMemory 功能
+└── [ ] 迁移 SemanticMemory 功能
+
+Day 5:
+├── [ ] 迁移 ProceduralMemory 功能
+├── [ ] 迁移 ResourceMemory 功能
+└── [ ] 编写迁移测试
 ```
 
-### Phase 2: 检索质量提升 (2周)
+### 6.2 Week 2: 搜索优化
 
 ```
-Week 3:
-├── [ ] 集成 Cohere Reranker
-├── [ ] 实现 Embedding 微调接口
-└── [ ] 性能基准测试
+Day 1-2:
+├── [ ] 精简 EnhancedHybridSearchEngineV2
+├── [ ] 移除未使用子模块
+└── [ ] 保留核心: Vector + BM25 + RRF
 
-Week 4:
-├── [ ] 实现查询改写增强
-├── [ ] 添加多语言支持
-└── [ ] P95延迟 < 150ms
+Day 3-4:
+├── [ ] 集成 QueryClassifier
+├── [ ] 集成 AdaptiveThreshold
+└── [ ] 性能测试
+
+Day 5:
+├── [ ] 可选: 集成 CausalReasoning
+└── [ ] 可选: 集成 TemporalReasoning
 ```
 
-### Phase 3: 流式处理 (2周)
+### 6.3 Week 3: 存储与测试
 
 ```
-Week 5:
-├── [ ] 设计 Streaming API 规范
-├── [ ] 实现 SSE 支持
-└── [ ] 实现 WebSocket 服务
+Day 1-2:
+├── [ ] 简化 StorageCoordinator
+├── [ ] 集成 KnowledgeVault
+└── [ ] 集成 Forgetting
 
-Week 6:
-├── [ ] 添加实时推送机制
-├── [ ] 实现背压控制
-└── [ ] 负载测试
-```
+Day 3-4:
+├── [ ] 端到端测试
+├── [ ] 性能基准测试
+└── [ ] 文档更新
 
-### Phase 4: 多Agent框架 (3周)
-
-```
-Week 7-8:
-├── [ ] 设计 Agent 通信协议
-├── [ ] 实现 Fleet Manager
-└── [ ] 实现任务分解
-
-Week 9:
-├── [ ] 实现负载均衡
-├── [ ] 实现故障恢复
-└── [ ] E2E测试
+Day 5:
+├── [ ] 清理旧代码
+├── [ ] 发布 v7.0
+└── [ ] 提交PR
 ```
 
 ---
 
 ## 七、验证指标
 
-### 7.1 功能激活
+### 7.1 架构指标
 
-| 功能 | 当前 | Week 2 | Week 4 | Week 6 | Week 9 |
-|------|------|--------|--------|--------|--------|
-| CoreMemory | ⚠️ | ✅ | ✅ | ✅ | ✅ |
-| Knowledge Vault | ❌ | ✅ | ✅ | ✅ | ✅ |
-| Forgetting | ❌ | ✅ | ✅ | ✅ | ✅ |
-| Metacognition | ❌ | ✅ | ✅ | ✅ | ✅ |
-| Semantic Hierarchy | ❌ | ⚠️ | ✅ | ✅ | ✅ |
-| Graph Memory | ⚠️ | ⚠️ | ✅ | ✅ | ✅ |
-| Streaming | ❌ | ❌ | ❌ | ✅ | ✅ |
-| Fleet Manager | ❌ | ❌ | ❌ | ❌ | ✅ |
+| 指标 | 当前 | 目标 | 状态 |
+|------|------|------|------|
+| 模块数量 | 31 Crates | 20 Crates | 🔄 |
+| 核心耦合 | 高 | 低 | 🔄 |
+| 代码行数 | ~315K | ~200K | 🔄 |
+| 接口一致性 | 低 | 高 | 🔄 |
 
-### 7.2 性能指标
+### 7.2 功能指标
 
-| 指标 | 当前 | Week 4 | Week 9 | Mem0基准 |
-|------|------|--------|--------|----------|
-| Precision@K | 85% | 92% | 95% | 90% |
-| Recall@K | 80% | 88% | 92% | 85% |
-| MRR | 80% | 88% | 92% | 85% |
-| P95延迟 | 200ms | 150ms | 100ms | 150ms |
-| QPS | 600 | 800 | 1000 | 800 |
+| 指标 | 当前 | 目标 | Mem0 |
+|------|------|------|------|
+| Precision@K | 85% | 92% | 90% |
+| Recall@K | 80% | 88% | 85% |
+| P95延迟 | 200ms | 120ms | 150ms |
+| QPS | 600 | 800 | 800 |
+
+### 7.3 代码质量
+
+| 指标 | 当前 | 目标 |
+|------|------|------|
+| 测试覆盖率 | 60% | 80% |
+| 文档覆盖率 | 50% | 80% |
+| 编译警告 | 22个 | 0个 |
 
 ---
 
 ## 八、行动清单
 
-### 立即行动 (本周)
+### 立即行动 (Day 1)
 
-- [ ] 创建功能激活追踪系统
-- [ ] 激活 CoreMemory Manager
-- [ ] 激活 Knowledge Vault
-- [ ] 编写激活测试
+- [ ] 创建 CognitiveMemory Trait 设计文档
+- [ ] 设计模块合并计划
+- [ ] 创建分支 feature/fusion-v6
 
-### 短期行动 (2周)
+### Week 1 行动
 
-- [ ] 完成 Phase 1 所有功能激活
-- [ ] 补充激活功能的测试
-- [ ] 更新相关文档
+- [ ] 实现 CognitiveMemoryManager
+- [ ] 迁移 8 种记忆类型
+- [ ] 编写单元测试
 
-### 中期行动 (1个月)
+### Week 2 行动
 
-- [ ] 完成 Phase 2-3
-- [ ] 性能达标
-- [ ] 流式处理上线
+- [ ] 精简 EnhancedSearchEngineV2
+- [ ] 性能测试
+- [ ] 集成可选推理模块
 
-### 长期行动 (3个月)
+### Week 3 行动
 
-- [ ] 完成所有 Phase
-- [ ] 达到 Mem0 同等水平
-- [ ] 发布 v8.0
+- [ ] 简化存储层
+- [ ] 端到端测试
+- [ ] 发布 v7.0
 
 ---
 
-**计划版本**: v5.0
-**特点**: 
-- 深度发掘31个Crate中的隐藏能力
-- 完整分析8种认知记忆实现
-- 详细评估推理引擎 (因果/时序/图)
-- 制定激活计划与优先级
-- 设置验证指标和里程碑
+## 九、架构对比
+
+### 9.1 当前 vs 目标
+
+```
+当前架构 (问题):
+┌────────────────────────────────────────────────────────────┐
+│ 31 Crates → 功能分散                                      │
+│ 8个独立Manager → 耦合高                                    │
+│ 27个搜索子模块 → 过于复杂                                    │
+│ 多个未激活功能 → 维护负担                                    │
+└────────────────────────────────────────────────────────────┘
+
+目标架构 (精简):
+┌────────────────────────────────────────────────────────────┐
+│ 20 Crates → 职责清晰                                       │
+│ CognitiveMemory → 统一记忆管理                                │
+│ EnhancedSearch → 核心搜索融合                                 │
+│ StorageCoordinator → 统一存储                                 │
+└────────────────────────────────────────────────────────────┘
+```
+
+### 9.2 与Mem0对比
+
+| 维度 | AgentMem (目标) | Mem0 | 评估 |
+|------|-----------------|------|------|
+| 记忆类型 | 6种融合 | 4种 | ✅ 领先 |
+| 搜索融合 | Vector+BM25+RRF | 向量+关键词 | ✅ 持平 |
+| 存储架构 | 统一Coordinator | Qdrant | ✅ 领先 |
+| 复杂度 | 精简 | 简单 | 🔄 |
+
+---
+
+## 十、风险与缓解
+
+### 10.1 技术风险
+
+| 风险 | 影响 | 缓解 |
+|------|------|------|
+| 融合破坏现有功能 | 高 | 充分测试 |
+| 性能下降 | 中 | 性能基准测试 |
+| 接口不兼容 | 高 | 向后兼容 |
+
+### 10.2 进度风险
+
+| 风险 | 影响 | 缓解 |
+|------|------|------|
+| 时间不足 | 高 | 优先核心融合 |
+| 测试不足 | 中 | 增加测试时间 |
+
+---
+
+**计划版本**: v6.0
+**特点**: 聚焦核心、高内聚低耦合、精简可执行
+**目标**: 3周内完成融合，发布v7.0

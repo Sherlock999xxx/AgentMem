@@ -33,15 +33,15 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_redis_store_creation() {
-        let store = create_test_store().await;
+    async fn test_redis_store_creation() -> anyhow::Result<()> {
+        let store = create_test_store().await?;
         let count = store.count_vectors().await?;
         assert_eq!(count, 0);
     }
 
     #[tokio::test]
-    async fn test_add_and_get_vector() {
-        let store = create_test_store().await;
+    async fn test_add_and_get_vector() -> anyhow::Result<()> {
+        let store = create_test_store().await?;
 
         let vector_data = create_test_vector("cache1", vec![1.0, 2.0, 3.0, 4.0]);
         let ids = store.add_vectors(vec![vector_data.clone()]).await?;
@@ -67,8 +67,8 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_search_vectors() {
-        let store = create_test_store().await;
+    async fn test_search_vectors() -> anyhow::Result<()> {
+        let store = create_test_store().await?;
 
         // 添加测试向量
         let vectors = vec![
@@ -89,8 +89,8 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_search_with_threshold() {
-        let store = create_test_store().await;
+    async fn test_search_with_threshold() -> anyhow::Result<()> {
+        let store = create_test_store().await?;
 
         // 添加测试向量
         let vectors = vec![
@@ -113,8 +113,8 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_update_vectors() {
-        let store = create_test_store().await;
+    async fn test_update_vectors() -> anyhow::Result<()> {
+        let store = create_test_store().await?;
 
         // 添加初始向量
         let vector_data = create_test_vector("cache1", vec![1.0, 2.0, 3.0, 4.0]);
@@ -130,8 +130,8 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_delete_vectors() {
-        let store = create_test_store().await;
+    async fn test_delete_vectors() -> anyhow::Result<()> {
+        let store = create_test_store().await?;
 
         // 添加测试向量
         let vectors = vec![
@@ -158,8 +158,8 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_clear_store() {
-        let store = create_test_store().await;
+    async fn test_clear_store() -> anyhow::Result<()> {
+        let store = create_test_store().await?;
 
         // 添加测试向量
         let vectors = vec![
@@ -176,8 +176,8 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_dimension_validation() {
-        let store = create_test_store().await;
+    async fn test_dimension_validation() -> anyhow::Result<()> {
+        let store = create_test_store().await?;
 
         // 尝试添加错误维度的向量
         let wrong_dimension_vector = create_test_vector("test1", vec![1.0, 2.0]); // 只有2维，期望4维
@@ -191,8 +191,8 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_empty_id_generation() {
-        let store = create_test_store().await;
+    async fn test_empty_id_generation() -> anyhow::Result<()> {
+        let store = create_test_store().await?;
 
         // 创建一个空ID的向量
         let mut metadata = HashMap::new();
@@ -212,8 +212,8 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_batch_operations() {
-        let store = create_test_store().await;
+    async fn test_batch_operations() -> anyhow::Result<()> {
+        let store = create_test_store().await?;
 
         // 批量添加向量
         let vectors = vec![
@@ -239,8 +239,8 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_similarity_calculation() {
-        let store = create_test_store().await;
+    async fn test_similarity_calculation() -> anyhow::Result<()> {
+        let store = create_test_store().await?;
 
         // 添加已知向量
         let vectors = vec![
@@ -269,8 +269,8 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_cache_statistics() {
-        let store = create_test_store().await;
+    async fn test_cache_statistics() -> anyhow::Result<()> {
+        let store = create_test_store().await?;
 
         // 添加一些向量
         let vectors = vec![
@@ -294,8 +294,8 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_distributed_lock() {
-        let store = create_test_store().await;
+    async fn test_distributed_lock() -> anyhow::Result<()> {
+        let store = create_test_store().await?;
 
         // 获取分布式锁
         let lock = store.acquire_lock("test_resource", 60).await?;
@@ -312,8 +312,8 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_cache_warm_and_cleanup() {
-        let store = create_test_store().await;
+    async fn test_cache_warm_and_cleanup() -> anyhow::Result<()> {
+        let store = create_test_store().await?;
 
         // 添加测试向量
         let vectors = vec![
@@ -340,8 +340,8 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_ttl_operations() {
-        let store = create_test_store().await;
+    async fn test_ttl_operations() -> anyhow::Result<()> {
+        let store = create_test_store().await?;
 
         // 添加测试向量
         let vectors = vec![
@@ -359,8 +359,8 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_high_performance_operations() {
-        let store = create_test_store().await;
+    async fn test_high_performance_operations() -> anyhow::Result<()> {
+        let store = create_test_store().await?;
 
         // 测试高性能操作：快速的缓存访问
         let start_time = std::time::Instant::now();
@@ -397,8 +397,8 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_session_management() {
-        let store = create_test_store().await;
+    async fn test_session_management() -> anyhow::Result<()> {
+        let store = create_test_store().await?;
 
         // 测试会话管理场景
         let session_vectors = vec![
@@ -426,8 +426,8 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_real_time_processing() {
-        let store = create_test_store().await;
+    async fn test_real_time_processing() -> anyhow::Result<()> {
+        let store = create_test_store().await?;
 
         // 测试实时数据处理场景
         let real_time_data = vec![

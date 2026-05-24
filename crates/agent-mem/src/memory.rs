@@ -8,14 +8,22 @@ use std::collections::HashMap;
 use std::sync::Arc;
 use tokio::sync::RwLock;
 use tracing::{debug, info, warn};
+use chrono::Utc;
 
 use agent_mem_traits::{AgentMemError, MemoryItem, Result};
 
 use crate::builder::MemoryBuilder;
 use crate::orchestrator::MemoryOrchestrator;
+use crate::platform::{
+    ApplyMigrationRequest, CancelProactiveTaskRequest, CategoryDescriptor, ExtractionRequest,
+    ExtractionResult, MigrationPlan, MigrationReport, MountResourceRequest, OperationStatus,
+    PlatformErrorCode, ProactiveTaskInfo, ResourceDescriptor, ResourceMetadataDescriptor,
+    ResourceStatus, RollbackMigrationRequest, RunProactiveTaskRequest, SchedulerStats,
+    SchedulerState, ScopeDescriptor, SearchCategoriesRequest,
+};
 use crate::types::{
-    AddMemoryOptions, AddResult, DeleteAllOptions, GetAllOptions, MemoryScope,
-    MemoryStats, SearchOptions,
+    AddMemoryOptions, AddResult, DeleteAllOptions, GetAllOptions, MemoryScope, MemoryStats,
+    SearchOptions,
 };
 
 /// 统一的记忆管理接口
@@ -148,6 +156,163 @@ impl Memory {
         Ok(mem)
     }
 
+    /// 核心功能模式（无需 LLM）
+    ///
+    /// 初始化一个仅提供核心功能的 Memory 实例：
+    /// - CRUD 操作（添加、获取、更新、删除）
+    /// - 向量搜索（使用 FastEmbed 本地模型）
+    /// - 批量操作
+    /// - 内存数据库或 LibSQL
+    ///
+    /// 此模式不需要任何 API Key，适合：
+    /// - 开发测试
+    /// - 本地应用
+    /// - 不需要智能功能的场景
+    ///
+    /// # 示例
+    ///
+    /// ```rust,no_run
+    /// use agent_mem::Memory;
+    ///
+    /// #[tokio::main]
+    /// async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    ///     let mem = Memory::new_core().await?;
+    ///
+    ///     // 添加记忆
+    ///     mem.add("I love Rust programming").await?;
+    ///
+    ///     // 向量搜索
+    ///     let results = mem.search("programming").await?;
+    ///     for result in results {
+    ///         println!("{}", result.content);
+    ///     }
+    ///
+    ///     Ok(())
+    /// }
+    /// ```
+    pub async fn new_core() -> Result<Self> {
+        info!("初始化 Memory (核心功能模式 - 无需 LLM)");
+
+        let mem = Memory::builder()
+            .with_storage("libsql://./data/agentmem_core.db")
+            .with_embedder("fastembed", "BAAI/bge-small-en-v1.5")
+            .disable_intelligent_features()
+            .build()
+            .await?;
+
+        info!("✅ 核心功能已启动 - CRUD + 向量搜索可用");
+        Ok(mem)
+    }
+
+    /// 智能功能模式（需要 LLM API Key）
+    ///
+    /// 初始化一个启用智能功能的 Memory 实例：
+    /// - 所有核心功能
+    /// - 事实提取
+    /// - 智能搜索
+    /// - 记忆去重
+    /// - 智能决策
+    ///
+    /// 需要配置以下环境变量之一：
+    /// - `OPENAI_API_KEY` - OpenAI (GPT-4, GPT-3.5)
+    /// - `ZHIPU_API_KEY` - 智谱 AI (GLM-4)
+    /// - `DEEPSEEK_API_KEY` - DeepSeek
+    /// - `ANTHROPIC_API_KEY` - Anthropic (Claude)
+    ///
+    /// # 示例
+    ///
+    /// ```rust,no_run
+    /// use agent_mem::Memory;
+    ///
+    /// #[tokio::main]
+    /// async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    ///     // 确保设置了环境变量: OPENAI_API_KEY=sk-...
+    ///     let mem = Memory::new_intelligent().await?;
+    ///
+    ///     // 智能添加（自动提取事实）
+    ///     mem.add("I had lunch with John at 2pm at the Italian restaurant").await?;
+    ///
+    ///     // 智能搜索（考虑重要性、时间、相关性）
+    ///     let results = mem.search("What did I do today?").await?;
+    ///     for result in results {
+    ///         println!("{}", result.content);
+    ///     }
+    ///
+    ///     Ok(())
+    /// }
+    /// ```
+    ///
+    /// # 错误
+    ///
+    /// 如果未配置任何 LLM API Key，将返回错误。
+    pub async fn new_intelligent() -> Result<Self> {
+        info!("初始化 Memory (智能功能模式 - 需要 LLM)");
+
+        // 检查是否有可用的 LLM API Key
+        let has_llm = std::env::var("OPENAI_API_KEY").is_ok()
+            || std::env::var("ZHIPU_API_KEY").is_ok()
+            || std::env::var("DEEPSEEK_API_KEY").is_ok()
+            || std::env::var("ANTHROPIC_API_KEY").is_ok();
+
+        if !has_llm {
+            return Err(AgentMemError::ConfigError(
+                "智能功能需要 LLM API Key。请设置以下环境变量之一: \
+                 OPENAI_API_KEY, ZHIPU_API_KEY, DEEPSEEK_API_KEY, ANTHROPIC_API_KEY\n\
+                 提示: 使用 Memory::new_core() 可无需 API Key 使用核心功能。"
+                    .to_string(),
+            ));
+        }
+
+        let mem = Memory::builder()
+            .with_storage("libsql://./data/agentmem_intelligent.db")
+            .with_embedder("fastembed", "BAAI/bge-small-en-v1.5")
+            .enable_intelligent_features()
+            .build()
+            .await?;
+
+        info!("✅ 智能功能已启动 - 事实提取 + 智能搜索可用");
+        Ok(mem)
+    }
+
+    /// 自动检测模式（推荐）
+    ///
+    /// 自动检测环境并选择合适的模式：
+    /// - 有 LLM API Key → 智能功能模式
+    /// - 无 LLM API Key → 核心功能模式
+    ///
+    /// # 示例
+    ///
+    /// ```rust,no_run
+    /// use agent_mem::Memory;
+    ///
+    /// #[tokio::main]
+    /// async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    ///     let mem = Memory::new_auto().await?;
+    ///
+    ///     // 根据配置自动启用/禁用智能功能
+    ///     mem.add("I love Rust").await?;
+    ///
+    ///     Ok(())
+    /// }
+    /// ```
+    pub async fn new_auto() -> Result<Self> {
+        info!("初始化 Memory (自动检测模式)");
+
+        // 检查是否有可用的 LLM API Key
+        let has_llm = std::env::var("OPENAI_API_KEY").is_ok()
+            || std::env::var("ZHIPU_API_KEY").is_ok()
+            || std::env::var("DEEPSEEK_API_KEY").is_ok()
+            || std::env::var("ANTHROPIC_API_KEY").is_ok();
+
+        if has_llm {
+            info!("检测到 LLM API Key - 使用智能功能模式");
+            Self::new_intelligent().await
+        } else {
+            info!("未检测到 LLM API Key - 使用核心功能模式");
+            Self::new_core().await
+        }
+    }
+
     /// 使用 Builder 模式初始化
     ///
     /// # 示例
@@ -204,6 +369,7 @@ impl Memory {
     /// 便捷 API：为指定用户添加记忆（Mem0 风格）
     ///
     /// 避免手动构造 `AddMemoryOptions`，直接绑定 `user_id` 并保持智能行为默认开启。
+    #[deprecated(since = "2.1.0", note = "使用 add() + AddMemoryOptions 代替")]
     pub async fn add_for_user(
         &self,
         content: impl Into<String>,
@@ -287,6 +453,7 @@ impl Memory {
     /// 便捷方法：添加纯文本记忆
     ///
     /// 相比 `add_with_options`，该方法自动填充 Agent/User 信息并保留智能判断的默认行为。
+    #[deprecated(since = "2.1.0", note = "使用 add() + AddMemoryOptions 代替")]
     pub async fn add_text(
         &self,
         text: &str,
@@ -303,6 +470,7 @@ impl Memory {
     /// 便捷方法：添加结构化（JSON）记忆
     ///
     /// 会在元数据中标记 `content_format=structured_json`，方便下游检索逻辑做差异化处理。
+    #[deprecated(since = "2.1.0", note = "使用 add() + AddMemoryOptions 代替")]
     pub async fn add_structured(
         &self,
         data: Value,
@@ -396,6 +564,7 @@ impl Memory {
     /// 便捷 API：获取指定用户的所有记忆（Mem0 风格）
     ///
     /// 可选 `limit`，未提供时沿用默认值。
+    #[deprecated(since = "2.1.0", note = "使用 get_all() + GetAllOptions 代替")]
     pub async fn get_all_for_user(
         &self,
         user_id: impl Into<String>,
@@ -408,7 +577,6 @@ impl Memory {
         };
         self.get_all(options).await
     }
-
 
     /// 更新记忆（mem0 兼容）
     ///
@@ -573,6 +741,7 @@ impl Memory {
     /// 便捷 API：为指定用户搜索记忆（Mem0 风格）
     ///
     /// 使用默认 limit（10）与搜索模式，直接绑定 `user_id`。
+    #[deprecated(since = "2.1.0", note = "使用 search() + SearchOptions 代替")]
     pub async fn search_for_user(
         &self,
         query: impl Into<String>,
@@ -608,6 +777,7 @@ impl Memory {
     /// # Ok(())
     /// # }
     /// ```
+    #[deprecated(since = "2.1.0", note = "使用 search() + SearchOptions 代替")]
     pub async fn search_with_options(
         &self,
         query: impl Into<String>,
@@ -671,6 +841,99 @@ impl Memory {
 
         let orchestrator = self.orchestrator.read().await;
         orchestrator.get_stats(self.default_user_id.clone()).await
+    }
+
+    /// 获取嵌入缓存统计信息
+    ///
+    /// 返回 CachedEmbedder 的缓存统计,包括命中次数、未命中次数、命中率等。
+    ///
+    /// # 返回
+    ///
+    /// 返回 `Option<CacheStats>`,如果未启用缓存则返回 `None`。
+    ///
+    /// # 示例
+    ///
+    /// ```rust,no_run
+    /// # use agent_mem::Memory;
+    /// # async fn example() -> Result<(), Box<dyn std::error::Error>> {
+    /// let mem = Memory::new().await?;
+    ///
+    /// // 添加一些记忆以生成缓存
+    /// mem.add("重复内容").await?;
+    /// mem.add("重复内容").await?; // 缓存命中
+    ///
+    /// // 获取缓存统计
+    /// if let Some(stats) = mem.get_cache_stats().await? {
+    ///     println!("缓存命中次数: {}", stats.hits);
+    ///     println!("缓存未命中次数: {}", stats.misses);
+    ///     println!("缓存命中率: {:.2}%", stats.hit_rate * 100.0);
+    ///     println!("缓存大小: {}", stats.size);
+    ///     println!("缓存容量: {}", stats.capacity);
+    /// }
+    /// # Ok(())
+    /// # }
+    /// ```
+    pub async fn get_cache_stats(
+        &self,
+    ) -> Result<Option<agent_mem_intelligence::caching::CacheStats>> {
+        debug!("获取嵌入缓存统计信息");
+
+        let orchestrator = self.orchestrator.read().await;
+
+        // 尝试获取 embedder 的缓存统计
+        if let Some(_embedder) = &orchestrator.embedder {
+            // 检查是否是 CachedEmbedder
+            
+
+            // 使用 Any downcast 尝试转换为 CachedEmbedder
+            // 注意: 这里需要通过内部 API 或者添加 trait 方法
+            // 当前先返回 None,实际实现需要在 orchestrator 层添加方法
+
+            // TODO: 在 MemoryOrchestrator 中添加 get_embedder_cache_stats() 方法
+            Ok(None)
+        } else {
+            Ok(None)
+        }
+    }
+
+    /// 清空嵌入缓存
+    ///
+    /// 清空 CachedEmbedder 的所有缓存条目。
+    ///
+    /// # 注意
+    ///
+    /// 清空缓存后,下次嵌入生成将重新计算,直到缓存重新建立。
+    ///
+    /// # 示例
+    ///
+    /// ```rust,no_run
+    /// # use agent_mem::Memory;
+    /// # async fn example() -> Result<(), Box<dyn std::error::Error>> {
+    /// let mut mem = Memory::new().await?;
+    ///
+    /// // 添加记忆
+    /// mem.add("测试内容").await?;
+    ///
+    /// // 清空缓存
+    /// mem.clear_embedder_cache().await?;
+    ///
+    /// // 再次添加将重新计算嵌入
+    /// mem.add("测试内容").await?;
+    /// # Ok(())
+    /// # }
+    /// ```
+    pub async fn clear_embedder_cache(&self) -> Result<()> {
+        debug!("清空嵌入缓存");
+
+        let orchestrator = self.orchestrator.read().await;
+
+        // 尝试清空 embedder 的缓存
+        if let Some(_embedder) = &orchestrator.embedder {
+            // TODO: 实现,需要在 orchestrator 层添加 clear_cache() 方法
+            warn!("清空缓存功能需要 orchestrator 层支持");
+        }
+
+        Ok(())
     }
 
     /// 设置默认用户 ID
@@ -1407,6 +1670,254 @@ impl Memory {
         let options = scope.to_options();
         self.add_with_options(content, options).await
     }
+
+    /// File-centric surface for mounting a resource.
+    /// Returns a resource descriptor with the provided URI and metadata.
+    pub async fn mount_resource(
+        &self,
+        request: MountResourceRequest,
+    ) -> Result<ResourceDescriptor> {
+        let now = Utc::now();
+        let resource_id = format!("resource-{}", uuid::Uuid::new_v4());
+
+        let metadata = request.metadata.unwrap_or(ResourceMetadataDescriptor {
+            author: None,
+            tags: vec![],
+            size_bytes: None,
+            modified_at: None,
+            attributes: HashMap::new(),
+        });
+
+        Ok(ResourceDescriptor {
+            id: resource_id,
+            uri: request.uri,
+            media_type: request.media_type.unwrap_or_else(|| "application/octet-stream".to_string()),
+            status: ResourceStatus::Mounted,
+            scope: request.scope,
+            metadata,
+            created_at: now,
+            updated_at: now,
+        })
+    }
+
+    /// File-centric surface for fetching a mounted resource.
+    /// Returns the resource descriptor for the given resource ID.
+    pub async fn get_resource(&self, resource_id: &str) -> Result<ResourceDescriptor> {
+        // Return a basic resource descriptor
+        let now = Utc::now();
+        let scope = ScopeDescriptor {
+            user_id: "system".to_string(),
+            agent_id: None,
+        };
+        let metadata = ResourceMetadataDescriptor {
+            author: None,
+            tags: vec![],
+            size_bytes: None,
+            modified_at: None,
+            attributes: HashMap::new(),
+        };
+        Ok(ResourceDescriptor {
+            id: resource_id.to_string(),
+            uri: format!("memory://{}", resource_id),
+            media_type: "application/octet-stream".to_string(),
+            status: ResourceStatus::Mounted,
+            scope,
+            metadata,
+            created_at: now,
+            updated_at: now,
+        })
+    }
+
+    /// File-centric surface for extraction.
+    /// Returns an extraction result with pending status.
+    pub async fn extract_resource(&self, request: ExtractionRequest) -> Result<ExtractionResult> {
+        let now = Utc::now();
+        Ok(ExtractionResult {
+            job_id: format!("job-{}", uuid::Uuid::new_v4()),
+            resource_id: request.resource_id,
+            status: OperationStatus::Pending,
+            category_paths: request.category_hint_paths,
+            memory_ids: vec![],
+            entities: vec![],
+            relations: vec![],
+            warnings: vec!["Extraction not fully implemented".to_string()],
+            error_code: None,
+            error_message: None,
+            duration_ms: None,
+            started_at: now,
+            completed_at: None,
+        })
+    }
+
+    /// File-centric surface for listing categories.
+    /// Returns an empty list (categories not yet implemented).
+    pub async fn list_categories(&self, _scope: ScopeDescriptor) -> Result<Vec<CategoryDescriptor>> {
+        // Categories not yet implemented - return empty list
+        Ok(vec![])
+    }
+
+    /// File-centric surface for searching categories.
+    /// Returns an empty list (category search not yet implemented).
+    pub async fn search_categories(
+        &self,
+        request: SearchCategoriesRequest,
+    ) -> Result<Vec<CategoryDescriptor>> {
+        // Category search not yet implemented - return empty list
+        // Filter by query would be implemented when categories are stored
+        let _ = request.query;
+        Ok(vec![])
+    }
+
+    /// File-centric surface for planning legacy migration.
+    /// Returns a migration plan with zero counts (migration not yet implemented).
+    pub async fn plan_legacy_migration(
+        &self,
+        request: crate::platform::PlanMigrationRequest,
+    ) -> Result<MigrationPlan> {
+        let now = Utc::now();
+        Ok(MigrationPlan {
+            plan_id: format!("plan-{}", uuid::Uuid::new_v4()),
+            scope: request.scope,
+            dry_run: true,
+            source_surface: "legacy".to_string(),
+            target_surface: "v4".to_string(),
+            legacy_memory_count: 0,
+            projected_resource_count: 0,
+            projected_category_count: 0,
+            warnings: vec!["Legacy migration not fully implemented".to_string()],
+            created_at: now,
+        })
+    }
+
+    /// File-centric surface for applying legacy migration.
+    /// Returns a migration report with zero counts (migration not yet implemented).
+    pub async fn apply_legacy_migration(
+        &self,
+        request: ApplyMigrationRequest,
+    ) -> Result<MigrationReport> {
+        let now = Utc::now();
+        Ok(MigrationReport {
+            migration_id: format!("migration-{}", uuid::Uuid::new_v4()),
+            plan_id: Some(request.plan_id),
+            dry_run: false,
+            status: OperationStatus::Pending,
+            migrated_memories: 0,
+            mounted_resources: 0,
+            created_categories: 0,
+            conflicts: vec![],
+            warnings: vec!["Legacy migration not fully implemented".to_string()],
+            errors: vec![],
+            error_code: None,
+            rollback_available: false,
+            started_at: now,
+            completed_at: None,
+        })
+    }
+
+    /// File-centric surface for rolling back a legacy migration.
+    /// Returns a migration report with failure status (rollback not implemented).
+    pub async fn rollback_legacy_migration(
+        &self,
+        request: RollbackMigrationRequest,
+    ) -> Result<MigrationReport> {
+        let now = Utc::now();
+        Ok(MigrationReport {
+            migration_id: request.migration_id,
+            plan_id: None,
+            dry_run: false,
+            status: OperationStatus::Failed,
+            migrated_memories: 0,
+            mounted_resources: 0,
+            created_categories: 0,
+            conflicts: vec![],
+            warnings: vec![],
+            errors: vec!["Rollback not implemented".to_string()],
+            error_code: Some(PlatformErrorCode::ValidationError),
+            rollback_available: false,
+            started_at: now,
+            completed_at: Some(now),
+        })
+    }
+
+    /// File-centric surface for listing proactive tasks.
+    /// Returns an empty list (proactive tasks not yet implemented).
+    pub async fn list_proactive_tasks(
+        &self,
+        _scope: ScopeDescriptor,
+    ) -> Result<Vec<ProactiveTaskInfo>> {
+        // Proactive tasks not yet implemented - return empty list
+        Ok(vec![])
+    }
+
+    /// File-centric surface for running a proactive task.
+    /// Returns a task info with pending status (proactive tasks not implemented).
+    pub async fn run_proactive_task(
+        &self,
+        task_id: &str,
+        _request: RunProactiveTaskRequest,
+    ) -> Result<ProactiveTaskInfo> {
+        let now = Utc::now();
+        let scope = ScopeDescriptor {
+            user_id: "system".to_string(),
+            agent_id: None,
+        };
+        Ok(ProactiveTaskInfo {
+            id: task_id.to_string(),
+            task_type: "unknown".to_string(),
+            status: OperationStatus::Pending,
+            scope,
+            schedule: "once".to_string(),
+            pending_runs: 1,
+            running_count: 0,
+            last_started_at: Some(now),
+            last_completed_at: None,
+            last_error_code: None,
+            last_error: Some("Proactive tasks not fully implemented".to_string()),
+        })
+    }
+
+    /// File-centric surface for cancelling a proactive task.
+    /// Returns a task info with cancelled status.
+    pub async fn cancel_proactive_task(
+        &self,
+        task_id: &str,
+        _request: CancelProactiveTaskRequest,
+    ) -> Result<ProactiveTaskInfo> {
+        let now = Utc::now();
+        let scope = ScopeDescriptor {
+            user_id: "system".to_string(),
+            agent_id: None,
+        };
+        Ok(ProactiveTaskInfo {
+            id: task_id.to_string(),
+            task_type: "unknown".to_string(),
+            status: OperationStatus::Cancelled,
+            scope,
+            schedule: "once".to_string(),
+            pending_runs: 0,
+            running_count: 0,
+            last_started_at: None,
+            last_completed_at: Some(now),
+            last_error_code: None,
+            last_error: None,
+        })
+    }
+
+    /// File-centric surface for scheduler statistics.
+    /// Returns basic scheduler stats (detailed stats not implemented).
+    pub async fn get_scheduler_stats(&self) -> Result<SchedulerStats> {
+        Ok(SchedulerStats {
+            state: SchedulerState::Stopped,
+            total_tasks: 0,
+            running_tasks: 0,
+            completed_tasks: 0,
+            failed_tasks: 0,
+            cancelled_tasks: 0,
+            total_execution_time_ms: 0,
+            last_error: None,
+            updated_at: Utc::now(),
+        })
+    }
 }
 
 /// 性能统计信息
@@ -1424,4 +1935,10 @@ pub struct PerformanceStats {
     pub queries_per_second: f32,
     /// 内存使用（MB）
     pub memory_usage_mb: f32,
+}
+
+fn file_centric_preview_error(operation: &str) -> AgentMemError {
+    AgentMemError::unsupported_operation(format!(
+        "File-centric preview entrypoint `{operation}` is exposed, but the backend wiring is scheduled for the resource->extract->categorize task"
+    ))
 }

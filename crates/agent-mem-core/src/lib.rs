@@ -13,6 +13,7 @@ pub mod agent_state;
 // pub mod v4_migration;  // 临时禁用，等核心功能完成后再修复
 /// Specialized memory agents for different cognitive memory types
 pub mod agents;
+pub mod cognitive_memory;
 /// Background agent processing system
 pub mod background_agent;
 /// Multi-level caching system with warming strategies
@@ -74,6 +75,10 @@ pub mod causal_reasoning;
 pub mod semantic_hierarchy;
 /// Phase 5.1: Adaptive learning mechanism - learning strategy optimization, adaptive parameter adjustment, online learning support
 pub mod adaptive_learning;
+/// Adaptive strategy manager for dynamic memory strategy optimization
+pub mod adaptive_strategy;
+/// LLM optimizer for context compression and prompt optimization
+pub mod llm_optimizer;
 /// Phase 5.2: Decentralized architecture - distributed sync mechanism, conflict resolution strategy, network optimization
 pub mod decentralized_architecture;
 /// Phase 5.3: Schema evolution system - schema update mechanism, schema evolution algorithm, schema creation support
@@ -86,8 +91,11 @@ pub mod prompt;
 pub mod query;
 /// Active retrieval system with topic extraction, intelligent routing, and context synthesis
 pub mod retrieval;
+pub mod scheduler;
 pub mod search;
 pub mod security;
+/// Input validation for API endpoints
+pub mod validation;
 /// Simplified Memory API (Mem0-style)
 // simple_memory模块已删除，统一使用Memory V4架构
 pub mod storage;
@@ -145,6 +153,9 @@ pub use retrieval::{
     TopicHierarchy,
 };
 
+// Re-export scheduler modules
+pub use scheduler::{DefaultMemoryScheduler, ExponentialDecayModel};
+
 // Re-export integration modules
 pub use integration::{
     ComponentHealth, HealthStatus, SystemConfig, SystemIntegrationManager, SystemState,
@@ -166,6 +177,13 @@ pub use cache::{
     CacheWarmingConfig, DataLoader, EvictionPolicy, InvalidationStrategy, MemoryCache,
     MemoryCacheConfig, MemoryCacheStats, MultiLevelCache, MultiLevelCacheConfig, WarmingStats,
     WarmingStrategy,
+};
+
+// 🆕 P2: Re-export LLM optimizer modules
+pub use llm_optimizer::{
+    CacheLevelConfig as LlmCacheLevelConfig,  // Alias to avoid conflict with cache::CacheLevelConfig
+    ContextCompressor, ContextCompressorConfig, ContextCompressionResult,
+    LlmOptimizer, LlmOptimizationConfig, LlmPerformanceMetrics,
 };
 
 // Re-export from traits

@@ -9,6 +9,24 @@
 
 package agentmem_http
 
+/// 最小Map实现，仅覆盖 http_new 包当前使用的构造与 put 语义
+public class Map<K, V> {
+    private var pairs: Array<(K, V)>
+
+    public init() {
+        this.pairs = Array<(K, V)>()
+    }
+
+    public func put(key: K, value: V): Unit {
+        let newPairs = Array<(K, V)>(this.pairs.size + 1, {_ => (key, value)})
+        for (i in 0..this.pairs.size) {
+            newPairs[i] = this.pairs[i]
+        }
+        newPairs[this.pairs.size] = (key, value)
+        this.pairs = newPairs
+    }
+}
+
 /// HTTP错误类型
 public enum AgentMemError {
     /// 网络错误
@@ -28,14 +46,14 @@ public enum AgentMemError {
     
     /// 获取错误消息
     public func getMessage(): String {
-        match (this) {
-            | NetworkError(msg) => "网络错误: ${msg}"
-            | HttpError(code, msg) => "HTTP错误 ${code}: ${msg}"
-            | JsonParseError(msg) => "JSON解析错误: ${msg}"
-            | ValidationError(msg) => "验证错误: ${msg}"
-            | NotFoundError(msg) => "未找到: ${msg}"
-            | UnauthorizedError(msg) => "未授权: ${msg}"
-            | ServerError(msg) => "服务器错误: ${msg}"
+        return match (this) {
+            case NetworkError(msg) => "网络错误: ${msg}"
+            case HttpError(code, msg) => "HTTP错误 ${code}: ${msg}"
+            case JsonParseError(msg) => "JSON解析错误: ${msg}"
+            case ValidationError(msg) => "验证错误: ${msg}"
+            case NotFoundError(msg) => "未找到: ${msg}"
+            case UnauthorizedError(msg) => "未授权: ${msg}"
+            case ServerError(msg) => "服务器错误: ${msg}"
         }
     }
 }
@@ -47,9 +65,9 @@ public enum Result<T, E> {
     
     /// 是否成功
     public func isOk(): Bool {
-        match (this) {
-            | Ok(_) => true
-            | Err(_) => false
+        return match (this) {
+            case Ok(_) => true
+            case Err(_) => false
         }
     }
     
@@ -60,13 +78,12 @@ public enum Result<T, E> {
     
     /// 解包，失败时抛出异常
     public func getOrThrow(): T {
-        match (this) {
-            | Ok(value) => value
-            | Err(e) => {
+        return match (this) {
+            case Ok(value) => value
+            case Err(e) =>
                 // 简化实现：返回默认值或抛出错误
                 // 注：实际应使用异常机制
                 throw Exception("Result unwrap failed")
-            }
         }
     }
 }
@@ -87,4 +104,3 @@ public func mapHttpError(code: Int32, message: String): AgentMemError {
         return HttpError(code, message)
     }
 }
-

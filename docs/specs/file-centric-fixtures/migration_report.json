@@ -1,0 +1,18 @@
+{
+  "migration_id": "mig-run-123",
+  "plan_id": "mig-plan-123",
+  "dry_run": false,
+  "status": "succeeded",
+  "migrated_memories": 42,
+  "mounted_resources": 15,
+  "created_categories": 6,
+  "conflicts": [],
+  "warnings": [
+    "1 legacy memory reused an existing resource descriptor"
+  ],
+  "errors": [],
+  "error_code": null,
+  "rollback_available": true,
+  "started_at": "2026-03-18T10:10:00Z",
+  "completed_at": "2026-03-18T10:10:04Z"
+}

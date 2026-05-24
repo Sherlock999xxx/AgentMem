@@ -8,8 +8,7 @@ use std::collections::HashMap;
 use std::path::Path;
 
 /// Master configuration for AgentMem V4.0
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[derive(Default)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct AgentMemConfig {
     /// Search configuration
     pub search: SearchConfig,
@@ -32,7 +31,6 @@ pub struct AgentMemConfig {
     /// Storage configuration
     pub storage: StorageConfig,
 }
-
 
 impl AgentMemConfig {
     /// Load configuration from TOML file

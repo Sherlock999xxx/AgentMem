@@ -467,7 +467,7 @@ mod tests {
     use super::*;
 
     #[tokio::test]
-    async fn test_adaptive_learning() {
+    async fn test_adaptive_learning() -> anyhow::Result<()> {
         let engine = AdaptiveLearningEngine::with_defaults();
 
         // 记录性能指标
@@ -487,7 +487,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_parameter_adjustment() {
+    async fn test_parameter_adjustment() -> anyhow::Result<()> {
         let engine = AdaptiveLearningEngine::with_defaults();
 
         // 设置参数
@@ -498,4 +498,17 @@ mod tests {
         assert_eq!(value, Some(0.8));
     }
 }
+
+
+    async fn test_parameter_adjustment() -> anyhow::Result<()> {
+        let engine = AdaptiveLearningEngine::with_defaults();
+
+        // 设置参数
+        engine.set_parameter("vector_weight", 0.8).await?;
+
+        // 获取参数
+        let value = engine.get_parameter("vector_weight").await;
+        assert_eq!(value, Some(0.8));
+        Ok(())
+    }
 

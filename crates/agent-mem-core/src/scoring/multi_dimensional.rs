@@ -399,9 +399,6 @@ pub struct CacheStats {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-    use agent_mem_traits::{AttributeKey, AttributeValue, Content, MetadataV4 as MemoryMetadata, AttributeSet, MemoryId, RelationGraph};
-
     fn create_test_memory(importance: f64, age_hours: i64) -> Memory {
         let created_at = Utc::now() - chrono::Duration::hours(age_hours);
         
@@ -443,8 +440,7 @@ mod tests {
         }
     }
 
-    #[tokio::test]
-    async fn test_multi_dimensional_scoring() {
+    async fn test_multi_dimensional_scoring() -> anyhow::Result<()> {
         let scorer = MultiDimensionalScorer::with_defaults();
         
         let memory = create_test_memory(0.8, 1);
@@ -460,7 +456,6 @@ mod tests {
         assert!(score.composite >= 0.0 && score.composite <= 1.0);
     }
 
-    #[tokio::test]
     async fn test_recency_decay() {
         let scorer = MultiDimensionalScorer::with_defaults();
         
@@ -473,8 +468,7 @@ mod tests {
         assert!(recent_score > old_score, "新记忆应该得分更高");
     }
 
-    #[tokio::test]
-    async fn test_importance_scoring() {
+    async fn test_importance_scoring() -> anyhow::Result<()> {
         let scorer = MultiDimensionalScorer::with_defaults();
         
         let high_importance = create_test_memory(0.9, 1);
@@ -486,8 +480,7 @@ mod tests {
         assert!(high_score > low_score, "高重要性应该得分更高");
     }
 
-    #[tokio::test]
-    async fn test_score_caching() {
+    async fn test_score_caching() -> anyhow::Result<()> {
         let scorer = MultiDimensionalScorer::with_defaults();
         
         let memory = create_test_memory(0.5, 1);

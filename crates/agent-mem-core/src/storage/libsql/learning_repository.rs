@@ -304,7 +304,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_create_and_get_feedback() {
+    async fn test_create_and_get_feedback() -> anyhow::Result<()> {
         let conn = setup_test_db().await;
         let repo = LibSqlLearningRepository::new(conn);
 
@@ -350,7 +350,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_delete_old_feedback() {
+    async fn test_delete_old_feedback() -> anyhow::Result<()> {
         let conn = setup_test_db().await;
         let repo = LibSqlLearningRepository::new(conn);
 

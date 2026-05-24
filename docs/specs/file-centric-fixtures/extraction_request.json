@@ -1,0 +1,13 @@
+{
+  "resource_id": "res-123",
+  "scope": {
+    "user_id": "user-123",
+    "agent_id": "agent-abc"
+  },
+  "category_hint_paths": [
+    "/preferences/communication"
+  ],
+  "persist_output": true,
+  "include_entities": true,
+  "include_relations": true
+}

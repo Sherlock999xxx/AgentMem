@@ -78,11 +78,8 @@ async fn test_retrieval_orchestrator_multiple_memory_types() {
         .expect("Failed to retrieve memories");
 
     // 验证结果包含多种记忆类型
-    let memory_types: std::collections::HashSet<_> = response
-        .memories
-        .iter()
-        .map(|m| m.memory_type)
-        .collect();
+    let memory_types: std::collections::HashSet<_> =
+        response.memories.iter().map(|m| m.memory_type).collect();
 
     assert!(
         memory_types.len() > 1,

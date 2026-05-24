@@ -9,7 +9,6 @@ use crate::routes::memory::{calculate_access_pattern_score, get_search_stats, Me
 use axum::{extract::Extension, response::Json};
 use chrono::Utc;
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
 use std::sync::Arc;
 use tracing::info;
 
@@ -40,7 +39,7 @@ pub struct PredictionRequest {
 }
 
 /// 🆕 Phase 2.3: 基于访问模式预测记忆
-/// 
+///
 /// 预测逻辑：
 /// 1. 基于访问频率和最近访问时间（使用calculate_access_pattern_score）
 /// 2. 基于搜索统计（高频搜索的记忆更可能被需要）
@@ -73,7 +72,7 @@ fn predict_memories_by_access_pattern(
 }
 
 /// 🆕 Phase 2.3: 基于搜索统计预测记忆
-/// 
+///
 /// 预测逻辑：
 /// 1. 如果总搜索次数高，说明系统活跃，预测最近访问的记忆
 /// 2. 如果缓存命中率高，说明访问模式稳定，预测高频记忆
@@ -100,7 +99,7 @@ fn enhance_prediction_with_search_stats(
 }
 
 /// 获取记忆预测
-/// 
+///
 /// 🆕 Phase 2.3: 简化版MemoryPredictor - 基于访问模式和搜索历史预测可能需要的记忆
 #[utoipa::path(
     post,
@@ -118,8 +117,10 @@ pub async fn predict_memories(
     Extension(repositories): Extension<Arc<agent_mem_core::storage::factory::Repositories>>,
     Json(request): Json<PredictionRequest>,
 ) -> ServerResult<Json<models::ApiResponse<MemoryPredictionResponse>>> {
-    info!("🔮 开始记忆预测: query={:?}, limit={:?}", 
-        request.query, request.limit);
+    info!(
+        "🔮 开始记忆预测: query={:?}, limit={:?}",
+        request.query, request.limit
+    );
 
     let limit = request.limit.unwrap_or(10);
     if limit == 0 {
@@ -133,76 +134,58 @@ pub async fn predict_memories(
     let db_path = std::env::var("DATABASE_URL")
         .unwrap_or_else(|_| "file:./data/agentmem.db".to_string())
         .replace("file:", "");
-    
-    let db = Builder::new_local(&db_path)
-        .build()
-        .await
-        .map_err(|e| {
-            crate::error::ServerError::internal_error(format!("Failed to open database: {}", e))
-        })?;
-    
-    let conn = db
-        .connect()
-        .map_err(|e| {
-            crate::error::ServerError::internal_error(format!("Failed to connect: {}", e))
-        })?;
+
+    let db = Builder::new_local(&db_path).build().await.map_err(|e| {
+        crate::error::ServerError::internal_error(format!("Failed to open database: {}", e))
+    })?;
+
+    let conn = db.connect().map_err(|e| {
+        crate::error::ServerError::internal_error(format!("Failed to connect: {}", e))
+    })?;
 
     // 构建查询：获取访问频率和最近访问时间
     // 根据是否有过滤条件构建不同的查询
     let mut rows = if let Some(agent_id) = &request.agent_id {
         let query = "SELECT id, access_count, last_accessed FROM memories WHERE is_deleted = 0 AND agent_id = ? ORDER BY access_count DESC, last_accessed DESC LIMIT ?";
-        let mut stmt = conn
-            .prepare(query)
-            .await
-            .map_err(|e| {
-                crate::error::ServerError::internal_error(format!("Failed to prepare query: {}", e))
-            })?;
-        stmt
-            .query(params![agent_id.clone(), (limit * 2) as i64])
+        let mut stmt = conn.prepare(query).await.map_err(|e| {
+            crate::error::ServerError::internal_error(format!("Failed to prepare query: {}", e))
+        })?;
+        stmt.query(params![agent_id.clone(), (limit * 2) as i64])
             .await
             .map_err(|e| {
                 crate::error::ServerError::internal_error(format!("Failed to execute query: {}", e))
             })?
     } else if let Some(user_id) = &request.user_id {
         let query = "SELECT id, access_count, last_accessed FROM memories WHERE is_deleted = 0 AND user_id = ? ORDER BY access_count DESC, last_accessed DESC LIMIT ?";
-        let mut stmt = conn
-            .prepare(query)
-            .await
-            .map_err(|e| {
-                crate::error::ServerError::internal_error(format!("Failed to prepare query: {}", e))
-            })?;
-        stmt
-            .query(params![user_id.clone(), (limit * 2) as i64])
+        let mut stmt = conn.prepare(query).await.map_err(|e| {
+            crate::error::ServerError::internal_error(format!("Failed to prepare query: {}", e))
+        })?;
+        stmt.query(params![user_id.clone(), (limit * 2) as i64])
             .await
             .map_err(|e| {
                 crate::error::ServerError::internal_error(format!("Failed to execute query: {}", e))
             })?
     } else {
         let query = "SELECT id, access_count, last_accessed FROM memories WHERE is_deleted = 0 ORDER BY access_count DESC, last_accessed DESC LIMIT ?";
-        let mut stmt = conn
-            .prepare(query)
-            .await
-            .map_err(|e| {
-                crate::error::ServerError::internal_error(format!("Failed to prepare query: {}", e))
-            })?;
-        stmt
-            .query(params![(limit * 2) as i64])
-            .await
-            .map_err(|e| {
-                crate::error::ServerError::internal_error(format!("Failed to execute query: {}", e))
-            })?
+        let mut stmt = conn.prepare(query).await.map_err(|e| {
+            crate::error::ServerError::internal_error(format!("Failed to prepare query: {}", e))
+        })?;
+        stmt.query(params![(limit * 2) as i64]).await.map_err(|e| {
+            crate::error::ServerError::internal_error(format!("Failed to execute query: {}", e))
+        })?
     };
 
     // 2. 计算访问模式评分
     let mut memory_scores: Vec<(String, f64, i64)> = Vec::new();
-    while let Some(row) = rows
-        .next()
-        .await
-        .map_err(|e| {
-            crate::error::ServerError::internal_error(format!("Failed to fetch row: {}", e))
-        })? {
-        let id: String = row.get(0)
-            .map_err(|e| crate::error::ServerError::internal_error(format!("Failed to get memory_id from row: {}", e)))?;
+    while let Some(row) = rows.next().await.map_err(|e| {
+        crate::error::ServerError::internal_error(format!("Failed to fetch row: {}", e))
+    })? {
+        let id: String = row.get(0).map_err(|e| {
+            crate::error::ServerError::internal_error(format!(
+                "Failed to get memory_id from row: {}",
+                e
+            ))
+        })?;
         let access_count: i64 = row.get(1).unwrap_or(0);
         let last_accessed_ts: Option<i64> = row.get(2).ok();
 
@@ -212,9 +195,7 @@ pub async fn predict_memories(
     }
 
     // 3. 按评分排序
-    memory_scores.sort_by(|a, b| {
-        b.1.partial_cmp(&a.1).unwrap_or(std::cmp::Ordering::Equal)
-    });
+    memory_scores.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap_or(std::cmp::Ordering::Equal));
 
     // 4. 生成预测
     let (mut predictions, mut scores, mut basis) =
@@ -291,4 +272,3 @@ mod tests {
         assert_eq!(request.query, Some("test".to_string()));
     }
 }
-

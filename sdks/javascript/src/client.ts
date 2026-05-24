@@ -26,6 +26,17 @@ import {
   NotFoundError,
   RateLimitError,
   ServerError,
+  // File-centric types (Phase D1)
+  ResourceDescriptor,
+  CategoryDescriptor,
+  ScopeDescriptor,
+  ExtractionRequest,
+  ExtractionResult,
+  MigrationPlan,
+  MigrationReport,
+  ProactiveTaskInfo,
+  SchedulerStats,
+  OperationStatus,
 } from './types';
 import { createConfig, getApiBaseUrl, getDefaultHeaders } from './config';
 
@@ -349,5 +360,181 @@ export class AgentMemClient {
       ...this.config,
       apiKey: '***', // Mask API key for security
     };
+  }
+
+  // ============================================================================
+  // File-Centric API Methods (Phase D1)
+  // ============================================================================
+
+  // Resource Operations
+
+  /**
+   * Mount a file-like resource
+   */
+  async mountResource(params: {
+    uri: string;
+    media_type: string;
+    scope: ScopeDescriptor;
+    metadata?: any;
+  }): Promise<ResourceDescriptor> {
+    return this.makeRequest<ResourceDescriptor>('POST', '/file-centric/resources', params);
+  }
+
+  /**
+   * Get a resource by ID
+   */
+  async getResource(resourceId: string): Promise<ResourceDescriptor> {
+    return this.makeRequest<ResourceDescriptor>('GET', `/file-centric/resources/${resourceId}`, undefined, { useCache: true });
+  }
+
+  /**
+   * List resources with optional filters
+   */
+  async listResources(params?: {
+    scope?: ScopeDescriptor;
+    status?: string;
+    limit?: number;
+    offset?: number;
+  }): Promise<ResourceDescriptor[]> {
+    const response = await this.makeRequest<{ resources: ResourceDescriptor[] }>('GET', '/file-centric/resources', params, { useCache: true });
+    return response.resources;
+  }
+
+  // Category Operations
+
+  /**
+   * Get a category by ID
+   */
+  async getCategory(categoryId: string): Promise<CategoryDescriptor> {
+    return this.makeRequest<CategoryDescriptor>('GET', `/file-centric/categories/${categoryId}`, undefined, { useCache: true });
+  }
+
+  /**
+   * Get a category by path
+   */
+  async getCategoryByPath(path: string, scope: ScopeDescriptor): Promise<CategoryDescriptor> {
+    return this.makeRequest<CategoryDescriptor>('GET', '/file-centric/categories/by-path', { path, ...scope }, { useCache: true });
+  }
+
+  /**
+   * List categories with optional filters
+   */
+  async listCategories(params?: {
+    scope?: ScopeDescriptor;
+    parent_id?: string;
+    status?: string;
+    limit?: number;
+    offset?: number;
+  }): Promise<CategoryDescriptor[]> {
+    const response = await this.makeRequest<{ categories: CategoryDescriptor[] }>('GET', '/file-centric/categories', params, { useCache: true });
+    return response.categories;
+  }
+
+  /**
+   * Search categories by query
+   */
+  async searchCategories(params: {
+    query: string;
+    scope: ScopeDescriptor;
+    limit?: number;
+  }): Promise<CategoryDescriptor[]> {
+    const response = await this.makeRequest<{ categories: CategoryDescriptor[] }>('POST', '/file-centric/categories/search', params);
+    return response.categories;
+  }
+
+  // Extraction Operations
+
+  /**
+   * Extract structured data from a resource
+   */
+  async extractResource(params: ExtractionRequest): Promise<ExtractionResult> {
+    return this.makeRequest<ExtractionResult>('POST', `/file-centric/resources/${params.resource_id}/extract`, params);
+  }
+
+  /**
+   * Get extraction job status
+   */
+  async getExtractionStatus(jobId: string): Promise<ExtractionResult> {
+    return this.makeRequest<ExtractionResult>('GET', `/file-centric/extractions/${jobId}`, undefined, { useCache: true });
+  }
+
+  // Migration Operations
+
+  /**
+   * Plan migration from legacy memories
+   */
+  async planLegacyMigration(params: {
+    scope: ScopeDescriptor;
+    dry_run: boolean;
+  }): Promise<MigrationPlan> {
+    return this.makeRequest<MigrationPlan>('POST', '/file-centric/migrations/plan', params);
+  }
+
+  /**
+   * Apply a migration plan
+   */
+  async applyLegacyMigration(params: {
+    plan_id: string;
+    scope: ScopeDescriptor;
+  }): Promise<MigrationReport> {
+    return this.makeRequest<MigrationReport>('POST', '/file-centric/migrations/apply', params);
+  }
+
+  /**
+   * Get migration status
+   */
+  async getMigrationStatus(migrationId: string): Promise<MigrationReport> {
+    return this.makeRequest<MigrationReport>('GET', `/file-centric/migrations/${migrationId}`, undefined, { useCache: true });
+  }
+
+  /**
+   * Rollback a migration
+   */
+  async rollbackMigration(migrationId: string): Promise<MigrationReport> {
+    return this.makeRequest<MigrationReport>('POST', `/file-centric/migrations/${migrationId}/rollback`);
+  }
+
+  // Proactive Operations
+
+  /**
+   * List proactive background tasks
+   */
+  async listProactiveTasks(params?: {
+    scope?: ScopeDescriptor;
+    task_type?: string;
+    status?: OperationStatus;
+    limit?: number;
+    offset?: number;
+  }): Promise<ProactiveTaskInfo[]> {
+    const response = await this.makeRequest<{ tasks: ProactiveTaskInfo[] }>('GET', '/file-centric/proactive/tasks', params, { useCache: true });
+    return response.tasks;
+  }
+
+  /**
+   * Get a proactive task by ID
+   */
+  async getProactiveTask(taskId: string): Promise<ProactiveTaskInfo> {
+    return this.makeRequest<ProactiveTaskInfo>('GET', `/file-centric/proactive/tasks/${taskId}`, undefined, { useCache: true });
+  }
+
+  /**
+   * Trigger a proactive task
+   */
+  async runProactiveTask(taskId: string): Promise<{ run_id: string; status: OperationStatus }> {
+    return this.makeRequest<{ run_id: string; status: OperationStatus }>('POST', `/file-centric/proactive/tasks/${taskId}/run`);
+  }
+
+  /**
+   * Cancel a running proactive task
+   */
+  async cancelProactiveTask(taskId: string, runId: string): Promise<{ status: OperationStatus }> {
+    return this.makeRequest<{ status: OperationStatus }>('POST', `/file-centric/proactive/tasks/${taskId}/runs/${runId}/cancel`);
+  }
+
+  /**
+   * Get scheduler statistics
+   */
+  async getSchedulerStats(): Promise<SchedulerStats> {
+    return this.makeRequest<SchedulerStats>('GET', '/file-centric/proactive/scheduler/stats', undefined, { useCache: true });
   }
 }

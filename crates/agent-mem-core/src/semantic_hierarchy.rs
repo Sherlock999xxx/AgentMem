@@ -491,7 +491,7 @@ mod tests {
     use super::*;
 
     #[tokio::test]
-    async fn test_semantic_hierarchy() {
+    async fn test_semantic_hierarchy() -> anyhow::Result<()> {
         let index = SemanticHierarchyIndex::with_defaults();
 
         // 添加根节点
@@ -552,6 +552,6 @@ mod tests {
 
         let results = index.search_by_meaning(&query, 10).await?;
         assert!(!results.is_empty());
+        Ok(())
     }
 }
-

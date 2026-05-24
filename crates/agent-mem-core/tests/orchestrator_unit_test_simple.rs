@@ -72,6 +72,9 @@ async fn test_memory_integrator_inject_memories() {
         semantic_weight: 0.9,
         enable_compression: true,
         compression_threshold: 5,
+        enable_active_retrieval: false,
+        enable_context_enhancement: false,
+        enable_graph_memory: false,
     };
     let integrator = MemoryIntegrator::new(memory_engine, config);
 
@@ -84,18 +87,15 @@ async fn test_memory_integrator_inject_memories() {
     // 3. 注入记忆到 prompt
     let formatted = integrator.inject_memories_to_prompt(&memories);
 
-    // 4. 验证格式化结果
-    assert!(
-        formatted.contains("Semantic") || formatted.contains("semantic"),
-        "Should contain memory type"
-    );
+    // 4. 验证格式化结果（极简格式：序号 + 内容）
+    assert!(formatted.contains("1."), "Should contain memory number");
     assert!(
         formatted.contains("coffee"),
         "Should contain memory content"
     );
     assert!(
-        formatted.contains("Episodic") || formatted.contains("episodic"),
-        "Should contain memory type"
+        formatted.contains("2."),
+        "Should contain second memory number"
     );
     assert!(formatted.contains("John"), "Should contain memory content");
 
@@ -116,6 +116,9 @@ async fn test_memory_integrator_filter_by_relevance() {
         semantic_weight: 0.9,
         enable_compression: true,
         compression_threshold: 5,
+        enable_active_retrieval: false,
+        enable_context_enhancement: false,
+        enable_graph_memory: false,
     };
     let integrator = MemoryIntegrator::new(memory_engine, config);
 
@@ -161,6 +164,9 @@ async fn test_memory_integrator_sort_memories() {
         semantic_weight: 0.9,
         enable_compression: true,
         compression_threshold: 5,
+        enable_active_retrieval: false,
+        enable_context_enhancement: false,
+        enable_graph_memory: false,
     };
     let integrator = MemoryIntegrator::new(memory_engine, config);
 
@@ -212,6 +218,9 @@ async fn test_memory_integrator_empty_memories() {
         semantic_weight: 0.9,
         enable_compression: true,
         compression_threshold: 5,
+        enable_active_retrieval: false,
+        enable_context_enhancement: false,
+        enable_graph_memory: false,
     };
     let integrator = MemoryIntegrator::new(memory_engine, config);
 
@@ -244,6 +253,9 @@ async fn test_memory_integrator_no_score() {
         semantic_weight: 0.9,
         enable_compression: true,
         compression_threshold: 5,
+        enable_active_retrieval: false,
+        enable_context_enhancement: false,
+        enable_graph_memory: false,
     };
     let integrator = MemoryIntegrator::new(memory_engine, config);
 
@@ -275,8 +287,8 @@ async fn test_memory_integrator_config() {
     // 1. 测试默认配置
     let default_config = MemoryIntegratorConfig::default();
     assert_eq!(
-        default_config.max_memories, 10,
-        "Default max memories should be 10"
+        default_config.max_memories, 3,
+        "Default max memories should be 3 (Phase 2/3 optimization)"
     );
     assert_eq!(
         default_config.relevance_threshold, 0.1,
@@ -302,6 +314,9 @@ async fn test_memory_integrator_config() {
         semantic_weight: 0.9,
         enable_compression: false,
         compression_threshold: 20,
+        enable_active_retrieval: false,
+        enable_context_enhancement: false,
+        enable_graph_memory: false,
     };
     assert_eq!(custom_config.relevance_threshold, 0.8);
     assert_eq!(custom_config.max_memories, 20);

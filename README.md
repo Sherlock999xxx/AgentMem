@@ -21,6 +21,22 @@
 
 **AgentMem** is a high-performance, enterprise-grade memory management platform built in Rust, designed specifically for AI agents and LLM-powered applications. It provides persistent memory, intelligent semantic search, and enterprise-grade reliability with a modular plugin architecture.
 
+### MVP Version (v2.1)
+
+For production use, we recommend the **MVP version** with simplified API:
+
+```rust
+// 6 Core Methods
+memory.add(content)                    // Add memory
+memory.get(id)                         // Get memory
+memory.search(query)                   // Semantic search
+memory.delete(id)                      // Delete memory
+memory.get_all(options)               // List memories
+memory.get_stats()                    // Get statistics
+```
+
+See [plan27.md](plan27.md) for MVP implementation details.
+
 ### Why AgentMem?
 
 Modern LLM applications face critical limitations that AgentMem solves:

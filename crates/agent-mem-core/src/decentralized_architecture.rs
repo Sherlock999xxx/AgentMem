@@ -472,7 +472,7 @@ mod tests {
     use super::*;
 
     #[tokio::test]
-    async fn test_decentralized_manager() {
+    async fn test_decentralized_manager() -> anyhow::Result<()> {
         let manager = DecentralizedManager::with_defaults();
 
         // 注册节点
@@ -502,7 +502,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_decentralized_manager_empty_nodes() {
+    async fn test_decentralized_manager_empty_nodes() -> anyhow::Result<()> {
         let manager = DecentralizedManager::with_defaults();
 
         // 测试没有节点时的同步
@@ -567,7 +567,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_conflict_resolution() {
+    async fn test_conflict_resolution() -> anyhow::Result<()> {
         let manager = DecentralizedManager::with_defaults();
 
         let conflict = ConflictRecord {

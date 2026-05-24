@@ -19,6 +19,9 @@ agent-mem-tools = { path = "../agent-mem-tools" }
 agent-mem-llm = { path = "../agent-mem-llm" }
 agent-mem-observability = { path = "../agent-mem-observability" }
 agent-mem-performance = { path = "../agent-mem-performance" }  # ✅ Phase 2.2.5: 熔断器模式
+agent-mem-resource = { path = "../agent-mem-resource" }  # 🆕 File-centric resource management
+agent-mem-category = { path = "../agent-mem-category" }  # 🆕 File-centric category management
+agent-mem-extraction = { path = "../agent-mem-extraction" }  # 🆕 File-centric extraction pipeline
 agent-mem-storage = { path = "../agent-mem-storage", optional = true }
 # agent-mem-lumosai = { path = "../agent-mem-lumosai", optional = true }  # LumosAI集成 - TEMPORARILY DISABLED
 # lumosai_core = { git = "https://github.com/louloulin/lumos.ai", package = "lumosai_core", optional = true }  # LumosAI集成 - TEMPORARILY DISABLED
@@ -28,6 +31,7 @@ axum = { version = "0.7", features = ["macros", "multipart", "ws"] }
 tower = { version = "0.4", features = ["full"] }
 tower-http = { version = "0.5", features = ["cors", "trace", "fs", "limit", "timeout"] }
 hyper = { version = "1.0", features = ["full"] }
+http = "1.0"
 
 # Async runtime
 tokio = { version = "1.0", features = ["full"] }
@@ -63,7 +67,7 @@ config = "0.14"
 dotenvy = "0.15"
 
 # Database (for direct SQL queries)
-libsql = "0.6"
+libsql = "0.9"
 
 # Metrics and monitoring
 metrics = "0.22"
@@ -82,6 +86,9 @@ chrono = { version = "0.4", features = ["serde"] }
 # Regular expressions
 regex = "1.10"
 
+# High-performance hashing (P1 optimization)
+twox-hash = "1.6"
+
 # Validation
 validator = { version = "0.18", features = ["derive"] }
 
@@ -95,6 +102,12 @@ sqlx = { version = "0.7", features = ["runtime-tokio-rustls", "postgres", "uuid"
 clap = { version = "4.0", features = ["derive"] }
 argon2 = "0.5.3"
 sha2.workspace = true
+
+# Webhook support (P1 gap vs Mem0/Letta)
+dashmap = "6.0"
+ring = "0.17"
+hex = "0.4"
+rand = "0.8"
 
 [features]
 default = ["libsql", "lancedb"]  # ✅ 添加lancedb到默认features

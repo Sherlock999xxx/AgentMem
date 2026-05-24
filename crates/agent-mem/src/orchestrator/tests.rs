@@ -34,9 +34,7 @@ mod tests {
         // 测试存储模块
         let mut config = OrchestratorConfig::default();
         config.storage_url = Some("memory://".to_string());
-        let orchestrator = MemoryOrchestrator::new_with_config(config)
-            .await
-            .unwrap();
+        let orchestrator = MemoryOrchestrator::new_with_config(config).await.unwrap();
 
         // 测试快速添加记忆
         let result = orchestrator

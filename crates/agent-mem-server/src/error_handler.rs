@@ -8,14 +8,13 @@
 
 use crate::error::{ErrorContext, ServerError, ServerResult};
 use std::backtrace::Backtrace;
-use std::fmt;
 use tracing::{error, warn};
 
 /// Error handler trait for consistent error handling
 pub trait ErrorHandler {
     /// Convert error to ServerError with context
     fn to_server_error(self, context: impl Into<String>) -> ServerError;
-    
+
     /// Convert error to ServerError with detailed context
     fn to_server_error_with_details(
         self,
@@ -125,8 +124,11 @@ impl ErrorMonitor {
 
     /// Record an error
     pub fn record_error(&self, error: &ServerError) {
-        let count = self.count.fetch_add(1, std::sync::atomic::Ordering::Relaxed) + 1;
-        
+        let count = self
+            .count
+            .fetch_add(1, std::sync::atomic::Ordering::Relaxed)
+            + 1;
+
         // Update last error time
         if let Ok(mut last) = self.last_error.lock() {
             *last = Some(std::time::Instant::now());

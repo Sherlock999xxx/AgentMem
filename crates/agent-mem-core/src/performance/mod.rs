@@ -233,7 +233,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_performance_manager_start_stop() {
+    async fn test_performance_manager_start_stop() -> anyhow::Result<()> {
         let config = PerformanceConfig::default();
         let manager = PerformanceManager::new(config);
 
@@ -253,3 +253,24 @@ mod tests {
         assert_eq!(stats.cache_stats.total_requests, 0);
     }
 }
+
+    async fn test_performance_manager_start_stop() -> anyhow::Result<()> {
+        let config = PerformanceConfig::default();
+        let manager = PerformanceManager::new(config);
+
+        manager.start().await?;
+        assert!(*manager.running.read().await);
+
+        manager.stop().await?;
+        assert!(!*manager.running.read().await);
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn test_get_performance_stats() {
+        let config = PerformanceConfig::default();
+        let manager = PerformanceManager::new(config);
+
+        let stats = manager.get_performance_stats().await;
+        assert_eq!(stats.cache_stats.total_requests, 0);
+    }

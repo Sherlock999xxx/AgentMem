@@ -168,9 +168,9 @@ impl StorageModule {
 
                     // 转换metadata为HashMap<String, String>，并添加 memory_id
                     let mut metadata_for_manager: std::collections::HashMap<String, String> =
-                            full_metadata_for_db
-                                .iter()
-                                .filter_map(|(k, v)| v.as_str().map(|s| (k.clone(), s.to_string())))
+                        full_metadata_for_db
+                            .iter()
+                            .filter_map(|(k, v)| v.as_str().map(|s| (k.clone(), s.to_string())))
                             .collect();
                     // 添加 memory_id 到 metadata，以便后续可以通过它查找
                     metadata_for_manager.insert("_memory_id".to_string(), memory_id_for_db.clone());
@@ -188,7 +188,7 @@ impl StorageModule {
                         )
                         .await
                         .map_err(|e| format!("MemoryManager write failed: {e}"))?;
-                    
+
                     // 验证：如果 manager_id 与我们的 memory_id 不同，记录警告
                     if manager_id != memory_id_for_db {
                         warn!(
@@ -196,7 +196,7 @@ impl StorageModule {
                             manager_id, memory_id_for_db
                         );
                     }
-                    
+
                     Ok(())
                 } else {
                     // ⚠️ 关键：MemoryManager未初始化应该报错，不能静默失败
@@ -434,7 +434,7 @@ impl StorageModule {
         }
 
         // 降级：从向量存储获取
-        if let Some(vector_store) = &orchestrator.vector_store {
+        if let Some(_vector_store) = &orchestrator.vector_store {
             // 尝试通过 ID 搜索（如果向量存储支持）
             // 这里假设可以通过 metadata 中的 ID 字段来查找
             // 实际实现可能需要根据具体的向量存储 API 调整
@@ -452,7 +452,7 @@ impl StorageModule {
         content: String,
         agent_id: String,
         user_id: Option<String>,
-        run_id: Option<String>,
+        _run_id: Option<String>,
         metadata: Option<HashMap<String, serde_json::Value>>,
         infer: bool,
         memory_type: Option<String>,

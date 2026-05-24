@@ -137,6 +137,8 @@ impl SystemIntegrationManager {
             context: None,
             enable_topic_extraction: false,
             enable_context_synthesis: false,
+            resource_id: None,
+            category_path: None,
         };
         let result = self.active_retrieval_system.retrieve(request).await?;
 
@@ -173,6 +175,8 @@ impl SystemIntegrationManager {
             context: None,
             enable_topic_extraction: true,
             enable_context_synthesis: true,
+            resource_id: None,
+            category_path: None,
         };
         let response = self.active_retrieval_system.retrieve(request).await?;
         let results = if let Some(synthesis) = response.synthesis_result {

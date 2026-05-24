@@ -680,7 +680,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_resource_memory_manager_creation() {
+    async fn test_resource_memory_manager_creation() -> anyhow::Result<()> {
         let temp_dir = TempDir::new().unwrap();
         let config = ResourceStorageConfig {
             storage_root: temp_dir.path().to_path_buf(),
@@ -692,6 +692,7 @@ mod tests {
 
         assert_eq!(stats.total_resources, 0);
         assert_eq!(stats.total_storage_size, 0);
+        Ok(())
     }
 
     #[tokio::test]
@@ -705,7 +706,7 @@ mod tests {
 
     #[tokio::test]
     #[ignore] // NOTE: This test passes when run individually but may fail in parallel
-    async fn test_store_and_retrieve_resource() {
+    async fn test_store_and_retrieve_resource() -> anyhow::Result<()> {
         let temp_dir = TempDir::new().unwrap();
         let config = ResourceStorageConfig {
             storage_root: temp_dir.path().join("storage"),
@@ -749,7 +750,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_resource_deduplication() {
+    async fn test_resource_deduplication() -> anyhow::Result<()> {
         let temp_dir = TempDir::new().unwrap();
         let config = ResourceStorageConfig {
             storage_root: temp_dir.path().join("storage"),
@@ -782,10 +783,11 @@ mod tests {
         let stats = manager.get_stats().await?;
         assert_eq!(stats.total_resources, 1);
         assert_eq!(stats.deduplication_savings, test_content.len() as u64);
+        Ok(())
     }
 
     #[tokio::test]
-    async fn test_search_by_type() {
+    async fn test_search_by_type() -> anyhow::Result<()> {
         let temp_dir = TempDir::new().unwrap();
         let config = ResourceStorageConfig {
             storage_root: temp_dir.path().join("storage"),
@@ -865,7 +867,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_search_by_filename() {
+    async fn test_search_by_filename() -> anyhow::Result<()> {
         let temp_dir = TempDir::new().unwrap();
         let config = ResourceStorageConfig {
             storage_root: temp_dir.path().join("storage"),
@@ -929,7 +931,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_delete_resource() {
+    async fn test_delete_resource() -> anyhow::Result<()> {
         let temp_dir = TempDir::new().unwrap();
         let config = ResourceStorageConfig {
             storage_root: temp_dir.path().join("storage"),
@@ -1002,7 +1004,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_storage_stats() {
+    async fn test_storage_stats() -> anyhow::Result<()> {
         let temp_dir = TempDir::new().unwrap();
         let config = ResourceStorageConfig {
             storage_root: temp_dir.path().join("storage"),
@@ -1041,7 +1043,7 @@ mod tests {
 
     #[tokio::test]
     #[ignore] // NOTE: This test passes when run individually but may fail in parallel
-    async fn test_storage_health_check() {
+    async fn test_storage_health_check() -> anyhow::Result<()> {
         let temp_dir = TempDir::new().unwrap();
         let config = ResourceStorageConfig {
             storage_root: temp_dir.path().join("storage"),
@@ -1078,7 +1080,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_clear_all() {
+    async fn test_clear_all() -> anyhow::Result<()> {
         let temp_dir = TempDir::new().unwrap();
         let config = ResourceStorageConfig {
             storage_root: temp_dir.path().join("storage"),
@@ -1153,7 +1155,7 @@ mod tests {
 
     #[tokio::test]
     #[ignore] // NOTE: This test passes when run individually but may fail in parallel
-    async fn test_resource_metadata_structure() {
+    async fn test_resource_metadata_structure() -> anyhow::Result<()> {
         let temp_dir = TempDir::new().unwrap();
         let config = ResourceStorageConfig {
             storage_root: temp_dir.path().join("storage"),
@@ -1177,7 +1179,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_multiple_resources_same_type() {
+    async fn test_multiple_resources_same_type() -> anyhow::Result<()> {
         let temp_dir = TempDir::new().unwrap();
         let config = ResourceStorageConfig {
             storage_root: temp_dir.path().join("storage"),

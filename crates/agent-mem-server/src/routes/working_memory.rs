@@ -114,10 +114,18 @@ pub async fn add_working_memory(
         .expires_in_seconds
         .map(|seconds| chrono::Utc::now() + chrono::Duration::seconds(seconds));
 
+    // ✅ 提取 agent_id：优先从 metadata 中获取，其次使用 user_id 生成，最后使用默认值
+    let agent_id = request
+        .metadata
+        .get("agent_id")
+        .and_then(|v| v.as_str())
+        .map(String::from)
+        .unwrap_or_else(|| format!("default-agent-{}", auth_user.user_id));
+
     let item = WorkingMemoryItem {
         id: uuid::Uuid::new_v4().to_string(),
         user_id: auth_user.user_id.clone(),
-        agent_id: "default".to_string(), // Can be enhanced to accept agent_id
+        agent_id, // ✅ 动态生成而非硬编码
         session_id: request.session_id.clone(),
         content: request.content.clone(),
         priority: request.priority.clamp(1, 10), // Ensure priority is 1-10

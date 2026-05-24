@@ -6,17 +6,21 @@
 pub mod abstractions;
 pub mod batch;
 pub mod cache;
+pub mod cognitive_memory;
 pub mod embedder;
 pub mod error;
 pub mod intelligence;
 pub mod llm;
 pub mod memory;
 pub mod memory_store;
+pub mod scheduler;
+pub mod scope;  // 统一 MemoryScope 定义
 pub mod session;
 pub mod storage;
 pub mod types;
 
 // Re-export main traits
+pub use abstractions::Memory;
 pub use batch::{
     AdvancedSearch, ArchiveCriteria, BatchMemoryOperations, ConfigurationProvider,
     HealthCheckProvider, MemoryLifecycle, MemoryStats, MemoryUpdate, RetryableOperations,
@@ -30,12 +34,18 @@ pub use intelligence::{
     IntelligentProcessingResult, MemoryActionType, MemoryDecision,
 };
 pub use llm::{LLMProvider, ModelInfo};
+pub use cognitive_memory::{
+    CognitiveMemoryProvider, CognitiveMemoryItem, CognitiveMemoryType,
+    CognitiveRecallOptions, CognitiveRecallResult, CognitiveMemoryStats,
+};
 pub use memory::MemoryProvider;
 pub use memory_store::{
     CoreMemoryItem, CoreMemoryStore, EpisodicEvent, EpisodicMemoryStore, EpisodicQuery,
     ProceduralMemoryItem, ProceduralMemoryStore, ProceduralQuery, SemanticMemoryItem,
     SemanticMemoryStore, SemanticQuery, WorkingMemoryItem, WorkingMemoryStore,
 };
+pub use scheduler::{MemoryScheduler, ScheduleConfig, ScheduleContext};
+pub use scope::MemoryScope;  // 统一导出 MemoryScope
 pub use session::SessionManager;
 pub use storage::{
     EmbeddingVectorStore, GraphResult, GraphStore, HistoryStore, KeyValueStore, LegacyVectorStore,

@@ -1870,7 +1870,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_add_memory() {
+    async fn test_add_memory() -> anyhow::Result<()> {
         let sql_repo = Arc::new(MockMemoryRepository {
             memories: Arc::new(RwLock::new(HashMap::new())),
         });
@@ -1907,7 +1907,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_delete_memory() {
+    async fn test_delete_memory() -> anyhow::Result<()> {
         let sql_repo = Arc::new(MockMemoryRepository {
             memories: Arc::new(RwLock::new(HashMap::new())),
         });
@@ -1945,7 +1945,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_get_memory_cache() {
+    async fn test_get_memory_cache() -> anyhow::Result<()> {
         let sql_repo = Arc::new(MockMemoryRepository {
             memories: Arc::new(RwLock::new(HashMap::new())),
         });
@@ -1979,7 +1979,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_update_memory() {
+    async fn test_update_memory() -> anyhow::Result<()> {
         let sql_repo = Arc::new(MockMemoryRepository {
             memories: Arc::new(RwLock::new(HashMap::new())),
         });
@@ -2016,7 +2016,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_batch_add_memories() {
+    async fn test_batch_add_memories() -> anyhow::Result<()> {
         let sql_repo = Arc::new(MockMemoryRepository {
             memories: Arc::new(RwLock::new(HashMap::new())),
         });
@@ -2066,7 +2066,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_batch_delete_memories() {
+    async fn test_batch_delete_memories() -> anyhow::Result<()> {
         let sql_repo = Arc::new(MockMemoryRepository {
             memories: Arc::new(RwLock::new(HashMap::new())),
         });
@@ -2160,7 +2160,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_lru_cache_eviction() {
+    async fn test_lru_cache_eviction() -> anyhow::Result<()> {
         let sql_repo = Arc::new(MockMemoryRepository {
             memories: Arc::new(RwLock::new(HashMap::new())),
         });
@@ -2214,7 +2214,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_lru_cache_hit_rate() {
+    async fn test_lru_cache_hit_rate() -> anyhow::Result<()> {
         let sql_repo = Arc::new(MockMemoryRepository {
             memories: Arc::new(RwLock::new(HashMap::new())),
         });
@@ -2252,7 +2252,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_batch_get_memories() {
+    async fn test_batch_get_memories() -> anyhow::Result<()> {
         let sql_repo = Arc::new(MockMemoryRepository {
             memories: Arc::new(RwLock::new(HashMap::new())),
         });
@@ -2290,7 +2290,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_exists() {
+    async fn test_exists() -> anyhow::Result<()> {
         let sql_repo = Arc::new(MockMemoryRepository {
             memories: Arc::new(RwLock::new(HashMap::new())),
         });
@@ -2313,7 +2313,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_count_memories() {
+    async fn test_count_memories() -> anyhow::Result<()> {
         let sql_repo = Arc::new(MockMemoryRepository {
             memories: Arc::new(RwLock::new(HashMap::new())),
         });
@@ -2342,7 +2342,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_health_check() {
+    async fn test_health_check() -> anyhow::Result<()> {
         let sql_repo = Arc::new(MockMemoryRepository {
             memories: Arc::new(RwLock::new(HashMap::new())),
         });
@@ -2374,7 +2374,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_reset_stats() {
+    async fn test_reset_stats() -> anyhow::Result<()> {
         let sql_repo = Arc::new(MockMemoryRepository {
             memories: Arc::new(RwLock::new(HashMap::new())),
         });
@@ -2411,7 +2411,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_verify_consistency() {
+    async fn test_verify_consistency() -> anyhow::Result<()> {
         let sql_repo = Arc::new(MockMemoryRepository {
             memories: Arc::new(RwLock::new(HashMap::new())),
         });
@@ -2445,7 +2445,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_verify_all_consistency() {
+    async fn test_verify_all_consistency() -> anyhow::Result<()> {
         let sql_repo = Arc::new(MockMemoryRepository {
             memories: Arc::new(RwLock::new(HashMap::new())),
         });
@@ -2521,7 +2521,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_sync_repository_to_vector_store() {
+    async fn test_sync_repository_to_vector_store() -> anyhow::Result<()> {
         let sql_repo = Arc::new(MockMemoryRepository {
             memories: Arc::new(RwLock::new(HashMap::new())),
         });
@@ -2561,7 +2561,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_sync_repository_to_vector_store_skip_existing() {
+    async fn test_sync_repository_to_vector_store_skip_existing() -> anyhow::Result<()> {
         let sql_repo = Arc::new(MockMemoryRepository {
             memories: Arc::new(RwLock::new(HashMap::new())),
         });
@@ -2593,7 +2593,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_sync_repository_to_vector_store_skip_no_embedding() {
+    async fn test_sync_repository_to_vector_store_skip_no_embedding() -> anyhow::Result<()> {
         let sql_repo = Arc::new(MockMemoryRepository {
             memories: Arc::new(RwLock::new(HashMap::new())),
         });
@@ -2624,7 +2624,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_rebuild_vector_index() {
+    async fn test_rebuild_vector_index() -> anyhow::Result<()> {
         let sql_repo = Arc::new(MockMemoryRepository {
             memories: Arc::new(RwLock::new(HashMap::new())),
         });
@@ -2664,7 +2664,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_rebuild_vector_index_no_clear() {
+    async fn test_rebuild_vector_index_no_clear() -> anyhow::Result<()> {
         let sql_repo = Arc::new(MockMemoryRepository {
             memories: Arc::new(RwLock::new(HashMap::new())),
         });
@@ -2706,7 +2706,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_rebuild_vector_index_skip_no_embedding() {
+    async fn test_rebuild_vector_index_skip_no_embedding() -> anyhow::Result<()> {
         let sql_repo = Arc::new(MockMemoryRepository {
             memories: Arc::new(RwLock::new(HashMap::new())),
         });
@@ -2737,7 +2737,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_warmup_cache() {
+    async fn test_warmup_cache() -> anyhow::Result<()> {
         let sql_repo = Arc::new(MockMemoryRepository {
             memories: Arc::new(RwLock::new(HashMap::new())),
         });
@@ -2771,7 +2771,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_warmup_cache_with_filters() {
+    async fn test_warmup_cache_with_filters() -> anyhow::Result<()> {
         let sql_repo = Arc::new(MockMemoryRepository {
             memories: Arc::new(RwLock::new(HashMap::new())),
         });
@@ -2846,7 +2846,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_get_cache_stats() {
+    async fn test_get_cache_stats() -> anyhow::Result<()> {
         let sql_repo = Arc::new(MockMemoryRepository {
             memories: Arc::new(RwLock::new(HashMap::new())),
         });

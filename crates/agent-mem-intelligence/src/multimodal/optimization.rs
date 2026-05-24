@@ -587,7 +587,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_batch_processor() {
+    async fn test_batch_processor() -> anyhow::Result<()> {
         let config = MultimodalOptimizationConfig {
             batch_size: 2,
             ..Default::default()
@@ -603,5 +603,6 @@ mod tests {
 
         let results = processor.batch_align(embeddings).await?;
         assert_eq!(results.len(), 3);
+        Ok(())
     }
 }

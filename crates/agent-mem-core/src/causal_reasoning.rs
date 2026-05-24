@@ -509,7 +509,7 @@ mod tests {
     use super::*;
 
     #[tokio::test]
-    async fn test_causal_reasoning() {
+    async fn test_causal_reasoning() -> anyhow::Result<()> {
         let engine = CausalReasoningEngine::with_defaults();
 
         // 添加节点

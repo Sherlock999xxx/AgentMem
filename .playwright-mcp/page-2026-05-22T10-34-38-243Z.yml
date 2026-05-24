@@ -1,0 +1,375 @@
+- generic [ref=e3]:
+  - banner [ref=e6]:
+    - link [ref=e9] [cursor=pointer]:
+      - /url: ./
+      - img [ref=e12]
+    - generic [ref=e14]:
+      - paragraph [ref=e18]: DEVELOPERS
+      - link "PRICING" [ref=e22] [cursor=pointer]:
+        - /url: ./pricing
+        - paragraph [ref=e24]: PRICING
+      - paragraph [ref=e28]: USECASES
+      - paragraph [ref=e34]: RESOURCES
+      - link "DOCS" [ref=e38] [cursor=pointer]:
+        - /url: https://docs.mem0.ai
+        - paragraph [ref=e40]: DOCS
+    - link "home_primary_get-started Home Start For Free" [ref=e43] [cursor=pointer]:
+      - /url: https://app.mem0.ai/login
+      - generic:
+        - paragraph: home_primary_get-started
+      - generic:
+        - paragraph: Home
+      - paragraph [ref=e45]: Start For Free
+  - generic [ref=e51]:
+    - generic [ref=e54]:
+      - generic [ref=e55]:
+        - link "Participate in AgentRush" [ref=e56] [cursor=pointer]:
+          - /url: https://mem0.ai/agentrush
+          - paragraph [ref=e59]: Participate in AgentRush
+        - generic [ref=e62]:
+          - generic [ref=e63]:
+            - heading "AI memory that persists across sessions and agents" [level=2] [ref=e65]
+            - paragraph [ref=e68]: Drop-in memory infrastructure for AI agents and apps. Context that persists. Built for production.
+          - link "home_primary_get-started Home Get Started" [ref=e72] [cursor=pointer]:
+            - /url: https://app.mem0.ai/login
+            - generic:
+              - paragraph: home_primary_get-started
+            - generic:
+              - paragraph: Home
+            - paragraph [ref=e74]: Get Started
+      - generic [ref=e82]:
+        - generic [ref=e83]:
+          - paragraph [ref=e88] [cursor=pointer]: SDK Integration
+          - paragraph [ref=e93] [cursor=pointer]: Agent Harness
+          - paragraph [ref=e98] [cursor=pointer]: Plugin
+        - generic [ref=e102]:
+          - generic [ref=e110]:
+            - paragraph [ref=e115] [cursor=pointer]: Python
+            - paragraph [ref=e120] [cursor=pointer]: node js
+          - generic [ref=e123]:
+            - button "Copy code" [ref=e124] [cursor=pointer]:
+              - img [ref=e125]
+            - generic [ref=e129]:
+              - generic [ref=e130]:
+                - generic [ref=e131]: "1"
+                - generic [ref=e132]: "2"
+                - generic [ref=e133]: "3"
+                - generic [ref=e134]: "4"
+                - generic [ref=e135]: "5"
+                - generic [ref=e136]: "6"
+                - generic [ref=e137]: "7"
+                - generic [ref=e138]: "8"
+                - generic [ref=e139]: "9"
+                - generic [ref=e140]: "10"
+                - generic [ref=e141]: "11"
+                - generic [ref=e142]: "12"
+                - generic [ref=e143]: "13"
+                - generic [ref=e144]: "14"
+                - generic [ref=e145]: "15"
+                - generic [ref=e146]: "16"
+                - generic [ref=e147]: "17"
+                - generic [ref=e148]: "18"
+                - generic [ref=e149]: "19"
+                - generic [ref=e150]: "20"
+                - generic [ref=e151]: "21"
+                - generic [ref=e152]: "22"
+                - generic [ref=e153]: "23"
+              - generic [ref=e154]:
+                - code [ref=e155]: "# Step 1 — Install the SDK (run in your terminal, not in Python):"
+                - code [ref=e156]: "#pip install mem0ai"
+                - code [ref=e157]
+                - code [ref=e158]: "# Step 2 — Save this as mem0_quickstart.py and run with: python mem0_quickstart.py"
+                - code [ref=e159]: import os
+                - code [ref=e160]: from mem0 import MemoryClient
+                - code [ref=e161]
+                - code [ref=e162]: "# Set your API key (get one at https://app.mem0.ai)"
+                - code [ref=e163]: client = MemoryClient(api_key=os.getenv("MEM0_API_KEY", "your-api-key-here"))
+                - code [ref=e164]
+                - code [ref=e165]: "# Add a memory"
+                - code [ref=e166]: messages = [
+                - code [ref=e167]: "{\"role\": \"user\", \"content\": \"I'm a vegetarian and allergic to nuts.\"},"
+                - code [ref=e168]: "{\"role\": \"assistant\", \"content\": \"Got it! I'll remember your dietary preferences.\"},"
+                - code [ref=e169]: "]"
+                - code [ref=e170]: client.add(messages, user_id="user123")
+                - code [ref=e171]
+                - code [ref=e172]: "# Search memories"
+                - code [ref=e173]: results = client.search(
+                - code [ref=e174]: "\"What are my dietary restrictions?\","
+                - code [ref=e175]: user_id="user123",
+                - code [ref=e176]: )
+                - code [ref=e177]: print(results)
+    - generic [ref=e183]:
+      - generic [ref=e186]:
+        - paragraph: 90,000+
+        - paragraph [ref=e187]: 90,000+
+      - paragraph [ref=e189]: Developers build with Mem0
+    - generic [ref=e212]:
+      - generic [ref=e213]:
+        - heading "Built for <developers> who want proof, not promises" [level=3] [ref=e216]:
+          - text: Built for <developers> who want proof,
+          - text: not promises
+        - paragraph [ref=e219]: Mem0 gives agents persistent memory without pipeline changes. Less redundant context, lower token costs, measurably faster responses.
+      - generic [ref=e222]:
+        - generic [ref=e223]:
+          - paragraph [ref=e231]: Mem0
+          - paragraph [ref=e234]:
+            - link "Try Mem0 now" [ref=e235] [cursor=pointer]:
+              - /url: https://app.mem0.ai/login
+        - generic [ref=e236]:
+          - generic [ref=e241] [cursor=pointer]:
+            - paragraph [ref=e243]: Efficiency
+            - img [ref=e247]
+          - paragraph [ref=e256] [cursor=pointer]: Visibility
+          - paragraph [ref=e265] [cursor=pointer]: Control
+        - generic [ref=e269]:
+          - heading "Memory Compression Engine" [level=4] [ref=e271]
+          - paragraph [ref=e273]: Automatically condenses chat history into compact memories that cut tokens and latency while keeping the right context.
+    - generic [ref=e280]:
+      - generic [ref=e281]:
+        - heading "How it works" [level=3] [ref=e283]
+        - generic [ref=e284]:
+          - heading "Add anything. Mem0 learns" [level=3] [ref=e286]
+          - generic [ref=e289]: p
+      - generic [ref=e292]:
+        - generic [ref=e293]:
+          - generic [ref=e301]:
+            - heading "Add" [level=4] [ref=e303]
+            - paragraph [ref=e305]:
+              - text: Input data in seconds with
+              - text: no config or boilerplate
+          - generic [ref=e313]:
+            - heading "Learn" [level=4] [ref=e315]
+            - paragraph [ref=e317]: Mem0 extracts and updates memories
+          - generic [ref=e323]:
+            - heading "Retrieve" [level=4] [ref=e325]
+            - paragraph [ref=e327]: Mem0 retrieves key memories as users interact
+        - img [ref=e332]
+    - generic [ref=e1215]:
+      - generic [ref=e1220]:
+        - heading "AI memory that adapts to your domain" [level=3] [ref=e1222]:
+          - text: AI memory that adapts
+          - text: to your domain
+        - paragraph [ref=e1225]: Mem0 helps AI remember what matters.
+      - generic [ref=e1227]:
+        - generic [ref=e1228]:
+          - paragraph [ref=e1232] [cursor=pointer]: Healthcare
+          - paragraph [ref=e1236] [cursor=pointer]: Education
+          - paragraph [ref=e1240] [cursor=pointer]: E-commerce
+          - paragraph [ref=e1244] [cursor=pointer]: Customer Support
+          - paragraph [ref=e1248] [cursor=pointer]: Sales & CRM
+        - generic [ref=e1249]:
+          - generic [ref=e1250]:
+            - generic [ref=e1252]:
+              - heading "Smart Patient Care Assistant" [level=4] [ref=e1255]
+              - paragraph [ref=e1258]: Remembers patient history, allergies, and treatment preferences across visits therefore providing personalized care that improves with every interaction.
+            - generic [ref=e1260]:
+              - heading "Chronic Condition Companion" [level=4] [ref=e1263]
+              - paragraph [ref=e1266]: Learns what works (and what doesn’t) for the patient over time, offering thoughtful reminders and insights tailored to each patient’s journey.
+            - generic [ref=e1268]:
+              - heading "Therapy Progress Tracker" [level=4] [ref=e1271]
+              - paragraph [ref=e1274]: Builds on previous sessions to deliver consistent, context-aware mental health support. Creates trust through conversations that remember what matters to each patient.
+          - link "home_secondary_healtcare Home Explore Mem0 for Healthcare" [ref=e1276] [cursor=pointer]:
+            - /url: ./usecase/healthcare
+            - generic:
+              - paragraph: home_secondary_healtcare
+            - generic:
+              - paragraph: Home
+            - paragraph [ref=e1278]: Explore Mem0 for Healthcare
+    - generic [ref=e1282]:
+      - paragraph [ref=e1285]: New Algorithm
+      - generic [ref=e1286]:
+        - heading "Benchmarking Mem0" [level=3] [ref=e1288]
+        - paragraph [ref=e1291]: Single-pass hierarchical distillation. Multi-signal retrieval. Benchmarked across LoCoMo, LongMemEval, and BEAM.
+      - link "home_primary_research Home View Research" [ref=e1294] [cursor=pointer]:
+        - /url: ./research
+        - generic:
+          - paragraph: home_primary_research
+        - generic:
+          - paragraph: Home
+        - paragraph [ref=e1296]: View Research
+    - generic [ref=e1307]:
+      - generic [ref=e1308]:
+        - heading "Built for enterprise Designed for control" [level=3] [ref=e1311]:
+          - text: Built for enterprise
+          - text: Designed for control
+        - paragraph [ref=e1314]: Memory at scale is infrastructure. Mem0 gives enterprise teams governance, reliability, and full observability so engineers spend time building, not recovering lost context.
+      - generic [ref=e1315]:
+        - generic [ref=e1316]:
+          - generic [ref=e1323]:
+            - heading "Governance" [level=4] [ref=e1325]
+            - paragraph [ref=e1327]: SOC 2, HIPAA, BYOK, zero-trust. Your data stays yours.
+          - generic [ref=e1334]:
+            - heading "Portable" [level=4] [ref=e1336]
+            - paragraph [ref=e1338]: Kubernetes, private cloud, or air-gapped. Same API everywhere.
+          - generic [ref=e1345]:
+            - heading "Auditable" [level=4] [ref=e1347]
+            - paragraph [ref=e1349]: Every read and write logged. Know what, who, and when.
+        - paragraph [ref=e1353]: We take security and privacy seriously. Mem0 is SOC 2 (Type 1) and HIPAA compliant, ensuring your data is protected with industry-standard safeguards at every step.
+    - generic [ref=e1363]:
+      - generic [ref=e1364]:
+        - paragraph [ref=e1369]: Blogs
+        - heading "Latest from the Mem0 Blog" [level=3] [ref=e1371]
+      - generic [ref=e1373]:
+        - link "Add Persistent Memory to Google Antigravity CLI with Mem0 MCP Add Persistent Memory to Google Antigravity CLI with Mem0 MCP May 21, 2026 · Engineering" [ref=e1377] [cursor=pointer]:
+          - /url: ./blog/add-persistent-memory-to-google-antigravity-cli-with-mem0-mcp
+          - img "Add Persistent Memory to Google Antigravity CLI with Mem0 MCP" [ref=e1380]
+          - generic [ref=e1381]:
+            - heading "Add Persistent Memory to Google Antigravity CLI with Mem0 MCP" [level=4] [ref=e1383]
+            - generic [ref=e1384]:
+              - paragraph [ref=e1386]:
+                - time [ref=e1387]: May 21, 2026
+              - paragraph [ref=e1389]: ·
+              - paragraph [ref=e1391]: Engineering
+        - 'link "Introducing Agent-First: Mem0 Signup without a Human in the Loop May 21, 2026 · Product" [ref=e1395] [cursor=pointer]':
+          - /url: ./blog/introducing-agentmode-mem0-signup-without-a-human-in-the-loop
+          - generic [ref=e1398]:
+            - 'heading "Introducing Agent-First: Mem0 Signup without a Human in the Loop" [level=4] [ref=e1400]'
+            - generic [ref=e1401]:
+              - paragraph [ref=e1403]:
+                - time [ref=e1404]: May 21, 2026
+              - paragraph [ref=e1406]: ·
+              - paragraph [ref=e1408]: Product
+        - link "Memory Layer for Open Source Agent Frameworks May 20, 2026 · Miscellaneous" [ref=e1412] [cursor=pointer]:
+          - /url: ./blog/memory-layer-for-open-source-agent-frameworks
+          - generic [ref=e1415]:
+            - heading "Memory Layer for Open Source Agent Frameworks" [level=4] [ref=e1417]
+            - generic [ref=e1418]:
+              - paragraph [ref=e1420]:
+                - time [ref=e1421]: May 20, 2026
+              - paragraph [ref=e1423]: ·
+              - paragraph [ref=e1425]: Miscellaneous
+  - contentinfo [ref=e1428]:
+    - generic [ref=e1429]:
+      - generic [ref=e1430]:
+        - heading "Give your AI a memory" [level=1] [ref=e1432]:
+          - generic [ref=e1433]: Give your AI a memory
+        - generic [ref=e1434]:
+          - heading "and" [level=1] [ref=e1436]:
+            - generic [ref=e1437]: and
+          - heading "personality" [level=1] [ref=e1439]:
+            - mark [ref=e1440]:
+              - generic [ref=e1441]: personality
+      - generic [ref=e1442]:
+        - link "home_primary_get-started home_primary_get-started Get Started" [ref=e1444] [cursor=pointer]:
+          - /url: https://app.mem0.ai/login
+          - generic:
+            - paragraph: home_primary_get-started
+          - generic:
+            - paragraph: home_primary_get-started
+          - paragraph [ref=e1446]: Get Started
+        - link "home_primary_get-started Home See Pricing" [ref=e1453] [cursor=pointer]:
+          - /url: ./pricing
+          - generic:
+            - paragraph: home_primary_get-started
+          - generic:
+            - paragraph: Home
+          - paragraph [ref=e1455]: See Pricing
+    - generic [ref=e1461]:
+      - generic [ref=e1462]:
+        - generic [ref=e1463]:
+          - link [ref=e1465] [cursor=pointer]:
+            - /url: ./
+            - img [ref=e1468]
+          - generic [ref=e1470]:
+            - paragraph [ref=e1472]: Drop-in memory infrastructure for AI agents and apps. Context that persists. Built for production.
+            - generic [ref=e1473]:
+              - link "Twitter" [ref=e1474] [cursor=pointer]:
+                - /url: https://x.com/mem0ai
+                - img "Twitter" [ref=e1476]
+              - link "Linkedin" [ref=e1477] [cursor=pointer]:
+                - /url: https://www.linkedin.com/company/mem0/
+                - img "Linkedin" [ref=e1479]
+              - link "Github" [ref=e1480] [cursor=pointer]:
+                - /url: https://github.com/mem0ai/mem0
+                - img "Github" [ref=e1482]
+              - link "Discord" [ref=e1483] [cursor=pointer]:
+                - /url: https://discord.com/invite/skNhacB39h
+                - img "Discord" [ref=e1485]
+        - generic [ref=e1486]:
+          - generic [ref=e1487]:
+            - paragraph [ref=e1489]: PRODUCT
+            - generic [ref=e1490]:
+              - paragraph [ref=e1494]:
+                - link "Blog" [ref=e1495] [cursor=pointer]:
+                  - /url: ./blog
+              - paragraph [ref=e1499]:
+                - link "Research" [ref=e1500] [cursor=pointer]:
+                  - /url: ./research
+              - paragraph [ref=e1504]:
+                - link "Docs" [ref=e1505] [cursor=pointer]:
+                  - /url: https://docs.mem0.ai/introduction
+              - paragraph [ref=e1509]:
+                - link "Investors" [ref=e1510] [cursor=pointer]:
+                  - /url: ./investors
+              - paragraph [ref=e1514]:
+                - link "Careers" [ref=e1515] [cursor=pointer]:
+                  - /url: ./careers
+              - paragraph [ref=e1519]:
+                - link "Trust Center" [ref=e1520] [cursor=pointer]:
+                  - /url: https://trust.mem0.ai/
+              - paragraph [ref=e1524]:
+                - link "Privacy Policy" [ref=e1525] [cursor=pointer]:
+                  - /url: ./
+              - paragraph [ref=e1529]:
+                - link "Status" [ref=e1530] [cursor=pointer]:
+                  - /url: https://status.mem0.ai/
+          - generic [ref=e1531]:
+            - paragraph [ref=e1533]: USECASE
+            - generic [ref=e1534]:
+              - paragraph [ref=e1538]:
+                - link "Customer Support" [ref=e1539] [cursor=pointer]:
+                  - /url: ./usecase/customer-support
+              - paragraph [ref=e1543]:
+                - link "Healthcare" [ref=e1544] [cursor=pointer]:
+                  - /url: ./usecase/healthcare
+              - paragraph [ref=e1548]:
+                - link "Education" [ref=e1549] [cursor=pointer]:
+                  - /url: ./usecase/education
+              - paragraph [ref=e1553]:
+                - link "Sales & CRM" [ref=e1554] [cursor=pointer]:
+                  - /url: ./usecase/sales
+              - paragraph [ref=e1558]:
+                - link "E-Commerce" [ref=e1559] [cursor=pointer]:
+                  - /url: ./usecase/e-commerce
+          - generic [ref=e1560]:
+            - paragraph [ref=e1562]: COMPANY
+            - paragraph [ref=e1567]:
+              - link "Contact Us" [ref=e1568] [cursor=pointer]:
+                - /url: mailto:support@mem0.ai
+      - generic [ref=e1570]:
+        - generic [ref=e1571]:
+          - paragraph [ref=e1573]: Summarize with AI
+          - generic [ref=e1574]:
+            - generic [ref=e1576]:
+              - 'button "Navigate to dynamic URL: ChatGPT Logo" [ref=e1578] [cursor=pointer]':
+                - img "ChatGPT Logo" [ref=e1579]
+              - generic:
+                - paragraph: Summarize
+              - generic:
+                - paragraph: home_primary_get-started
+            - generic [ref=e1581]:
+              - 'button "Navigate to dynamic URL: Claude Logo" [ref=e1583] [cursor=pointer]':
+                - img "Claude Logo" [ref=e1584]
+              - generic:
+                - paragraph: Summarize
+              - generic:
+                - paragraph: home_primary_get-started
+            - generic [ref=e1586]:
+              - 'button "Navigate to dynamic URL: Grok Logo" [ref=e1588] [cursor=pointer]':
+                - img "Grok Logo" [ref=e1589]
+              - generic:
+                - paragraph: Summarize
+              - generic:
+                - paragraph: home_primary_get-started
+            - generic [ref=e1591]:
+              - 'button "Navigate to dynamic URL: Perplexity Logo" [ref=e1593] [cursor=pointer]':
+                - img "Perplexity Logo" [ref=e1594]
+              - generic:
+                - paragraph: Summarize
+              - generic:
+                - paragraph: home_primary_get-started
+        - paragraph [ref=e1596]: © 2026 Mem0
+    - generic [ref=e1598]:
+      - img "Base Image"
+      - generic:
+        - img "Reveal Image"

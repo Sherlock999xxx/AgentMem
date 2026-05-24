@@ -2,11 +2,6 @@
 //!
 //! 测试检索模块的各种功能
 
-use super::*;
-use crate::types::AddResult;
-use agent_mem_core::types::MemoryType;
-use agent_mem_traits::MemoryItem;
-
 #[cfg(test)]
 mod retrieval_tests {
     use super::*;
@@ -39,7 +34,8 @@ mod retrieval_tests {
         // 短查询应该有较低的阈值（更宽松）
         assert!(threshold < 0.8);
 
-        let long_query = "this is a very long and detailed query that should have a higher threshold";
+        let long_query =
+            "this is a very long and detailed query that should have a higher threshold";
         let long_threshold = UtilsModule::calculate_dynamic_threshold(long_query, None);
 
         // 长查询应该有较高的阈值（更严格）
@@ -64,7 +60,9 @@ mod retrieval_tests {
 
         let mut filters = SearchFilters::default();
         filters.user_id = Some("test_user".to_string());
-        filters.metadata.insert("key".to_string(), "value".to_string());
+        filters
+            .metadata
+            .insert("key".to_string(), "value".to_string());
 
         assert_eq!(filters.user_id, Some("test_user".to_string()));
         assert_eq!(filters.metadata.get("key"), Some(&"value".to_string()));

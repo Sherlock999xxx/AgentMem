@@ -1027,7 +1027,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_default_hierarchy_manager() {
+    async fn test_default_hierarchy_manager() -> anyhow::Result<()> {
         use agent_mem_traits::{MemoryType as TraitMemoryType, Session};
         use chrono::Utc;
 

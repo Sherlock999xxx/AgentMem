@@ -1,0 +1,17 @@
+{
+  "plan_id": "mig-plan-123",
+  "scope": {
+    "user_id": "user-123",
+    "agent_id": "agent-abc"
+  },
+  "dry_run": true,
+  "source_surface": "legacy_memory",
+  "target_surface": "file_centric",
+  "legacy_memory_count": 42,
+  "projected_resource_count": 15,
+  "projected_category_count": 6,
+  "warnings": [
+    "legacy memories without metadata will be assigned to /legacy/unclassified"
+  ],
+  "created_at": "2026-03-18T10:05:00Z"
+}

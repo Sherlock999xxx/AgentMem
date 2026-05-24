@@ -89,7 +89,7 @@ mod tests {
     }
     
     #[tokio::test]
-    async fn test_enhanced_hybrid_search_exact_id() {
+    async fn test_enhanced_hybrid_search_exact_id() -> anyhow::Result<()> {
         let config = EnhancedHybridConfig::default();
         let engine = EnhancedHybridSearchEngineV2::new(config)
             .with_vector_searcher(Arc::new(MockVectorSearcher))
@@ -166,7 +166,7 @@ mod tests {
     }
     
     #[tokio::test]
-    async fn test_metrics_collection() {
+    async fn test_metrics_collection() -> anyhow::Result<()> {
         let config = EnhancedHybridConfig {
             enable_metrics: true,
             ..Default::default()
@@ -185,7 +185,7 @@ mod tests {
     }
     
     #[tokio::test]
-    async fn test_parallel_search() {
+    async fn test_parallel_search() -> anyhow::Result<()> {
         let config = EnhancedHybridConfig {
             enable_parallel: true,
             ..Default::default()

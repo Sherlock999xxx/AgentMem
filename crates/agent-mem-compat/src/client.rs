@@ -812,6 +812,7 @@ impl Mem0Client {
 
         let limit = filters.as_ref().and_then(|f| f.limit).unwrap_or(1000); // Default large limit for get_all
 
+        // ✅ P1 Optimization: Filter with references first, then clone
         let mut memories: Vec<Memory> = self
             .memories
             .iter()
@@ -1062,43 +1063,16 @@ impl Mem0Client {
         // Step 5: Apply limit
         candidate_memories.truncate(request.limit);
 
-        // Step 6: Convert to search results
-        let results: Vec<MemorySearchResultItem> = candidate_memories
-            .into_iter()
-            .map(|memory| MemorySearchResultItem {
-                id: memory.id.clone(),
-                content: memory.memory.clone(),
-                user_id: memory.user_id.clone(),
-                agent_id: memory.agent_id.clone(),
-                run_id: memory.run_id.clone(),
-                metadata: memory.metadata.clone(),
-                score: memory.score,
-                created_at: memory.created_at,
-                updated_at: memory.updated_at,
-            })
-            .collect();
-
-        let total_results = results.len();
+        // ✅ P1 Optimization: Remove unnecessary intermediate conversion
+        // Directly use candidate_memories instead of converting through MemorySearchResultItem
+        let total_results = candidate_memories.len();
         debug!(
             "Enhanced search found {} results for query: {}",
             total_results, request.query
         );
 
         Ok(MemorySearchResult {
-            memories: results
-                .into_iter()
-                .map(|item| Memory {
-                    id: item.id,
-                    memory: item.content,
-                    user_id: item.user_id,
-                    agent_id: item.agent_id,
-                    run_id: item.run_id,
-                    metadata: item.metadata,
-                    score: item.score,
-                    created_at: item.created_at,
-                    updated_at: item.updated_at,
-                })
-                .collect(),
+            memories: candidate_memories,
             total: total_results,
             metadata: HashMap::new(),
         })

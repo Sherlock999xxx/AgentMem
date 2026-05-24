@@ -1,0 +1,12 @@
+[package]
+name = "working-memory-demo"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+agent-mem-working-memory = { path = "../../crates/agent-mem-working-memory" }
+agent-mem-traits = { path = "../../crates/agent-mem-traits" }
+tokio = { version = "1", features = ["full"] }
+chrono = { version = "0.4", features = ["serde"] }
+serde_json = "1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }

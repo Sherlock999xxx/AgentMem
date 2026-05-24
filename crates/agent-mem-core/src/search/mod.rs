@@ -37,6 +37,11 @@ pub mod query_optimizer;
 pub mod ranker;
 pub mod reranker;
 pub mod vector_search;
+/// Week 11-13: Enhanced search with category/resource awareness
+pub mod category_recall;
+pub mod resource_recall;
+pub mod sufficiency_check;
+pub mod enhanced_v4;
 
 pub use adaptive::{
     AdaptiveSearchOptimizer, QueryFeatures, SearchReranker, SearchWeights, WeightPredictor,
@@ -73,6 +78,23 @@ pub use ranker::{RRFRanker, SearchResultRanker};
 pub use vector_search::{
     build_hybrid_vector_search_sql, build_vector_search_sql, VectorDistanceOperator,
     VectorSearchEngine,
+};
+// Week 11-13: Enhanced search exports
+pub use category_recall::{
+    CategoryFilter, CategoryRecallConfig, CategoryRecallEngine, CategoryRecallResult,
+    CategorySearchResult, CategoryScope, InMemoryCategoryRecall,
+};
+pub use resource_recall::{
+    ResourceContext, ResourceRecallConfig, ResourceRecallEngine, ResourceRecallResult,
+    ResourceType, InMemoryResourceRecall,
+};
+pub use sufficiency_check::{
+    SufficiencyAction, SufficiencyCheckResult, SufficiencyCheckType, SufficiencyChecker,
+    SufficiencyConfig, SufficiencyContext, RuleBasedSufficiencyChecker,
+};
+pub use enhanced_v4::{
+    EnhancedQueryType, EnhancedSearchV4, EnhancedSearchV4Config, EnhancedSearchV4Result,
+    EnhancedSearchV4Stats,
 };
 
 use agent_mem_traits::{

@@ -19,7 +19,6 @@ async fn create_test_memory() -> Memory {
 /// 测试类型转换方法
 #[cfg(test)]
 mod type_conversion_tests {
-    
 
     #[test]
     fn test_structured_fact_to_memory_item() {
@@ -127,7 +126,6 @@ mod intelligent_add_tests {
 /// 测试混合搜索流水线
 #[cfg(test)]
 mod hybrid_search_tests {
-    
 
     #[tokio::test]
     #[cfg(feature = "postgres")]
@@ -172,7 +170,6 @@ mod hybrid_search_tests {
 /// 测试智能决策
 #[cfg(test)]
 mod intelligent_decision_tests {
-    
 
     #[tokio::test]
     async fn test_decision_add() {
@@ -300,9 +297,7 @@ mod integration_tests {
                 assert!(!add_result.results.is_empty());
             }
             Err(e) => {
-                println!(
-                    "⚠️ infer=true 测试失败（可能是因为 Intelligence 组件未初始化）: {e:?}"
-                );
+                println!("⚠️ infer=true 测试失败（可能是因为 Intelligence 组件未初始化）: {e:?}");
                 // 如果 Intelligence 组件未初始化，应该降级到简单模式
                 // 这不是错误，只是一个警告
             }

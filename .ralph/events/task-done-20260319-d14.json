@@ -1,0 +1,1 @@
+{"event": "task.done", "message": "Phase D1.4: JavaScript file-centric client methods complete - 18 methods added to client.ts", "timestamp": "2026-03-19T00:00:00Z", "task": "D1.4", "phase": "D1", "details": {"sdk": "javascript", "methods_count": 18, "file": "sdks/javascript/src/client.ts", "lines": "365-539"}}

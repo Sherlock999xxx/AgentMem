@@ -290,13 +290,7 @@ async fn test_performance_baseline() {
 
     // 创建100个候选结果
     let candidates: Vec<_> = (0..100)
-        .map(|i| {
-            create_test_result(
-                &format!("id_{i}"),
-                0.5 + (i as f32 / 200.0),
-                "test content",
-            )
-        })
+        .map(|i| create_test_result(&format!("id_{i}"), 0.5 + (i as f32 / 200.0), "test content"))
         .collect();
 
     let query_vector = vec![0.5; 1536];

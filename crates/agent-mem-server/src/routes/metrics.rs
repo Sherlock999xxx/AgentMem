@@ -1,6 +1,6 @@
 //! Metrics and monitoring routes
 
-use crate::routes::memory::{MemoryManager, get_search_stats};
+use crate::routes::memory::{get_search_stats, MemoryManager};
 use crate::{error::ServerResult, models::MetricsResponse};
 use axum::{
     body::Body,
@@ -30,7 +30,7 @@ fn get_uptime_seconds() -> f64 {
 }
 
 /// 获取内存使用量（字节）
-/// 
+///
 /// 🆕 Phase 4.2: 监控增强 - 实现真实的系统指标收集
 fn get_memory_usage_bytes() -> f64 {
     // 使用标准库获取当前进程的内存使用
@@ -41,7 +41,7 @@ fn get_memory_usage_bytes() -> f64 {
 }
 
 /// 获取CPU使用率（百分比）
-/// 
+///
 /// 🆕 Phase 4.2: 监控增强 - 实现真实的系统指标收集
 fn get_cpu_usage_percent() -> f64 {
     // 使用标准库获取CPU使用率
@@ -96,7 +96,10 @@ pub async fn get_metrics(
     // 内存使用（简化实现，实际可以使用sysinfo crate）
     let memory_usage = get_memory_usage_bytes();
     metrics.insert("memory_usage_bytes".to_string(), memory_usage);
-    metrics.insert("memory_usage_mb".to_string(), memory_usage / (1024.0 * 1024.0));
+    metrics.insert(
+        "memory_usage_mb".to_string(),
+        memory_usage / (1024.0 * 1024.0),
+    );
 
     // CPU使用率（简化实现，实际可以使用sysinfo crate）
     let cpu_usage = get_cpu_usage_percent();
@@ -106,13 +109,34 @@ pub async fn get_metrics(
     // 使用现有的搜索统计API获取统计信息（通过内部函数）
     let search_stats = get_search_stats();
     let search_stats_read = search_stats.read().await;
-    metrics.insert("search_total_searches".to_string(), search_stats_read.get_total_searches() as f64);
-    metrics.insert("search_cache_hits".to_string(), search_stats_read.get_cache_hits() as f64);
-    metrics.insert("search_cache_misses".to_string(), search_stats_read.get_cache_misses() as f64);
-    metrics.insert("search_cache_hit_rate".to_string(), search_stats_read.cache_hit_rate());
-    metrics.insert("search_avg_latency_ms".to_string(), search_stats_read.avg_latency_ms());
-    metrics.insert("search_exact_queries".to_string(), search_stats_read.get_exact_queries() as f64);
-    metrics.insert("search_vector_searches".to_string(), search_stats_read.get_vector_searches() as f64);
+    metrics.insert(
+        "search_total_searches".to_string(),
+        search_stats_read.get_total_searches() as f64,
+    );
+    metrics.insert(
+        "search_cache_hits".to_string(),
+        search_stats_read.get_cache_hits() as f64,
+    );
+    metrics.insert(
+        "search_cache_misses".to_string(),
+        search_stats_read.get_cache_misses() as f64,
+    );
+    metrics.insert(
+        "search_cache_hit_rate".to_string(),
+        search_stats_read.cache_hit_rate(),
+    );
+    metrics.insert(
+        "search_avg_latency_ms".to_string(),
+        search_stats_read.avg_latency_ms(),
+    );
+    metrics.insert(
+        "search_exact_queries".to_string(),
+        search_stats_read.get_exact_queries() as f64,
+    );
+    metrics.insert(
+        "search_vector_searches".to_string(),
+        search_stats_read.get_vector_searches() as f64,
+    );
 
     let response = MetricsResponse {
         timestamp: Utc::now(),
@@ -160,7 +184,9 @@ pub async fn get_prometheus_metrics(
                         .status(500)
                         .body(Body::from("Internal server error"))
                         .unwrap_or_else(|_| {
-                            tracing::error!("Critical: Failed to build even minimal error response");
+                            tracing::error!(
+                                "Critical: Failed to build even minimal error response"
+                            );
                             // This should never happen, but if it does, return a basic response
                             // Using a simple string as body is always safe
                             Response::new(Body::from("Internal server error"))

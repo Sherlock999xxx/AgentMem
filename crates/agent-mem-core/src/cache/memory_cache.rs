@@ -304,7 +304,7 @@ mod tests {
     use super::*;
 
     #[tokio::test]
-    async fn test_memory_cache_set_get() {
+    async fn test_memory_cache_set_get() -> anyhow::Result<()> {
         let cache = MemoryCache::new(MemoryCacheConfig::default());
 
         cache
@@ -356,3 +356,4 @@ mod tests {
         assert_eq!(stats.total_sets, 1);
     }
 }
+

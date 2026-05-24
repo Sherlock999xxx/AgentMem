@@ -245,9 +245,10 @@ impl Mem5Client {
         self.telemetry.track_operation_start("add_memory").await;
 
         // Acquire semaphore permit for concurrency control
-        let _permit = self.semaphore.acquire().await.map_err(|e| {
-            ClientError::InternalError(format!("Failed to acquire semaphore: {e}"))
-        })?;
+        let _permit =
+            self.semaphore.acquire().await.map_err(|e| {
+                ClientError::InternalError(format!("Failed to acquire semaphore: {e}"))
+            })?;
 
         // Create enhanced request
         let request = EnhancedAddRequest {
@@ -262,9 +263,9 @@ impl Mem5Client {
         };
 
         // Validate request
-        request.validate().map_err(|e| {
-            ClientError::ValidationError(format!("Request validation failed: {e}"))
-        })?;
+        request
+            .validate()
+            .map_err(|e| ClientError::ValidationError(format!("Request validation failed: {e}")))?;
 
         // Execute with error recovery
         let result = self
@@ -384,9 +385,10 @@ impl Mem5Client {
             .track_operation_start("search_memories")
             .await;
 
-        let _permit = self.semaphore.acquire().await.map_err(|e| {
-            ClientError::InternalError(format!("Failed to acquire semaphore: {e}"))
-        })?;
+        let _permit =
+            self.semaphore.acquire().await.map_err(|e| {
+                ClientError::InternalError(format!("Failed to acquire semaphore: {e}"))
+            })?;
 
         // Create enhanced search request
         let request = EnhancedSearchRequest {

@@ -305,10 +305,8 @@ impl KvCacheManager {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
 
-    #[tokio::test]
-    async fn test_kv_cache_basic() {
+    async fn test_kv_cache_basic() -> anyhow::Result<()> {
         let cache = KvCacheManager::with_defaults();
         
         let prompt_hash = "test_prompt_123";
@@ -333,8 +331,7 @@ mod tests {
         assert_eq!(injected_values, values);
     }
 
-    #[tokio::test]
-    async fn test_kv_cache_ttl() {
+    async fn test_kv_cache_ttl() -> anyhow::Result<()> {
         let mut config = KvCacheConfig::default();
         config.ttl_seconds = 1; // 1 second TTL
         let cache = KvCacheManager::new(config);
@@ -355,8 +352,7 @@ mod tests {
         assert!(cache.get(prompt_hash).await.is_none());
     }
 
-    #[tokio::test]
-    async fn test_kv_cache_stats() {
+    async fn test_kv_cache_stats() -> anyhow::Result<()> {
         let cache = KvCacheManager::with_defaults();
         
         let prompt_hash = "test_stats";

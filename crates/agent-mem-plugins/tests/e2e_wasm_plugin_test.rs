@@ -16,9 +16,7 @@ async fn test_load_hello_plugin_wasm() -> Result<(), Box<dyn std::error::Error>>
     plugin_path.push("target/wasm32-wasip1/release/hello_plugin.wasm");
 
     if !plugin_path.exists() {
-        println!(
-            "⚠️  Skipping test: WASM plugin not found at {plugin_path:?}"
-        );
+        println!("⚠️  Skipping test: WASM plugin not found at {plugin_path:?}");
         println!("   Run ./build_plugins.sh to build WASM plugins");
         return Ok(());
     }
@@ -75,9 +73,7 @@ async fn test_memory_processor_plugin_wasm() -> Result<(), Box<dyn std::error::E
     plugin_path.push("target/wasm32-wasip1/release/memory_processor_plugin.wasm");
 
     if !plugin_path.exists() {
-        println!(
-            "⚠️  Skipping test: WASM plugin not found at {plugin_path:?}"
-        );
+        println!("⚠️  Skipping test: WASM plugin not found at {plugin_path:?}");
         return Ok(());
     }
 
@@ -144,9 +140,7 @@ async fn test_code_analyzer_plugin_wasm() -> Result<(), Box<dyn std::error::Erro
     plugin_path.push("target/wasm32-wasip1/release/code_analyzer_plugin.wasm");
 
     if !plugin_path.exists() {
-        println!(
-            "⚠️  Skipping test: WASM plugin not found at {plugin_path:?}"
-        );
+        println!("⚠️  Skipping test: WASM plugin not found at {plugin_path:?}");
         return Ok(());
     }
 

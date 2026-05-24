@@ -1161,7 +1161,7 @@ mod tests {
     use crate::types::{Content, MemoryBuilder, QueryBuilder};
 
     #[tokio::test]
-    async fn test_content_preprocess_stage() {
+    async fn test_content_preprocess_stage() -> anyhow::Result<()> {
         let stage = ContentPreprocessStage {
             min_length: 5,
             max_length: 1000,
@@ -1177,7 +1177,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_content_too_short() {
+    async fn test_content_too_short() -> anyhow::Result<()> {
         let stage = ContentPreprocessStage {
             min_length: 100,
             max_length: 1000,
@@ -1192,7 +1192,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_entity_extraction_stage() {
+    async fn test_entity_extraction_stage() -> anyhow::Result<()> {
         let stage = EntityExtractionStage {
             extract_persons: true,
             extract_orgs: true,
@@ -1222,7 +1222,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_entity_extraction_enhanced() {
+    async fn test_entity_extraction_enhanced() -> anyhow::Result<()> {
         let stage = EntityExtractionStage {
             extract_persons: false,
             extract_orgs: false,
@@ -1278,7 +1278,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_query_understanding_stage() {
+    async fn test_query_understanding_stage() -> anyhow::Result<()> {
         let stage = QueryUnderstandingStage;
 
         let query = QueryBuilder::new().text("Test query").limit(10).build();
@@ -1374,7 +1374,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_memory_compression_stage() {
+    async fn test_memory_compression_stage() -> anyhow::Result<()> {
         let stage = MemoryCompressionStage {
             enable_content_compression: true,
             enable_attribute_compression: true,
@@ -1445,7 +1445,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_importance_reassessment_stage() {
+    async fn test_importance_reassessment_stage() -> anyhow::Result<()> {
         let stage = ImportanceReassessmentStage {
             enable_access_freq: true,
             enable_temporal_decay: true,
@@ -1514,7 +1514,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_query_expansion_stage() {
+    async fn test_query_expansion_stage() -> anyhow::Result<()> {
         let stage = QueryExpansionStage {
             enable_synonym: true,
             enable_relation: true,

@@ -1,0 +1,54 @@
+[package]
+name = "agent-mem-memvid"
+version = "0.1.0"
+edition = "2021"
+description = "MemVid storage backend for AgentMem 2.0"
+license = "Apache-2.0"
+repository = "https://github.com/agentmem/agentmem"
+
+[dependencies]
+# Core traits
+agent-mem-traits = { path = "../agent-mem-traits" }
+
+# MemVid integration
+memvid-core = "2.0"
+
+# Async runtime
+async-trait = "0.1"
+tokio = { version = "1.40", features = ["full"] }
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# Error handling
+thiserror = "1.0"
+anyhow = "1.0"
+
+# Logging
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+# Utilities
+chrono = { version = "0.4", features = ["serde"] }
+uuid = { version = "1.0", features = ["v4", "serde"] }
+
+# Caching
+lru = "0.12"
+
+# HTTP client for embedding APIs
+reqwest = { version = "0.12", features = ["json"] }
+
+[features]
+default = ["lex", "vec"]
+lex = ["memvid-core/lex"]
+vec = ["memvid-core/vec"]
+temporal_track = ["memvid-core/temporal_track"]
+parallel_segments = ["memvid-core/parallel_segments"]
+encryption = ["memvid-core/encryption"]
+full = ["lex", "vec", "temporal_track", "parallel_segments", "encryption"]
+
+[dev-dependencies]
+tokio-test = "0.4"
+criterion = "0.5"
+rand = "0.8"

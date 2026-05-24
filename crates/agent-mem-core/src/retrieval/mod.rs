@@ -17,7 +17,7 @@ pub mod topic_extractor;
 mod tests;
 
 // Re-export main types
-pub use agent_registry::AgentRegistry;
+pub use agent_registry::{AgentRegistry, RouteBy};
 pub use router::{
     RetrievalRouter, RetrievalRouterConfig, RetrievalStrategy, RouteDecision, RoutingResult,
 };
@@ -52,6 +52,18 @@ pub struct RetrievalRequest {
     pub enable_topic_extraction: bool,
     /// 是否启用上下文合成
     pub enable_context_synthesis: bool,
+    /// Resource ID for resource-first retrieval (optional)
+    ///
+    /// When present, restricts retrieval to memories extracted from this specific resource.
+    /// Enables resource-centric retrieval path: mount -> extract -> retrieve.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub resource_id: Option<String>,
+    /// Category path for category-aware retrieval (optional)
+    ///
+    /// When present, restricts retrieval to memories within this category hierarchy.
+    /// Format: "/category/subcategory" (e.g., "/preferences/communication/style")
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub category_path: Option<String>,
 }
 
 /// 检索响应
@@ -364,6 +376,8 @@ impl ActiveRetrievalSystem {
                     priority: 5, // Normal priority
                     timeout: Some(std::time::Duration::from_secs(5)),
                     retry_count: 0,
+                    resource_id: None,
+                    category_path: None,
                 };
 
                 // 调用真实 Agent

@@ -390,8 +390,7 @@ impl Default for MemoryStats {
 }
 
 /// 记忆可视化结果
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[derive(Default)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct MemoryVisualization {
     /// 总记忆数
     pub total_count: usize,
@@ -408,7 +407,6 @@ pub struct MemoryVisualization {
     /// 统计信息
     pub stats: MemoryStats,
 }
-
 
 /// 备份选项
 #[derive(Debug, Clone)]

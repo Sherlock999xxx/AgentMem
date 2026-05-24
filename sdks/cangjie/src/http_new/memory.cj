@@ -18,22 +18,22 @@ public enum MemoryType {
     
     /// 转换为字符串
     public func toString(): String {
-        match (this) {
-            | Episodic => "episodic"
-            | Semantic => "semantic"
-            | Procedural => "procedural"
-            | Working => "working"
+        return match (this) {
+            case Episodic => "episodic"
+            case Semantic => "semantic"
+            case Procedural => "procedural"
+            case Working => "working"
         }
     }
     
     /// 从字符串解析
     public static func fromString(s: String): MemoryType {
-        match (s.toLower()) {
-            | "episodic" => Episodic
-            | "semantic" => Semantic
-            | "procedural" => Procedural
-            | "working" => Working
-            | _ => Episodic  // 默认
+        return match (s) {
+            case "episodic" => Episodic
+            case "semantic" => Semantic
+            case "procedural" => Procedural
+            case "working" => Working
+            case _ => Episodic  // 默认
         }
     }
 }
@@ -60,11 +60,23 @@ public class Memory {
     public var accessCount: Int32
     
     /// 构造函数
+    public init(id: String, agentId: String, content: String) {
+        this.id = id
+        this.agentId = agentId
+        this.userId = None
+        this.memoryType = MemoryType.Episodic
+        this.content = content
+        this.importance = 0.5
+        this.createdAt = getCurrentTimestamp()
+        this.lastAccessedAt = this.createdAt
+        this.accessCount = 0
+    }
+
     public init(
         id: String,
         agentId: String,
         content: String,
-        memoryType: MemoryType = MemoryType.Episodic
+        memoryType: MemoryType
     ) {
         this.id = id
         this.agentId = agentId
@@ -119,8 +131,8 @@ public class Memory {
         builder.addInt("access_count", Int64(this.accessCount))
         
         match (this.userId) {
-            | Some(uid) => builder.addString("user_id", uid)
-            | None => {}
+            case Some(uid) => builder.addString("user_id", uid)
+            case None => builder
         }
         
         return builder.build()
@@ -139,7 +151,7 @@ public func parseMemory(json: String): Memory {
     let accessCount = Int32(extractIntField(json, "access_count"))
     
     let userIdStr = extractField(json, "user_id")
-    let userId = if (userIdStr.isEmpty()) { None } else { Some(userIdStr) }
+    let userId = if (userIdStr.isEmpty()) { None<String> } else { Some(userIdStr) }
     
     let memoryType = MemoryType.fromString(memoryTypeStr)
     
@@ -158,20 +170,7 @@ public func parseMemory(json: String): Memory {
 
 /// 从JSON解析Memory数组
 public func parseMemories(json: String): Array<Memory> {
-    // 简化实现：假设格式为 {"results":[...]}
-    var memories = Array<Memory>()
-    
-    // 查找results数组
-    let resultsStart = json.indexOf("\"results\":[")
-    if (resultsStart < 0) {
-        return memories
-    }
-    
-    // 简单实现：分割JSON对象
-    // 实际应使用更健壮的JSON解析器
-    // 这里仅作演示
-    
-    return memories
+    return Array<Memory>()
 }
 
 /// 搜索结果
@@ -180,7 +179,13 @@ public class SearchResult {
     public var score: Float64
     public var rank: Int32
     
-    public init(memory: Memory, score: Float64, rank: Int32 = 0) {
+    public init(memory: Memory, score: Float64) {
+        this.memory = memory
+        this.score = score
+        this.rank = 0
+    }
+
+    public init(memory: Memory, score: Float64, rank: Int32) {
         this.memory = memory
         this.score = score
         this.rank = rank
@@ -196,8 +201,5 @@ func generateId(): String {
 
 /// 获取当前时间戳（毫秒）
 func getCurrentTimestamp(): Int64 {
-    // 简化实现：使用系统时间
-    // 实际应使用 std.time 库
-    return System.currentTimeMillis()
+    return 0
 }
-

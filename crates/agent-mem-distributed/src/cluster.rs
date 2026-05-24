@@ -366,6 +366,7 @@ impl ClusterManager {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use tokio::time::sleep;
 
     #[tokio::test]
     async fn test_cluster_manager_creation() {

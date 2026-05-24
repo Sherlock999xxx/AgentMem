@@ -1,13 +1,7 @@
 //! API版本兼容性中间件
 //! Task 1.5: 记录使用旧版本路由的请求，便于监控迁移进度
 
-use axum::{
-    body::Body,
-    extract::Request,
-    http::{HeaderMap, StatusCode},
-    middleware::Next,
-    response::Response,
-};
+use axum::{extract::Request, http::StatusCode, middleware::Next, response::Response};
 use tracing::warn;
 
 /// API版本兼容性中间件
@@ -48,7 +42,10 @@ pub async fn api_version_compatibility_middleware(
         if let Ok(header_value) = recommended_path.parse() {
             headers.insert("X-API-Recommended", header_value);
         } else {
-            warn!("Failed to parse recommended path as header value: {}", recommended_path);
+            warn!(
+                "Failed to parse recommended path as header value: {}",
+                recommended_path
+            );
         }
     }
 

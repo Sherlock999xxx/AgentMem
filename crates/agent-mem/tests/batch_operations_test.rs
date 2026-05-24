@@ -31,7 +31,10 @@ async fn test_add_batch_basic() {
         ..Default::default()
     };
 
-    let results = mem.add_batch(contents, options).await.expect("批量添加失败");
+    let results = mem
+        .add_batch(contents, options)
+        .await
+        .expect("批量添加失败");
 
     assert_eq!(results.len(), 3, "应该成功添加 3 条记忆");
 
@@ -77,7 +80,10 @@ async fn test_add_batch_performance() {
         ..Default::default()
     };
 
-    let results = mem.add_batch(contents, options).await.expect("批量添加失败");
+    let results = mem
+        .add_batch(contents, options)
+        .await
+        .expect("批量添加失败");
     let duration = start.elapsed();
 
     assert_eq!(results.len(), 10);
@@ -100,7 +106,10 @@ async fn test_add_batch_with_infer_false() {
         ..Default::default()
     };
 
-    let results = mem.add_batch(contents, options).await.expect("批量添加失败");
+    let results = mem
+        .add_batch(contents, options)
+        .await
+        .expect("批量添加失败");
 
     assert_eq!(results.len(), 2);
     println!("✅ 批量添加（简单模式）测试通过");

@@ -6,9 +6,7 @@ use std::sync::Arc;
 use tracing::{info, warn};
 
 use agent_mem_core::operations::MemoryOperations;
-use agent_mem_core::storage::libsql::{
-    LibSqlMemoryOperations, LibSqlMemoryRepository,
-};
+use agent_mem_core::storage::libsql::{LibSqlMemoryOperations, LibSqlMemoryRepository};
 use agent_mem_embeddings::EmbeddingFactory;
 use agent_mem_intelligence::clustering::{dbscan::DBSCANClusterer, kmeans::KMeansClusterer};
 use agent_mem_intelligence::MemoryReasoner;
@@ -50,19 +48,19 @@ impl InitializationModule {
         let llm = match llm_provider.clone() {
             Some(llm) => llm,
             None => {
-            warn!("LLM Provider 未配置，Intelligence 组件将不可用");
-            return Ok(IntelligenceComponents {
-                fact_extractor: None,
-                advanced_fact_extractor: None,
-                batch_entity_extractor: None,
-                batch_importance_evaluator: None,
-                decision_engine: None,
-                enhanced_decision_engine: None,
-                importance_evaluator: None,
-                conflict_resolver: None,
-                llm_provider: None,
-            });
-        }
+                warn!("LLM Provider 未配置，Intelligence 组件将不可用");
+                return Ok(IntelligenceComponents {
+                    fact_extractor: None,
+                    advanced_fact_extractor: None,
+                    batch_entity_extractor: None,
+                    batch_importance_evaluator: None,
+                    decision_engine: None,
+                    enhanced_decision_engine: None,
+                    importance_evaluator: None,
+                    conflict_resolver: None,
+                    llm_provider: None,
+                });
+            }
         };
 
         // 创建各个 Intelligence 组件
@@ -407,24 +405,47 @@ impl InitializationModule {
                         Ok(embedder) => {
                             let dim = embedder.dimension();
                             info!("成功创建 FastEmbed Embedder ({}, {}维)", model, dim);
-                            
+
                             // P1 优化：如果启用嵌入队列，包装为队列化嵌入器
                             let embedder = if config.enable_embedding_queue.unwrap_or(true) {
                                 use agent_mem_embeddings::providers::QueuedEmbedder;
-                               let queued = QueuedEmbedder::new(
-                                   embedder,
-                                   config.embedding_batch_size.unwrap_or(64),
-                                   config.embedding_batch_interval_ms.unwrap_or(20),
-                                   true,
-                               );
-                               info!("✅ 嵌入队列已启用（批处理大小: {}, 间隔: {}ms）",
-                                   config.embedding_batch_size.unwrap_or(64),
-                                   config.embedding_batch_interval_ms.unwrap_or(20));
+                                let queued = QueuedEmbedder::new(
+                                    embedder,
+                                    config.embedding_batch_size.unwrap_or(64),
+                                    config.embedding_batch_interval_ms.unwrap_or(20),
+                                    true,
+                                );
+                                info!(
+                                    "✅ 嵌入队列已启用（批处理大小: {}, 间隔: {}ms）",
+                                    config.embedding_batch_size.unwrap_or(64),
+                                    config.embedding_batch_interval_ms.unwrap_or(20)
+                                );
                                 Arc::new(queued) as Arc<dyn Embedder + Send + Sync>
                             } else {
                                 embedder
                             };
-                            
+
+                            // P0 优化：如果启用嵌入缓存，包装为 CachedEmbedder（预期 2-5x 性能提升）
+                            let embedder = if config.enable_embedder_cache.unwrap_or(true) {
+                                use agent_mem_embeddings::cached_embedder::CachedEmbedder;
+                                use agent_mem_intelligence::caching::CacheConfig;
+                                let cache_size = config.embedder_cache_size.unwrap_or(1000);
+                                let cache_ttl = config.embedder_cache_ttl_secs.unwrap_or(3600);
+                                let cache_config = CacheConfig {
+                                    size: cache_size,
+                                    ttl_secs: cache_ttl,
+                                    enabled: true,
+                                };
+                                info!(
+                                    "✅ 嵌入缓存已启用（缓存大小: {}, TTL: {}秒）",
+                                    cache_size, cache_ttl
+                                );
+                                let cached = CachedEmbedder::new(embedder, cache_config);
+                                Arc::new(cached) as Arc<dyn Embedder + Send + Sync>
+                            } else {
+                                embedder
+                            };
+
                             Ok(Some(embedder))
                         }
                         Err(e) => {
@@ -454,20 +475,43 @@ impl InitializationModule {
                         // P1 优化：如果启用嵌入队列，包装为队列化嵌入器
                         let embedder = if config.enable_embedding_queue.unwrap_or(true) {
                             use agent_mem_embeddings::providers::QueuedEmbedder;
-                               let queued = QueuedEmbedder::new(
-                                   embedder,
-                                   config.embedding_batch_size.unwrap_or(64),
-                                   config.embedding_batch_interval_ms.unwrap_or(20),
-                                   true,
-                               );
-                               info!("✅ 嵌入队列已启用（批处理大小: {}, 间隔: {}ms）",
-                                   config.embedding_batch_size.unwrap_or(64),
-                                   config.embedding_batch_interval_ms.unwrap_or(20));
+                            let queued = QueuedEmbedder::new(
+                                embedder,
+                                config.embedding_batch_size.unwrap_or(64),
+                                config.embedding_batch_interval_ms.unwrap_or(20),
+                                true,
+                            );
+                            info!(
+                                "✅ 嵌入队列已启用（批处理大小: {}, 间隔: {}ms）",
+                                config.embedding_batch_size.unwrap_or(64),
+                                config.embedding_batch_interval_ms.unwrap_or(20)
+                            );
                             Arc::new(queued) as Arc<dyn Embedder + Send + Sync>
                         } else {
                             embedder
                         };
-                        
+
+                        // P0 优化：如果启用嵌入缓存，包装为 CachedEmbedder（预期 2-5x 性能提升）
+                        let embedder = if config.enable_embedder_cache.unwrap_or(true) {
+                            use agent_mem_embeddings::cached_embedder::CachedEmbedder;
+                            use agent_mem_intelligence::caching::CacheConfig;
+                            let cache_size = config.embedder_cache_size.unwrap_or(1000);
+                            let cache_ttl = config.embedder_cache_ttl_secs.unwrap_or(3600);
+                            let cache_config = CacheConfig {
+                                size: cache_size,
+                                ttl_secs: cache_ttl,
+                                enabled: true,
+                            };
+                            info!(
+                                "✅ 嵌入缓存已启用（缓存大小: {}, TTL: {}秒）",
+                                cache_size, cache_ttl
+                            );
+                            let cached = CachedEmbedder::new(embedder, cache_config);
+                            Arc::new(cached) as Arc<dyn Embedder + Send + Sync>
+                        } else {
+                            embedder
+                        };
+
                         info!("成功创建 OpenAI Embedder (text-embedding-ada-002, 1536维)");
                         Ok(Some(embedder))
                     }
@@ -713,7 +757,28 @@ impl InitializationModule {
                         "✅ 向量存储创建成功（{} 模式，维度: {}）",
                         provider, vector_dimension
                     );
-                    Ok(Some(store))
+
+                    // Phase 2.5 优化：用 CachedVectorStore 包装启用向量缓存
+                    if config.enable_vector_cache.unwrap_or(false) {
+                        use agent_mem_storage::cache::{CacheConfig, CachedVectorStore};
+                        let cache_config = CacheConfig {
+                            max_entries: config.vector_cache_size.unwrap_or(10000),
+                            default_ttl_seconds: config.vector_cache_ttl_seconds,
+                            enable_lru: true,
+                            ..Default::default()
+                        };
+
+                        info!(
+                            "Phase 2.5: 启用向量缓存（max_entries={}, ttl={:?})",
+                            cache_config.max_entries, cache_config.default_ttl_seconds
+                        );
+
+                        let cached_store = CachedVectorStore::new(store, cache_config);
+                        Ok(Some(Arc::new(cached_store)
+                            as Arc<dyn agent_mem_traits::VectorStore + Send + Sync>))
+                    } else {
+                        Ok(Some(store))
+                    }
                 }
                 Err(e) => {
                     warn!("创建向量存储失败: {}，降级到内存存储", e);
@@ -725,8 +790,29 @@ impl InitializationModule {
                     match MemoryVectorStore::new(fallback_config).await {
                         Ok(fallback_store) => {
                             info!("✅ 降级到内存向量存储成功（维度: {}）", vector_dimension);
-                            Ok(Some(Arc::new(fallback_store)
-                                as Arc<dyn agent_mem_traits::VectorStore + Send + Sync>))
+
+                            // Phase 2.5 优化：即使降级也启用缓存
+                            if config.enable_vector_cache.unwrap_or(false) {
+                                use agent_mem_storage::cache::{CacheConfig, CachedVectorStore};
+                                let cache_config = CacheConfig {
+                                    max_entries: config.vector_cache_size.unwrap_or(10000),
+                                    default_ttl_seconds: config.vector_cache_ttl_seconds,
+                                    enable_lru: true,
+                                    ..Default::default()
+                                };
+
+                                info!("Phase 2.5: 启用向量缓存（降级模式）");
+                                let cached_store = CachedVectorStore::new(
+                                    Arc::new(fallback_store)
+                                        as Arc<dyn agent_mem_traits::VectorStore + Send + Sync>,
+                                    cache_config,
+                                );
+                                Ok(Some(Arc::new(cached_store)
+                                    as Arc<dyn agent_mem_traits::VectorStore + Send + Sync>))
+                            } else {
+                                Ok(Some(Arc::new(fallback_store)
+                                    as Arc<dyn agent_mem_traits::VectorStore + Send + Sync>))
+                            }
                         }
                         Err(e2) => {
                             warn!("创建内存向量存储也失败: {}, 向量存储功能将不可用", e2);
@@ -749,9 +835,29 @@ impl InitializationModule {
                         "✅ 向量存储创建成功（Memory 模式，维度: {}）",
                         vector_dimension
                     );
-                    Ok(Some(
-                        Arc::new(store) as Arc<dyn agent_mem_traits::VectorStore + Send + Sync>
-                    ))
+
+                    // Phase 2.5 优化：启用向量缓存
+                    if config.enable_vector_cache.unwrap_or(false) {
+                        use agent_mem_storage::cache::{CacheConfig, CachedVectorStore};
+                        let cache_config = CacheConfig {
+                            max_entries: config.vector_cache_size.unwrap_or(10000),
+                            default_ttl_seconds: config.vector_cache_ttl_seconds,
+                            enable_lru: true,
+                            ..Default::default()
+                        };
+
+                        info!("Phase 2.5: 启用向量缓存（Memory 模式）");
+                        let cached_store = CachedVectorStore::new(
+                            Arc::new(store) as Arc<dyn agent_mem_traits::VectorStore + Send + Sync>,
+                            cache_config,
+                        );
+                        Ok(Some(Arc::new(cached_store)
+                            as Arc<dyn agent_mem_traits::VectorStore + Send + Sync>))
+                    } else {
+                        Ok(Some(
+                            Arc::new(store) as Arc<dyn agent_mem_traits::VectorStore + Send + Sync>
+                        ))
+                    }
                 }
                 Err(e) => {
                     warn!("创建向量存储失败: {}, 向量存储功能将不可用", e);
@@ -902,13 +1008,16 @@ impl InitializationModule {
     ///
     /// # Phase 0 Implementation (ag25.md)
     /// 这是Phase 0: 紧急修复的核心函数，确保记忆数据持久化到SQLite
-    /// 
+    ///
     /// # 性能优化 (2025-12-10)
     /// 使用连接池替代单连接，提升并发性能 5-10x
     pub async fn create_libsql_operations(
         db_path: &str,
     ) -> Result<Box<dyn MemoryOperations + Send + Sync>> {
-        info!("🔧 Phase 0: 创建 LibSQL Memory Operations (连接池模式): {}", db_path);
+        info!(
+            "🔧 Phase 0: 创建 LibSQL Memory Operations (连接池模式): {}",
+            db_path
+        );
 
         use agent_mem_core::storage::libsql::{
             connection::{LibSqlConnectionManager, LibSqlPoolConfig},
@@ -923,9 +1032,9 @@ impl InitializationModule {
         } else {
             db_path
         };
-        
+
         let use_pool = !actual_db_path.starts_with(":memory:");
-        
+
         if use_pool {
             // Step 1: 创建连接池（性能优化：使用连接池替代单连接）
             let pool_config = LibSqlPoolConfig {
@@ -959,7 +1068,7 @@ impl InitializationModule {
             // Step 3: 创建repository（使用连接池）
             let repo = LibSqlMemoryRepository::new_with_pool(pool);
             info!("✅ LibSqlMemoryRepository创建成功（连接池模式）");
-            
+
             // Step 4: 包装为operations（实现MemoryOperations trait）
             let operations = LibSqlMemoryOperations::new(repo);
 
@@ -972,21 +1081,23 @@ impl InitializationModule {
             // 内存模式：使用单连接（避免连接池在内存模式下的问题）
             info!("🔧 内存模式：使用单连接（避免连接池复杂性）");
 
-        // Step 1: 创建连接管理器
-            let conn_mgr = LibSqlConnectionManager::new(actual_db_path).await.map_err(|e| {
-            AgentMemError::StorageError(format!(
-                "Failed to create LibSQL connection manager: {e}"
-            ))
-        })?;
+            // Step 1: 创建连接管理器
+            let conn_mgr = LibSqlConnectionManager::new(actual_db_path)
+                .await
+                .map_err(|e| {
+                    AgentMemError::StorageError(format!(
+                        "Failed to create LibSQL connection manager: {e}"
+                    ))
+                })?;
 
-        info!("✅ LibSQL连接管理器创建成功");
+            info!("✅ LibSQL连接管理器创建成功");
 
-        // Step 2: 获取连接
-        let conn = conn_mgr.get_connection().await.map_err(|e| {
-            AgentMemError::StorageError(format!("Failed to get LibSQL connection: {e}"))
-        })?;
+            // Step 2: 获取连接
+            let conn = conn_mgr.get_connection().await.map_err(|e| {
+                AgentMemError::StorageError(format!("Failed to get LibSQL connection: {e}"))
+            })?;
 
-        info!("✅ 获取LibSQL连接成功");
+            info!("✅ 获取LibSQL连接成功");
 
             // Step 2.5: 运行迁移创建表
             use agent_mem_core::storage::libsql::run_migrations;
@@ -995,17 +1106,17 @@ impl InitializationModule {
             })?;
             info!("✅ 数据库迁移完成");
 
-        // Step 3: 创建repository
-        let repo = LibSqlMemoryRepository::new(conn);
-        info!("✅ LibSqlMemoryRepository创建成功");
+            // Step 3: 创建repository
+            let repo = LibSqlMemoryRepository::new(conn);
+            info!("✅ LibSqlMemoryRepository创建成功");
 
-        // Step 4: 包装为operations（实现MemoryOperations trait）
-        let operations = LibSqlMemoryOperations::new(repo);
+            // Step 4: 包装为operations（实现MemoryOperations trait）
+            let operations = LibSqlMemoryOperations::new(repo);
 
-        info!(
+            info!(
                 "✅ Phase 0: LibSQL Memory Operations 创建成功（单连接模式） - 数据将持久化到 {}",
                 actual_db_path
-        );
+            );
             Ok(Box::new(operations))
         }
     }

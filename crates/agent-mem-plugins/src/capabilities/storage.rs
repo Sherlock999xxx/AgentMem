@@ -75,7 +75,7 @@ mod tests {
     use super::*;
 
     #[tokio::test]
-    async fn test_storage_set_and_get() {
+    async fn test_storage_set_and_get() -> anyhow::Result<()> {
         let storage = StorageCapability::new();
 
         storage
@@ -85,10 +85,11 @@ mod tests {
 
         let value = storage.get("key1").await?;
         assert_eq!(value, Some("value1".to_string()));
+        Ok(())
     }
 
     #[tokio::test]
-    async fn test_storage_delete() {
+    async fn test_storage_delete() -> anyhow::Result<()> {
         let storage = StorageCapability::new();
 
         storage
@@ -100,10 +101,11 @@ mod tests {
         let deleted = storage.delete("key1").await?;
         assert!(deleted);
         assert!(!storage.exists("key1").await?);
+        Ok(())
     }
 
     #[tokio::test]
-    async fn test_storage_list_keys() {
+    async fn test_storage_list_keys() -> anyhow::Result<()> {
         let storage = StorageCapability::new();
 
         storage
@@ -124,10 +126,11 @@ mod tests {
         assert!(keys.contains(&"key1".to_string()));
         assert!(keys.contains(&"key2".to_string()));
         assert!(keys.contains(&"key3".to_string()));
+        Ok(())
     }
 
     #[tokio::test]
-    async fn test_storage_clear() {
+    async fn test_storage_clear() -> anyhow::Result<()> {
         let storage = StorageCapability::new();
 
         storage
@@ -143,5 +146,67 @@ mod tests {
 
         storage.clear().await?;
         assert_eq!(storage.count().await?, 0);
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn test_storage_delete_fixed() -> anyhow::Result<()> {
+        let storage = StorageCapability::new();
+
+        storage
+            .set("key1".to_string(), "value1".to_string())
+            .await
+            .unwrap();
+        assert!(storage.exists("key1").await?);
+
+        let deleted = storage.delete("key1").await?;
+        assert!(deleted);
+        assert!(!storage.exists("key1").await?);
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn test_storage_list_keys_fixed() -> anyhow::Result<()> {
+        let storage = StorageCapability::new();
+
+        storage
+            .set("key1".to_string(), "value1".to_string())
+            .await
+            .unwrap();
+        storage
+            .set("key2".to_string(), "value2".to_string())
+            .await
+            .unwrap();
+        storage
+            .set("key3".to_string(), "value3".to_string())
+            .await
+            .unwrap();
+
+        let keys = storage.list_keys().await?;
+        assert_eq!(keys.len(), 3);
+        assert!(keys.contains(&"key1".to_string()));
+        assert!(keys.contains(&"key2".to_string()));
+        assert!(keys.contains(&"key3".to_string()));
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn test_storage_clear_fixed() -> anyhow::Result<()> {
+        let storage = StorageCapability::new();
+
+        storage
+            .set("key1".to_string(), "value1".to_string())
+            .await
+            .unwrap();
+        storage
+            .set("key2".to_string(), "value2".to_string())
+            .await
+            .unwrap();
+
+        assert_eq!(storage.count().await?, 2);
+
+        storage.clear().await?;
+        assert_eq!(storage.count().await?, 0);
+        Ok(())
     }
 }

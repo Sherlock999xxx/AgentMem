@@ -271,9 +271,7 @@ async fn benchmark_concurrent_execution() {
         let total_time = start.elapsed();
         let avg_time = total_time / concurrency;
 
-        println!(
-            "  Concurrency {concurrency:<3}:  {total_time:?} total, {avg_time:?} avg"
-        );
+        println!("  Concurrency {concurrency:<3}:  {total_time:?} total, {avg_time:?} avg");
     }
 }
 

@@ -3,7 +3,8 @@
 //! 管理所有记忆 Agent 的注册表，用于检索系统调用真实的 Agent。
 
 use crate::agents::{
-    CoreAgent, EpisodicAgent, MemoryAgent, ProceduralAgent, SemanticAgent, WorkingAgent,
+    CoreAgent, EpisodicAgent, MemoryAgent, ProceduralAgent, ResourceAgent, SemanticAgent,
+    WorkingAgent,
 };
 use crate::coordination::{TaskRequest, TaskResponse};
 use crate::types::MemoryType;
@@ -11,6 +12,20 @@ use agent_mem_traits::Result;
 use std::collections::HashMap;
 use std::sync::Arc;
 use tokio::sync::RwLock;
+
+/// File-centric routing key for dual-surface agent dispatch
+///
+/// Enables routing by resource_id or category_path in addition to MemoryType,
+/// supporting the file-centric ingestion and retrieval paths.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum RouteBy {
+    /// Legacy MemoryType-based routing
+    MemoryType(MemoryType),
+    /// Resource-centric routing (mount/extract/categorize path)
+    Resource(String),
+    /// Category-aware routing (hierarchical retrieval)
+    Category(String),
+}
 
 /// Agent 注册表
 ///
@@ -26,6 +41,8 @@ pub struct AgentRegistry {
     procedural_agent: Option<Arc<RwLock<ProceduralAgent>>>,
     /// 工作记忆 Agent
     working_agent: Option<Arc<RwLock<WorkingAgent>>>,
+    /// 资源记忆 Agent
+    resource_agent: Option<Arc<RwLock<ResourceAgent>>>,
     /// Agent 映射表（用于快速查找）
     agent_map: Arc<RwLock<HashMap<MemoryType, AgentType>>>,
 }
@@ -38,6 +55,7 @@ enum AgentType {
     Semantic,
     Procedural,
     Working,
+    Resource,
 }
 
 impl AgentRegistry {
@@ -49,6 +67,7 @@ impl AgentRegistry {
             semantic_agent: None,
             procedural_agent: None,
             working_agent: None,
+            resource_agent: None,
             agent_map: Arc::new(RwLock::new(HashMap::new())),
         }
     }
@@ -109,6 +128,16 @@ impl AgentRegistry {
             .write()
             .await
             .insert(MemoryType::Working, AgentType::Working);
+        Ok(())
+    }
+
+    /// 注册资源记忆 Agent
+    pub async fn register_resource_agent(&mut self, agent: Arc<RwLock<ResourceAgent>>) -> Result<()> {
+        self.resource_agent = Some(agent);
+        self.agent_map
+            .write()
+            .await
+            .insert(MemoryType::Resource, AgentType::Resource);
         Ok(())
     }
 
@@ -191,6 +220,19 @@ impl AgentRegistry {
                     ))
                 }
             }
+            AgentType::Resource => {
+                if let Some(ref agent) = self.resource_agent {
+                    let mut agent_guard = agent.write().await;
+                    agent_guard
+                        .execute_task(task)
+                        .await
+                        .map_err(|e| agent_mem_traits::AgentMemError::MemoryError(e.to_string()))
+                } else {
+                    Err(agent_mem_traits::AgentMemError::NotFound(
+                        "Resource agent not initialized".to_string(),
+                    ))
+                }
+            }
         }
     }
 
@@ -208,6 +250,68 @@ impl AgentRegistry {
     pub async fn registered_memory_types(&self) -> Vec<MemoryType> {
         self.agent_map.read().await.keys().cloned().collect()
     }
+
+    /// Execute task by file-centric routing key
+    ///
+    /// Routes to the appropriate agent based on RouteBy variant:
+    /// - RouteBy::MemoryType: Uses legacy MemoryType-based dispatch
+    /// - RouteBy::Resource: Routes to ResourceAgent for mount/extract/categorize operations
+    /// - RouteBy::Category: Routes to SemanticAgent or KnowledgeAgent for category-aware retrieval
+    pub async fn execute_task_by_route(
+        &self,
+        route: &RouteBy,
+        task: TaskRequest,
+    ) -> Result<TaskResponse> {
+        match route {
+            RouteBy::MemoryType(memory_type) => {
+                // Legacy path: delegate to existing execute_task
+                self.execute_task(memory_type, task).await
+            }
+            RouteBy::Resource(_resource_id) => {
+                // Resource-first path: route to ResourceAgent
+                if let Some(ref agent) = self.resource_agent {
+                    let mut agent_guard = agent.write().await;
+                    agent_guard
+                        .execute_task(task)
+                        .await
+                        .map_err(|e| agent_mem_traits::AgentMemError::MemoryError(e.to_string()))
+                } else {
+                    Err(agent_mem_traits::AgentMemError::NotFound(
+                        "Resource agent not initialized".to_string(),
+                    ))
+                }
+            }
+            RouteBy::Category(_category_path) => {
+                // Category-aware path: route to SemanticAgent for hierarchical retrieval
+                // Future: should consider KnowledgeAgent when available
+                if let Some(ref agent) = self.semantic_agent {
+                    let mut agent_guard = agent.write().await;
+                    agent_guard
+                        .execute_task(task)
+                        .await
+                        .map_err(|e| agent_mem_traits::AgentMemError::MemoryError(e.to_string()))
+                } else {
+                    Err(agent_mem_traits::AgentMemError::NotFound(
+                        "Semantic agent not initialized".to_string(),
+                    ))
+                }
+            }
+        }
+    }
+
+    /// Check if a routing key has an available agent
+    ///
+    /// Returns true if:
+    /// - RouteBy::MemoryType: the memory type is registered
+    /// - RouteBy::Resource: resource_agent is registered
+    /// - RouteBy::Category: semantic_agent is registered
+    pub async fn has_route(&self, route: &RouteBy) -> bool {
+        match route {
+            RouteBy::MemoryType(memory_type) => self.has_agent(memory_type).await,
+            RouteBy::Resource(_) => self.resource_agent.is_some(),
+            RouteBy::Category(_) => self.semantic_agent.is_some(),
+        }
+    }
 }
 
 impl Default for AgentRegistry {
@@ -216,38 +320,40 @@ impl Default for AgentRegistry {
     }
 }
 
+
 #[cfg(test)]
 mod tests {
     use super::*;
-    // Note: These tests are disabled because they require a real Store implementation
-    // TODO: Re-enable these tests with proper Store setup
+    use anyhow::Result;
 
     #[tokio::test]
     #[ignore] // Disabled: requires real Store implementation
-    async fn test_agent_registry_basic() {
+    async fn test_agent_registry_basic() -> Result<()> {
         let registry = AgentRegistry::new();
-
+        
         // 创建一个 agent with real store
         // let store = Arc::new(/* create real store */);
         let agent = CoreAgent::new("test-agent".to_string());
         // agent.set_store(store);
         let agent_arc = Arc::new(RwLock::new(agent));
-
+        
         // 注册 agent
         // registry.register_core_agent(agent_arc).await?;
-
+        
         // 验证注册
         // assert!(registry.has_agent(&MemoryType::Core).await);
         // assert_eq!(registry.agent_count().await, 1);
-
+        
         // let types = registry.registered_memory_types().await;
         // assert_eq!(types.len(), 1);
         // assert!(types.contains(&MemoryType::Core));
+        
+        Ok(())
     }
 
     #[tokio::test]
     #[ignore] // Disabled: requires real Store implementation
-    async fn test_agent_registry_multiple_agents() {
+    async fn test_agent_registry_multiple_agents() -> Result<()> {
         let registry = AgentRegistry::new();
 
         // 注册多个 agents
@@ -261,5 +367,71 @@ mod tests {
 
         // 验证
         // assert_eq!(registry.agent_count().await, 1);
+
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn test_route_by_enum_variants() {
+        // Test RouteBy::MemoryType variant
+        let route_memory = RouteBy::MemoryType(MemoryType::Core);
+        assert!(matches!(route_memory, RouteBy::MemoryType(MemoryType::Core)));
+
+        // Test RouteBy::Resource variant
+        let route_resource = RouteBy::Resource("resource-123".to_string());
+        assert!(matches!(route_resource, RouteBy::Resource(_)));
+        if let RouteBy::Resource(id) = route_resource {
+            assert_eq!(id, "resource-123");
+        }
+
+        // Test RouteBy::Category variant
+        let route_category = RouteBy::Category("/preferences/communication".to_string());
+        assert!(matches!(route_category, RouteBy::Category(_)));
+        if let RouteBy::Category(path) = route_category {
+            assert_eq!(path, "/preferences/communication");
+        }
+    }
+
+    #[tokio::test]
+    async fn test_has_route_without_agents() {
+        let registry = AgentRegistry::new();
+
+        // Without any agents registered, all routes should return false
+        let memory_route = RouteBy::MemoryType(MemoryType::Core);
+        assert!(!registry.has_route(&memory_route).await);
+
+        let resource_route = RouteBy::Resource("test-resource".to_string());
+        assert!(!registry.has_route(&resource_route).await);
+
+        let category_route = RouteBy::Category("/test/category".to_string());
+        assert!(!registry.has_route(&category_route).await);
+    }
+
+    #[tokio::test]
+    async fn test_execute_task_by_route_resource_without_agent() {
+        let registry = AgentRegistry::new();
+        let task = TaskRequest::default();
+        let route = RouteBy::Resource("resource-456".to_string());
+
+        let result = registry.execute_task_by_route(&route, task).await;
+        assert!(result.is_err());
+
+        if let Err(e) = result {
+            assert!(matches!(e, agent_mem_traits::AgentMemError::NotFound(_)));
+        }
+    }
+
+    #[tokio::test]
+    async fn test_execute_task_by_route_category_without_agent() {
+        let registry = AgentRegistry::new();
+        let task = TaskRequest::default();
+        let route = RouteBy::Category("/category/path".to_string());
+
+        let result = registry.execute_task_by_route(&route, task).await;
+        assert!(result.is_err());
+
+        if let Err(e) = result {
+            assert!(matches!(e, agent_mem_traits::AgentMemError::NotFound(_)));
+        }
     }
 }

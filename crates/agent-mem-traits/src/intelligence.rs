@@ -2,12 +2,15 @@
 //!
 //! 定义智能记忆处理的接口，用于解耦 agent-mem-core 和 agent-mem-intelligence
 
+#![allow(deprecated)]
+
 use crate::{MemoryItem, Message, Result};
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
 /// 提取的事实信息
+#[allow(deprecated)]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ExtractedFact {
     pub content: String,
@@ -68,6 +71,7 @@ pub trait FactExtractor: Send + Sync {
 }
 
 /// 决策引擎 trait
+#[allow(deprecated)]
 #[async_trait]
 pub trait DecisionEngine: Send + Sync {
     /// 为事实做出记忆操作决策
@@ -79,6 +83,7 @@ pub trait DecisionEngine: Send + Sync {
 }
 
 /// 智能记忆处理器 trait (组合 FactExtractor 和 DecisionEngine)
+#[allow(deprecated)]
 #[async_trait]
 pub trait IntelligentMemoryProcessor: Send + Sync {
     /// 处理记忆内容，返回处理结果

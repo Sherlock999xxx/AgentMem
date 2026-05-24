@@ -997,7 +997,7 @@ impl Memory {
     /// 获取memory_type（向后兼容）
     pub fn memory_type(&self) -> MemoryType {
         self.attributes
-            .get(&AttributeKey::system("memory_type"))
+            .get(&AttributeKey::core("memory_type"))
             .and_then(|v| v.as_string())
             .and_then(|s| s.parse::<MemoryType>().ok())
             .unwrap_or(MemoryType::Semantic)
@@ -1046,7 +1046,7 @@ impl Memory {
         }
 
         attributes.set(
-            AttributeKey::system("memory_type"),
+            AttributeKey::core("memory_type"),
             AttributeValue::String(old.memory_type.as_str().to_string()),
         );
 
@@ -2210,7 +2210,7 @@ impl From<Memory> for MemoryItem {
 
         let memory_type_str = memory
             .attributes
-            .get(&AttributeKey::system("memory_type"))
+            .get(&AttributeKey::core("memory_type"))
             .and_then(|v| v.as_string())
             .unwrap_or("semantic");
 
@@ -2353,7 +2353,7 @@ impl TryFrom<MemoryItem> for Memory {
         }
 
         attributes.set(
-            AttributeKey::system("memory_type"),
+            AttributeKey::core("memory_type"),
             AttributeValue::String(item.memory_type.as_str().to_string()),
         );
 
@@ -2735,7 +2735,7 @@ mod tests {
         assert_eq!(
             memory
                 .attributes
-                .get(&AttributeKey::system("memory_type"))
+                .get(&AttributeKey::core("memory_type"))
                 .unwrap()
                 .as_string(),
             Some("semantic")
@@ -3138,7 +3138,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_dag_pipeline_linear() {
+    async fn test_dag_pipeline_linear() -> anyhow::Result<()> {
         // 线性DAG: A -> B -> C
         let dag = DagPipeline::new("test_linear")
             .add_node("A", TestStage::new("A", 10), vec![])
@@ -3152,10 +3152,11 @@ mod tests {
         assert_eq!(results.get("A"), Some(&1));
         assert_eq!(results.get("B"), Some(&1));
         assert_eq!(results.get("C"), Some(&1));
+        Ok(())
     }
 
     #[tokio::test]
-    async fn test_dag_pipeline_parallel() {
+    async fn test_dag_pipeline_parallel() -> anyhow::Result<()> {
         // 并行DAG: A, B, C (无依赖)
         let dag = DagPipeline::new("test_parallel")
             .add_node("A", TestStage::new("A", 50), vec![])
@@ -3174,10 +3175,11 @@ mod tests {
             "Parallel execution took {}ms, expected < 200ms",
             elapsed
         );
+        Ok(())
     }
 
     #[tokio::test]
-    async fn test_dag_pipeline_diamond() {
+    async fn test_dag_pipeline_diamond() -> anyhow::Result<()> {
         // 菱形DAG: A -> B,C -> D
         let dag = DagPipeline::new("test_diamond")
             .add_node("A", TestStage::new("A", 10), vec![])
@@ -3197,10 +3199,11 @@ mod tests {
         assert!(ctx.get::<bool>("B_executed").unwrap_or(false));
         assert!(ctx.get::<bool>("C_executed").unwrap_or(false));
         assert!(ctx.get::<bool>("D_executed").unwrap_or(false));
+        Ok(())
     }
 
     #[tokio::test]
-    async fn test_dag_pipeline_conditional() {
+    async fn test_dag_pipeline_conditional() -> anyhow::Result<()> {
         // 条件分支: A -> B (if true) or C (if false)
         struct ConditionalStage;
 
@@ -3247,10 +3250,11 @@ mod tests {
         let results2 = dag.execute(3, &mut ctx2).await?;
         assert!(!results2.contains_key("B"));
         assert!(results2.contains_key("C"));
+        Ok(())
     }
 
     #[tokio::test]
-    async fn test_dag_pipeline_cycle_detection() {
+    async fn test_dag_pipeline_cycle_detection() -> anyhow::Result<()> {
         // 创建循环依赖: A -> B -> C -> A
         let dag = DagPipeline::new("test_cycle")
             .add_node("A", TestStage::new("A", 10), vec!["C".to_string()])
@@ -3262,10 +3266,11 @@ mod tests {
 
         assert!(result.is_err());
         assert!(result.unwrap_err().to_string().contains("Cycle detected"));
+        Ok(())
     }
 
     #[tokio::test]
-    async fn test_dag_pipeline_max_parallelism() {
+    async fn test_dag_pipeline_max_parallelism() -> anyhow::Result<()> {
         // 测试并行度控制
         let dag = DagPipeline::new("test_parallelism")
             .add_node("A", TestStage::new("A", 100), vec![])
@@ -3286,5 +3291,6 @@ mod tests {
             "Execution took {}ms, expected >= 180ms",
             elapsed
         );
+        Ok(())
     }
 }

@@ -19,14 +19,12 @@ public func testHttpClient(): Bool {
     // 测试健康检查
     let result = client.get("/health")
     match (result) {
-        | Ok(response) => {
+        case Ok(response) =>
             println("✅ 健康检查成功: ${response}")
             return true
-        }
-        | Err(e) => {
+        case Err(e) =>
             println("❌ 健康检查失败: ${e.getMessage()}")
             return false
-        }
     }
 }
 
@@ -59,14 +57,12 @@ public func testAddMemory(): Bool {
     let result = api.addMemory(memory)
     
     match (result) {
-        | Ok(memoryId) => {
+        case Ok(memoryId) =>
             println("✅ 添加记忆成功, ID: ${memoryId}")
             return true
-        }
-        | Err(e) => {
+        case Err(e) =>
             println("❌ 添加记忆失败: ${e.getMessage()}")
             return false
-        }
     }
 }
 
@@ -81,16 +77,14 @@ public func testGetMemory(): Bool {
     let result = api.getMemory("mem-001")
     
     match (result) {
-        | Ok(memory) => {
+        case Ok(memory) =>
             println("✅ 获取记忆成功")
             println("  - ID: ${memory.id}")
             println("  - Content: ${memory.content}")
             return true
-        }
-        | Err(e) => {
+        case Err(e) =>
             println("❌ 获取记忆失败: ${e.getMessage()}")
             return false
-        }
     }
 }
 
@@ -105,14 +99,12 @@ public func testSearchMemories(): Bool {
     let result = api.searchMemories("测试", 10)
     
     match (result) {
-        | Ok(results) => {
-            println("✅ 搜索成功, 找到 ${results.size()} 条记忆")
+        case Ok(results) =>
+            println("✅ 搜索成功, 找到 ${results.size} 条记忆")
             return true
-        }
-        | Err(e) => {
+        case Err(e) =>
             println("❌ 搜索失败: ${e.getMessage()}")
             return false
-        }
     }
 }
 
@@ -131,66 +123,56 @@ public func testFullWorkflow(): Bool {
     
     var memoryId = ""
     match (addResult) {
-        | Ok(id) => {
+        case Ok(id) =>
             memoryId = id
             println("✅ 添加成功: ${id}")
-        }
-        | Err(e) => {
+        case Err(e) =>
             println("❌ 添加失败: ${e.getMessage()}")
             return false
-        }
     }
     
     // 2. 获取记忆
     println("步骤2: 获取记忆...")
     let getResult = api.getMemory(memoryId)
     match (getResult) {
-        | Ok(mem) => {
+        case Ok(mem) =>
             println("✅ 获取成功: ${mem.content}")
-        }
-        | Err(e) => {
+        case Err(e) =>
             println("❌ 获取失败: ${e.getMessage()}")
             return false
-        }
     }
     
     // 3. 更新记忆
     println("步骤3: 更新记忆...")
     let updateResult = api.updateMemory(memoryId, "更新后的内容")
     match (updateResult) {
-        | Ok(_) => {
+        case Ok(_) =>
             println("✅ 更新成功")
-        }
-        | Err(e) => {
+        case Err(e) =>
             println("❌ 更新失败: ${e.getMessage()}")
             return false
-        }
     }
     
     // 4. 搜索记忆
     println("步骤4: 搜索记忆...")
     let searchResult = api.searchMemories("测试", 10)
     match (searchResult) {
-        | Ok(results) => {
-            println("✅ 搜索成功: 找到 ${results.size()} 条")
-        }
-        | Err(e) => {
+        case Ok(results) =>
+            println("✅ 搜索成功: 找到 ${results.size} 条")
+        case Err(e) =>
             println("❌ 搜索失败: ${e.getMessage()}")
             return false
-        }
     }
     
     // 5. 删除记忆
     println("步骤5: 删除记忆...")
     let deleteResult = api.deleteMemory(memoryId)
     match (deleteResult) {
-        | Ok(_) => {
+        case Ok(_) =>
             println("✅ 删除成功")
-        }
-        | Err(e) => {
+        case Err(e) =>
             println("❌ 删除失败: ${e.getMessage()}")
             return false
-        }
     }
     
     println("\n✅ 完整工作流程测试通过！")
@@ -227,3 +209,6 @@ public func runAllTests() {
     }
 }
 
+main() {
+    runAllTests()
+}

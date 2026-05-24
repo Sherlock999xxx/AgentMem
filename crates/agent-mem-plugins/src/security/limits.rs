@@ -7,8 +7,7 @@ use std::sync::{Arc, RwLock};
 use std::time::{Duration, Instant};
 
 /// Resource limits configuration
-#[derive(Debug, Clone)]
-#[derive(Default)]
+#[derive(Debug, Clone, Default)]
 pub struct ResourceLimits {
     /// Memory limits
     pub memory: MemoryLimits,
@@ -19,7 +18,6 @@ pub struct ResourceLimits {
     /// I/O limits
     pub io: IoLimits,
 }
-
 
 /// Memory limits
 #[derive(Debug, Clone)]
@@ -38,7 +36,7 @@ impl Default for MemoryLimits {
     fn default() -> Self {
         Self {
             max_heap_bytes: 100 * 1024 * 1024, // 100 MB
-            max_stack_bytes: 1024 * 1024,  // 1 MB
+            max_stack_bytes: 1024 * 1024,      // 1 MB
             max_total_allocations: 10_000,
         }
     }
@@ -433,10 +431,7 @@ impl std::fmt::Display for ResourceLimitError {
                 )
             }
             ResourceLimitError::ReadLimitExceeded { bytes, limit } => {
-                write!(
-                    f,
-                    "Read limit exceeded: {bytes} bytes, limit {limit} bytes"
-                )
+                write!(f, "Read limit exceeded: {bytes} bytes, limit {limit} bytes")
             }
             ResourceLimitError::WriteLimitExceeded { bytes, limit } => {
                 write!(

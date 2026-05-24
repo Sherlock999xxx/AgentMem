@@ -56,7 +56,7 @@ impl ClientError {
                 }
 
                 if let Some(status) = e.status() {
-                    return status.is_server_error() || status == 429; // Rate limited
+                    return (status.is_server_error() && status.as_u16() != 501) || status == 429;
                 }
 
                 false
@@ -64,7 +64,7 @@ impl ClientError {
             ClientError::TimeoutError(_) => true,
             ClientError::NetworkError(_) => true,
             ClientError::ServerError { status, .. } => {
-                *status >= 500 || *status == 429 // 5xx errors or rate limiting
+                (*status >= 500 && *status != 501) || *status == 429
             }
             _ => false,
         }
@@ -106,6 +106,12 @@ mod tests {
             message: "Bad request".to_string(),
         };
         assert!(!client_error.is_retryable());
+
+        let preview_error = ClientError::ServerError {
+            status: 501,
+            message: "Preview endpoint not implemented".to_string(),
+        };
+        assert!(!preview_error.is_retryable());
 
         let auth_error = ClientError::AuthError("Invalid token".to_string());
         assert!(!auth_error.is_retryable());

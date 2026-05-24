@@ -52,7 +52,7 @@ impl Default for LibSqlPoolConfig {
 
 /// LibSQL connection pool
 pub struct LibSqlConnectionPool {
-    db: Database,
+    db: Arc<Database>,
     config: LibSqlPoolConfig,
     /// Available connections (idle)
     idle_connections: Arc<Mutex<Vec<(Connection, Instant)>>>,
@@ -78,7 +78,7 @@ impl LibSqlConnectionPool {
         })?;
 
         let pool = Self {
-            db,
+            db: Arc::new(db),
             config: config.clone(),
             idle_connections: Arc::new(Mutex::new(Vec::new())),
             semaphore: Arc::new(Semaphore::new(config.max_connections)),
@@ -192,6 +192,12 @@ impl LibSqlConnectionPool {
         idle.push((conn, Instant::now()));
     }
 
+    /// Get the underlying Database instance
+    /// This is used by components that need direct database access (e.g., LibSqlWorkingStore)
+    pub fn get_db(&self) -> Arc<Database> {
+        self.db.clone()
+    }
+
     /// 🆕 Phase 1.3: 连接池健康检查
     /// 预期效果: 确保连接池中的连接都是健康的
     pub async fn health_check(&self) -> Result<()> {
@@ -266,7 +272,7 @@ pub struct LibSqlPoolStats {
 
 /// LibSQL connection manager (backward compatibility)
 pub struct LibSqlConnectionManager {
-    db: Database,
+    db: Arc<Database>,
 }
 
 impl LibSqlConnectionManager {
@@ -299,7 +305,7 @@ impl LibSqlConnectionManager {
             AgentMemError::StorageError(format!("Failed to open database at {path}: {e}"))
         })?;
 
-        Ok(Self { db })
+        Ok(Self { db: Arc::new(db) })
     }
 
     /// Get a connection from the pool (backward compatibility - creates new connection each time)
@@ -479,7 +485,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_get_connection() {
+    async fn test_get_connection() -> anyhow::Result<()> {
         let temp_dir = TempDir::new().unwrap();
         let db_path = temp_dir.path().join("test.db");
         let db_path_str = db_path.to_str().unwrap();
@@ -499,8 +505,61 @@ mod tests {
         let result = manager.health_check().await;
         if let Err(e) = &result {
             eprintln!("Health check failed: {e:?}");
+        Ok(())
         }
         assert!(result.is_ok());
+    }
+
+    #[tokio::test]
+    async fn test_get_stats() -> anyhow::Result<()> {
+        let temp_dir = TempDir::new().unwrap();
+        let db_path = temp_dir.path().join("test.db");
+        let db_path_str = db_path.to_str().unwrap();
+
+        let manager = LibSqlConnectionManager::new(db_path_str).await?;
+        let stats = manager.get_stats().await;
+        assert!(stats.is_ok());
+
+        let stats = stats.unwrap();
+        assert!(stats.page_size > 0);
+        assert!(stats.size_mb() >= 0.0);
+    }
+
+    #[tokio::test]
+    async fn test_create_libsql_pool() {
+        let temp_dir = TempDir::new().unwrap();
+        let db_path = temp_dir.path().join("test.db");
+        let db_path_str = db_path.to_str().unwrap();
+
+        let conn = create_libsql_pool(db_path_str).await;
+        assert!(conn.is_ok());
+
+        // Test basic query
+        let conn = conn.unwrap();
+        let conn_guard = conn.lock().await;
+        let result = conn_guard
+            .execute(
+                "CREATE TABLE IF NOT EXISTS test (id INTEGER PRIMARY KEY)",
+                (),
+            )
+            .await;
+        assert!(result.is_ok());
+    }
+
+    #[tokio::test]
+    async fn test_multiple_connections() {
+        let temp_dir = TempDir::new().unwrap();
+        let db_path = temp_dir.path().join("test.db");
+        let db_path_str = db_path.to_str().unwrap();
+
+        let manager = LibSqlConnectionManager::new(db_path_str).await?;
+
+        // Get multiple connections
+        let conn1 = manager.get_connection().await;
+        let conn2 = manager.get_connection().await;
+
+        assert!(conn1.is_ok());
+        assert!(conn2.is_ok());
     }
 
     #[tokio::test]
@@ -540,7 +599,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_multiple_connections() {
+    async fn test_multiple_connections() -> anyhow::Result<()> {
         let temp_dir = TempDir::new().unwrap();
         let db_path = temp_dir.path().join("test.db");
         let db_path_str = db_path.to_str().unwrap();

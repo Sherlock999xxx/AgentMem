@@ -22,6 +22,8 @@ use crate::storage::libsql::{
     LibSqlApiKeyRepository, LibSqlAssociationRepository, LibSqlBlockRepository, LibSqlMemoryRepository, LibSqlMessageRepository,
     LibSqlOrganizationRepository, LibSqlPoolConfig, LibSqlToolRepository, LibSqlUserRepository,
 };
+#[cfg(feature = "libsql")]
+use agent_mem_storage::backends::libsql_working::LibSqlWorkingStore;
 
 // Note: PostgreSQL repository implementations are being refactored.
 // The factory will return a clear error until Pg repositories implement the traits.
@@ -141,16 +143,8 @@ impl RepositoryFactory {
             tools: Arc::new(LibSqlToolRepository::new_with_pool(pool.clone())),
             api_keys: Arc::new(LibSqlApiKeyRepository::new_with_pool(pool.clone())),
             memories: Arc::new(LibSqlMemoryRepository::new_with_pool(pool.clone())),
-            working_memory: {
-                // ✅ WorkingMemory uses the unified memories table internally
-                // This is an implementation detail hidden behind the trait
-                use agent_mem_storage::backends::LibSqlWorkingStore;
-                // WorkingStore also needs pool support, but for now use a connection from pool
-                let conn = pool.get().await.map_err(|e| {
-                    AgentMemError::StorageError(format!("Failed to get connection for working store: {e}"))
-                })?;
-                Arc::new(LibSqlWorkingStore::new(conn))
-            },
+            // ✅ LibSqlWorkingStore now uses libsql 0.9 API with direct database access
+            working_memory: Arc::new(LibSqlWorkingStore::new(pool.get_db())),
             blocks: Arc::new(LibSqlBlockRepository::new_with_pool(pool.clone())),
             associations: Arc::new(LibSqlAssociationRepository::new_with_pool(pool.clone())),
         })
@@ -506,14 +500,8 @@ impl StorageFactory {
             tools: Arc::new(LibSqlToolRepository::new_with_pool(pool.clone())),
             api_keys: Arc::new(LibSqlApiKeyRepository::new_with_pool(pool.clone())),
             memories: Arc::new(LibSqlMemoryRepository::new_with_pool(pool.clone())),
-            working_memory: {
-                use agent_mem_storage::backends::LibSqlWorkingStore;
-                // WorkingStore also needs pool support, but for now use a connection from pool
-                let conn = pool.get().await.map_err(|e| {
-                    AgentMemError::StorageError(format!("Failed to get connection for working store: {e}"))
-                })?;
-                Arc::new(LibSqlWorkingStore::new(conn))
-            },
+            // ✅ LibSqlWorkingStore now uses libsql 0.9 API with direct database access
+            working_memory: Arc::new(LibSqlWorkingStore::new(pool.get_db())),
             blocks: Arc::new(LibSqlBlockRepository::new_with_pool(pool.clone())),
             associations: Arc::new(LibSqlAssociationRepository::new_with_pool(pool.clone())),
         })
@@ -643,7 +631,7 @@ mod storage_factory_tests {
 
     #[tokio::test]
     #[cfg(feature = "libsql")]
-    async fn test_storage_factory_embedded_creates_tables() {
+    async fn test_storage_factory_embedded_creates_tables() -> anyhow::Result<()> {
         use crate::storage::models::{Organization, User};
         use tempfile::TempDir;
 
@@ -735,7 +723,7 @@ mod storage_factory_tests {
 
     #[tokio::test]
     #[cfg(feature = "libsql")]
-    async fn test_storage_factory_all_repositories_available() {
+    async fn test_storage_factory_all_repositories_available() -> anyhow::Result<()> {
         use tempfile::TempDir;
 
         let temp_dir = TempDir::new().unwrap();
@@ -765,5 +753,6 @@ mod storage_factory_tests {
         let _ = &repos.memories;
         let _ = &repos.messages;
         let _ = &repos.associations;
+        Ok(())
     }
 }

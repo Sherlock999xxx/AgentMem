@@ -1,0 +1,16 @@
+{
+  "id": "task-summary-123",
+  "task_type": "generate_summaries",
+  "status": "running",
+  "scope": {
+    "user_id": "user-123",
+    "agent_id": "agent-abc"
+  },
+  "schedule": "interval:60min",
+  "pending_runs": 1,
+  "running_count": 1,
+  "last_started_at": "2026-03-18T10:12:00Z",
+  "last_completed_at": "2026-03-18T09:12:00Z",
+  "last_error_code": null,
+  "last_error": null
+}

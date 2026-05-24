@@ -348,7 +348,7 @@ mod tests {
     use super::*;
 
     #[tokio::test]
-    async fn test_fuzzy_match_basic() {
+    async fn test_fuzzy_match_basic() -> anyhow::Result<()> {
         let engine = FuzzyMatchEngine::with_defaults();
 
         // 添加文档
@@ -390,7 +390,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_fuzzy_match_case_insensitive() {
+    async fn test_fuzzy_match_case_insensitive() -> anyhow::Result<()> {
         let engine = FuzzyMatchEngine::with_defaults();
 
         engine

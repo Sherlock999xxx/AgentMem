@@ -207,8 +207,12 @@ async fn test_complete_workflow() {
                 println!("  事件序列: {:?}", events);
                 // 如果历史记录存在，验证包含预期的事件
                 if history.len() >= 2 {
-                    assert!(events.contains(&"ADD") || events.contains(&"UPDATE") || events.contains(&"DELETE"), 
-                        "历史记录应该包含至少一个事件");
+                    assert!(
+                        events.contains(&"ADD")
+                            || events.contains(&"UPDATE")
+                            || events.contains(&"DELETE"),
+                        "历史记录应该包含至少一个事件"
+                    );
                 }
             } else {
                 println!("  ⚠️ 历史记录为空（可能 HistoryManager 未完全配置）");

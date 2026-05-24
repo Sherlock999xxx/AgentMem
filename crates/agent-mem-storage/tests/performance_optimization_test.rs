@@ -36,9 +36,7 @@ async fn test_batch_insertion_performance() {
     }
     let sequential_duration = start.elapsed();
 
-    println!(
-        "Sequential insertion: {sequential_duration:?} for {num_vectors} vectors"
-    );
+    println!("Sequential insertion: {sequential_duration:?} for {num_vectors} vectors");
 
     // Test 2: Batch insertion (optimized)
     let batch_path = dir.path().join("batch_test.lance");
@@ -59,9 +57,7 @@ async fn test_batch_insertion_performance() {
     batch_store.add_vectors(batch_vectors).await.unwrap();
     let batch_duration = start.elapsed();
 
-    println!(
-        "Batch insertion: {batch_duration:?} for {num_vectors} vectors"
-    );
+    println!("Batch insertion: {batch_duration:?} for {num_vectors} vectors");
 
     // Calculate speedup
     let speedup = sequential_duration.as_secs_f64() / batch_duration.as_secs_f64();

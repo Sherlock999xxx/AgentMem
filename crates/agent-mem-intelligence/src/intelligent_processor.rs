@@ -18,9 +18,7 @@ use crate::importance_evaluator::{
     ImportanceEvaluation, ImportanceEvaluator, ImportanceEvaluatorConfig,
 };
 use agent_mem_llm::{factory::RealLLMFactory, LLMProvider};
-use agent_mem_traits::{
-    LLMConfig, MemoryItem, MemoryV4 as Memory, Message, MetadataV4, Result,
-};
+use agent_mem_traits::{LLMConfig, MemoryItem, MemoryV4 as Memory, Message, MetadataV4, Result};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::sync::Arc;

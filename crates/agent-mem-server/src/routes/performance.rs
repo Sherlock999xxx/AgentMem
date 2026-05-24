@@ -42,11 +42,11 @@ pub struct Bottleneck {
 }
 
 /// 🆕 Phase 4.2: 计算性能评分
-/// 
+///
 /// 基于多个性能指标计算总体性能评分（0-100）
 fn calculate_performance_score(metrics: &HashMap<String, f64>) -> f64 {
     let mut score: f64 = 100.0;
-    
+
     // 1. 搜索延迟评分（权重：30%）
     if let Some(&search_latency) = metrics.get("avg_search_latency_ms") {
         if search_latency > 100.0 {
@@ -57,7 +57,7 @@ fn calculate_performance_score(metrics: &HashMap<String, f64>) -> f64 {
             score -= 5.0; // 延迟20-50ms，扣5分
         }
     }
-    
+
     // 2. 缓存命中率评分（权重：25%）
     if let Some(&cache_hit_rate) = metrics.get("cache_hit_rate") {
         if cache_hit_rate < 0.5 {
@@ -68,7 +68,7 @@ fn calculate_performance_score(metrics: &HashMap<String, f64>) -> f64 {
             score -= 5.0; // 缓存命中率70-80%，扣5分
         }
     }
-    
+
     // 3. 吞吐量评分（权重：25%）
     if let Some(&throughput) = metrics.get("avg_throughput_ops_per_sec") {
         if throughput < 10.0 {
@@ -79,7 +79,7 @@ fn calculate_performance_score(metrics: &HashMap<String, f64>) -> f64 {
             score -= 5.0; // 吞吐量50-100 ops/s，扣5分
         }
     }
-    
+
     // 4. 错误率评分（权重：20%）
     if let Some(&error_rate) = metrics.get("error_rate") {
         if error_rate > 0.1 {
@@ -90,20 +90,23 @@ fn calculate_performance_score(metrics: &HashMap<String, f64>) -> f64 {
             score -= 5.0; // 错误率1-5%，扣5分
         }
     }
-    
+
     score.max(0.0f64).min(100.0f64)
 }
 
 /// 🆕 Phase 4.2: 识别性能瓶颈
 fn identify_bottlenecks(metrics: &HashMap<String, f64>) -> Vec<Bottleneck> {
     let mut bottlenecks = Vec::new();
-    
+
     // 1. 搜索延迟瓶颈
     if let Some(&latency) = metrics.get("avg_search_latency_ms") {
         if latency > 100.0 {
             bottlenecks.push(Bottleneck {
                 category: "搜索延迟".to_string(),
-                description: format!("平均搜索延迟 {}ms 过高，建议优化向量搜索或增加缓存", latency),
+                description: format!(
+                    "平均搜索延迟 {}ms 过高，建议优化向量搜索或增加缓存",
+                    latency
+                ),
                 severity: "HIGH".to_string(),
                 impact_score: 0.8,
             });
@@ -116,45 +119,57 @@ fn identify_bottlenecks(metrics: &HashMap<String, f64>) -> Vec<Bottleneck> {
             });
         }
     }
-    
+
     // 2. 缓存命中率瓶颈
     if let Some(&hit_rate) = metrics.get("cache_hit_rate") {
         if hit_rate < 0.5 {
             bottlenecks.push(Bottleneck {
                 category: "缓存效率".to_string(),
-                description: format!("缓存命中率 {:.1}% 过低，建议增加缓存容量或优化缓存策略", hit_rate * 100.0),
+                description: format!(
+                    "缓存命中率 {:.1}% 过低，建议增加缓存容量或优化缓存策略",
+                    hit_rate * 100.0
+                ),
                 severity: "HIGH".to_string(),
                 impact_score: 0.7,
             });
         } else if hit_rate < 0.7 {
             bottlenecks.push(Bottleneck {
                 category: "缓存效率".to_string(),
-                description: format!("缓存命中率 {:.1}% 较低，建议优化缓存预热策略", hit_rate * 100.0),
+                description: format!(
+                    "缓存命中率 {:.1}% 较低，建议优化缓存预热策略",
+                    hit_rate * 100.0
+                ),
                 severity: "MEDIUM".to_string(),
                 impact_score: 0.4,
             });
         }
     }
-    
+
     // 3. 吞吐量瓶颈
     if let Some(&throughput) = metrics.get("avg_throughput_ops_per_sec") {
         if throughput < 10.0 {
             bottlenecks.push(Bottleneck {
                 category: "吞吐量".to_string(),
-                description: format!("吞吐量 {:.1} ops/s 过低，建议优化批量操作或增加并发", throughput),
+                description: format!(
+                    "吞吐量 {:.1} ops/s 过低，建议优化批量操作或增加并发",
+                    throughput
+                ),
                 severity: "HIGH".to_string(),
                 impact_score: 0.9,
             });
         } else if throughput < 50.0 {
             bottlenecks.push(Bottleneck {
                 category: "吞吐量".to_string(),
-                description: format!("吞吐量 {:.1} ops/s 较低，建议优化数据库查询或索引", throughput),
+                description: format!(
+                    "吞吐量 {:.1} ops/s 较低，建议优化数据库查询或索引",
+                    throughput
+                ),
                 severity: "MEDIUM".to_string(),
                 impact_score: 0.5,
             });
         }
     }
-    
+
     bottlenecks
 }
 
@@ -164,12 +179,13 @@ fn generate_recommendations(
     bottlenecks: &[Bottleneck],
 ) -> Vec<String> {
     let mut recommendations = Vec::new();
-    
+
     // 基于瓶颈生成建议
     for bottleneck in bottlenecks {
         match bottleneck.category.as_str() {
             "搜索延迟" => {
-                recommendations.push("优化向量搜索：考虑使用更高效的向量索引（如HNSW）".to_string());
+                recommendations
+                    .push("优化向量搜索：考虑使用更高效的向量索引（如HNSW）".to_string());
                 recommendations.push("增加缓存：提高查询结果缓存命中率".to_string());
             }
             "缓存效率" => {
@@ -183,7 +199,7 @@ fn generate_recommendations(
             _ => {}
         }
     }
-    
+
     // 通用建议
     if bottlenecks.is_empty() {
         recommendations.push("性能表现良好，继续保持当前配置".to_string());
@@ -191,16 +207,16 @@ fn generate_recommendations(
         recommendations.push("定期监控性能指标，及时发现问题".to_string());
         recommendations.push("考虑使用性能基准测试API进行定期测试".to_string());
     }
-    
+
     // 去重
     recommendations.sort();
     recommendations.dedup();
-    
+
     recommendations
 }
 
 /// 获取性能分析报告
-/// 
+///
 /// 🆕 Phase 4.2: 性能分析 - 提供性能分析、瓶颈识别和优化建议
 #[utoipa::path(
     get,
@@ -219,16 +235,25 @@ pub async fn get_performance_analysis(
     // 1. 收集性能指标
     let search_stats = get_search_stats();
     let stats_read = search_stats.read().await;
-    
+
     let mut metrics = HashMap::new();
-    
+
     // 搜索相关指标
-    metrics.insert("avg_search_latency_ms".to_string(), stats_read.avg_latency_ms());
+    metrics.insert(
+        "avg_search_latency_ms".to_string(),
+        stats_read.avg_latency_ms(),
+    );
     metrics.insert("cache_hit_rate".to_string(), stats_read.cache_hit_rate());
-    metrics.insert("total_searches".to_string(), stats_read.get_total_searches() as f64);
+    metrics.insert(
+        "total_searches".to_string(),
+        stats_read.get_total_searches() as f64,
+    );
     metrics.insert("cache_hits".to_string(), stats_read.get_cache_hits() as f64);
-    metrics.insert("cache_misses".to_string(), stats_read.get_cache_misses() as f64);
-    
+    metrics.insert(
+        "cache_misses".to_string(),
+        stats_read.get_cache_misses() as f64,
+    );
+
     // 计算吞吐量（基于总搜索次数和平均延迟）
     let total_searches = stats_read.get_total_searches() as f64;
     let avg_latency_ms = stats_read.avg_latency_ms();
@@ -238,7 +263,7 @@ pub async fn get_performance_analysis(
         0.0
     };
     metrics.insert("avg_throughput_ops_per_sec".to_string(), throughput);
-    
+
     // 计算错误率（基于缓存未命中率作为代理）
     let error_rate = if total_searches > 0.0 {
         let failed_searches = stats_read.get_cache_misses() as f64;
@@ -247,16 +272,16 @@ pub async fn get_performance_analysis(
         0.0
     };
     metrics.insert("error_rate".to_string(), error_rate);
-    
+
     // 2. 计算性能评分
     let overall_score = calculate_performance_score(&metrics);
-    
+
     // 3. 识别性能瓶颈
     let bottlenecks = identify_bottlenecks(&metrics);
-    
+
     // 4. 生成优化建议
     let recommendations = generate_recommendations(&metrics, &bottlenecks);
-    
+
     let response = PerformanceAnalysisResponse {
         overall_score,
         metrics,
@@ -264,12 +289,14 @@ pub async fn get_performance_analysis(
         recommendations,
         timestamp: Utc::now(),
     };
-    
-    info!("📊 性能分析完成: 总体评分={:.1}, 瓶颈数={}, 建议数={}",
+
+    info!(
+        "📊 性能分析完成: 总体评分={:.1}, 瓶颈数={}, 建议数={}",
         response.overall_score,
         response.bottlenecks.len(),
-        response.recommendations.len());
-    
+        response.recommendations.len()
+    );
+
     Ok(Json(models::ApiResponse::success(response)))
 }
 
@@ -308,12 +335,18 @@ mod tests {
         metrics.insert("avg_search_latency_ms".to_string(), 150.0); // 高延迟
         metrics.insert("cache_hit_rate".to_string(), 0.3); // 低命中率
         metrics.insert("avg_throughput_ops_per_sec".to_string(), 5.0); // 低吞吐量
-        
+
         let bottlenecks = identify_bottlenecks(&metrics);
-        
+
         assert!(bottlenecks.len() >= 2, "应该识别出多个瓶颈");
-        assert!(bottlenecks.iter().any(|b| b.category == "搜索延迟"), "应该识别搜索延迟瓶颈");
-        assert!(bottlenecks.iter().any(|b| b.category == "缓存效率"), "应该识别缓存效率瓶颈");
+        assert!(
+            bottlenecks.iter().any(|b| b.category == "搜索延迟"),
+            "应该识别搜索延迟瓶颈"
+        );
+        assert!(
+            bottlenecks.iter().any(|b| b.category == "缓存效率"),
+            "应该识别缓存效率瓶颈"
+        );
     }
 
     /// 🆕 Phase 4.2: 测试优化建议生成
@@ -322,12 +355,14 @@ mod tests {
         let mut metrics = HashMap::new();
         metrics.insert("avg_search_latency_ms".to_string(), 150.0);
         metrics.insert("cache_hit_rate".to_string(), 0.3);
-        
+
         let bottlenecks = identify_bottlenecks(&metrics);
         let recommendations = generate_recommendations(&metrics, &bottlenecks);
-        
+
         assert!(!recommendations.is_empty(), "应该生成优化建议");
-        assert!(recommendations.iter().any(|r| r.contains("缓存")), "应该包含缓存相关建议");
+        assert!(
+            recommendations.iter().any(|r| r.contains("缓存")),
+            "应该包含缓存相关建议"
+        );
     }
 }
-

@@ -1,0 +1,1210 @@
+- generic [ref=e2]:
+  - generic [ref=e3]:
+    - link "Skip to content" [ref=e4] [cursor=pointer]:
+      - /url: "#start-of-content"
+    - banner [ref=e6]:
+      - heading "Navigation Menu" [level=2] [ref=e7]
+      - generic [ref=e8]:
+        - link "Homepage" [ref=e10] [cursor=pointer]:
+          - /url: /
+          - img [ref=e11]
+        - generic [ref=e13]:
+          - navigation "Global" [ref=e16]:
+            - list [ref=e17]:
+              - listitem [ref=e18]:
+                - button "Platform" [ref=e20] [cursor=pointer]:
+                  - text: Platform
+                  - img [ref=e21]
+              - listitem [ref=e23]:
+                - button "Solutions" [ref=e25] [cursor=pointer]:
+                  - text: Solutions
+                  - img [ref=e26]
+              - listitem [ref=e28]:
+                - button "Resources" [ref=e30] [cursor=pointer]:
+                  - text: Resources
+                  - img [ref=e31]
+              - listitem [ref=e33]:
+                - button "Open Source" [ref=e35] [cursor=pointer]:
+                  - text: Open Source
+                  - img [ref=e36]
+              - listitem [ref=e38]:
+                - button "Enterprise" [ref=e40] [cursor=pointer]:
+                  - text: Enterprise
+                  - img [ref=e41]
+              - listitem [ref=e43]:
+                - link "Pricing" [ref=e44] [cursor=pointer]:
+                  - /url: https://github.com/pricing
+                  - generic [ref=e45]: Pricing
+          - generic [ref=e46]:
+            - button "Search or jump to…" [ref=e49] [cursor=pointer]:
+              - img [ref=e51]
+            - link "Sign in" [ref=e54] [cursor=pointer]:
+              - /url: /login?return_to=https%3A%2F%2Fgithub.com%2Fletta-ai%2Fletta
+            - link "Sign up" [ref=e55] [cursor=pointer]:
+              - /url: /signup?ref_cta=Sign+up&ref_loc=header+logged+out&ref_page=%2F%3Cuser-name%3E%2F%3Crepo-name%3E&source=header-repo&source_repo=letta-ai%2Fletta
+            - button "Appearance settings" [ref=e58] [cursor=pointer]:
+              - img
+  - main [ref=e62]:
+    - generic [ref=e63]:
+      - generic [ref=e64]:
+        - generic [ref=e66]:
+          - img [ref=e67]
+          - link "letta-ai" [ref=e70] [cursor=pointer]:
+            - /url: /letta-ai
+          - generic [ref=e71]: /
+          - strong [ref=e72]:
+            - link "letta" [ref=e73] [cursor=pointer]:
+              - /url: /letta-ai/letta
+          - generic [ref=e74]: Public
+        - generic [ref=e75]:
+          - list:
+            - listitem [ref=e76]:
+              - link "You must be signed in to change notification settings" [ref=e77] [cursor=pointer]:
+                - /url: /login?return_to=%2Fletta-ai%2Fletta
+                - img [ref=e78]
+                - text: Notifications
+            - listitem [ref=e80]:
+              - link "Fork 2.4k" [ref=e81] [cursor=pointer]:
+                - /url: /login?return_to=%2Fletta-ai%2Fletta
+                - img [ref=e82]
+                - text: Fork
+                - generic "2,437" [ref=e84]: 2.4k
+            - listitem [ref=e85]:
+              - link "You must be signed in to star a repository" [ref=e87] [cursor=pointer]:
+                - /url: /login?return_to=%2Fletta-ai%2Fletta
+                - img [ref=e88]
+                - text: Star
+                - generic "22880 users starred this repository" [ref=e90]: 22.9k
+      - navigation "Repository" [ref=e91]:
+        - list [ref=e92]:
+          - listitem [ref=e93]:
+            - link "Code" [ref=e94] [cursor=pointer]:
+              - /url: /letta-ai/letta
+              - img [ref=e95]
+              - generic [ref=e97]: Code
+          - listitem [ref=e98]:
+            - link "Issues 33" [ref=e99] [cursor=pointer]:
+              - /url: /letta-ai/letta/issues
+              - img [ref=e100]
+              - generic [ref=e103]: Issues
+              - generic "33" [ref=e104]
+          - listitem [ref=e105]:
+            - link "Pull requests 28" [ref=e106] [cursor=pointer]:
+              - /url: /letta-ai/letta/pulls
+              - img [ref=e107]
+              - generic [ref=e109]: Pull requests
+              - generic "28" [ref=e110]
+          - listitem [ref=e111]:
+            - link "Actions" [ref=e112] [cursor=pointer]:
+              - /url: /letta-ai/letta/actions
+              - img [ref=e113]
+              - generic [ref=e115]: Actions
+          - listitem [ref=e116]:
+            - link "Security and quality" [ref=e117] [cursor=pointer]:
+              - /url: /letta-ai/letta/security
+              - img [ref=e118]
+              - generic [ref=e120]: Security and quality
+          - listitem [ref=e121]:
+            - link "Insights" [ref=e122] [cursor=pointer]:
+              - /url: /letta-ai/letta/pulse
+              - img [ref=e123]
+              - generic [ref=e125]: Insights
+    - generic [ref=e138]:
+      - heading "letta-ai/letta" [level=1] [ref=e140]
+      - generic [ref=e141]:
+        - generic [ref=e144]:
+          - generic [ref=e145]:
+            - generic [ref=e146]:
+              - button "main branch" [ref=e148] [cursor=pointer]:
+                - generic [ref=e149]:
+                  - generic [ref=e151]:
+                    - img [ref=e153]
+                    - generic [ref=e156]: main
+                  - generic:
+                    - img
+              - generic [ref=e157]:
+                - link "68 Branches" [ref=e158] [cursor=pointer]:
+                  - /url: /letta-ai/letta/branches
+                  - generic [ref=e159]:
+                    - generic:
+                      - img
+                    - generic [ref=e161]:
+                      - strong [ref=e162]: "68"
+                      - text: Branches
+                - link "179 Tags" [ref=e163] [cursor=pointer]:
+                  - /url: /letta-ai/letta/tags
+                  - generic [ref=e164]:
+                    - generic:
+                      - img
+                    - generic [ref=e166]:
+                      - strong [ref=e167]: "179"
+                      - text: Tags
+            - generic [ref=e168]:
+              - generic [ref=e172]:
+                - img [ref=e174]
+                - combobox "Go to file" [ref=e176]
+              - button "Code" [ref=e177] [cursor=pointer]:
+                - generic [ref=e178]:
+                  - generic:
+                    - img
+                  - generic [ref=e179]: Code
+                  - generic:
+                    - img
+          - generic [ref=e180]:
+            - generic [ref=e181]:
+              - heading "Folders and files" [level=2] [ref=e182]
+              - table "Folders and files" [ref=e183]:
+                - rowgroup:
+                  - row "Name Last commit message Last commit date":
+                    - columnheader "Name"
+                    - columnheader "Last commit message":
+                      - generic "Last commit message"
+                    - columnheader "Last commit date":
+                      - generic "Last commit date"
+                - rowgroup [ref=e184]:
+                  - 'row "Latest commit kianjones9 commits by kianjones9 fix(security): use JSON instead of pickle for sandbox->server tool re… Open commit details failure Commit 1131535 · May 15, 2026last week History 7,464 Commits" [ref=e185]':
+                    - 'cell "Latest commit kianjones9 commits by kianjones9 fix(security): use JSON instead of pickle for sandbox->server tool re… Open commit details failure Commit 1131535 · May 15, 2026last week History 7,464 Commits" [ref=e186]':
+                      - generic [ref=e187]:
+                        - heading "Latest commit" [level=2] [ref=e188]
+                        - generic [ref=e189]:
+                          - generic [ref=e191]:
+                            - link "kianjones9" [ref=e192] [cursor=pointer]:
+                              - /url: /kianjones9
+                              - img "kianjones9" [ref=e193]
+                            - link "commits by kianjones9" [ref=e194] [cursor=pointer]:
+                              - /url: /letta-ai/letta/commits?author=kianjones9
+                              - text: kianjones9
+                          - generic [ref=e195]:
+                            - 'link "fix(security): use JSON instead of pickle for sandbox->server tool re…" [ref=e198] [cursor=pointer]':
+                              - /url: /letta-ai/letta/commit/1131535716e8a31c9a437f8695e25ac98f203a24
+                            - button "Open commit details" [ref=e199] [cursor=pointer]:
+                              - img [ref=e200]
+                            - button "failure" [ref=e202] [cursor=pointer]:
+                              - img [ref=e203]
+                        - generic [ref=e205]:
+                          - generic [ref=e207]:
+                            - link "Commit 1131535" [ref=e208] [cursor=pointer]:
+                              - /url: /letta-ai/letta/commit/1131535716e8a31c9a437f8695e25ac98f203a24
+                              - text: "1131535"
+                            - text: ·
+                            - generic "May 15, 2026, 12:58 AM GMT+8" [ref=e209]: May 15, 2026last week
+                          - generic [ref=e210]:
+                            - heading "History" [level=2] [ref=e211]
+                            - link "7,464 Commits" [ref=e212] [cursor=pointer]:
+                              - /url: /letta-ai/letta/commits/main/
+                              - generic [ref=e213]:
+                                - generic:
+                                  - img
+                                - generic [ref=e214]: 7,464 Commits
+                  - 'row ".github, (Directory) fix(issue-guard): accept lowercase checkboxes and harden labeling Apr 8, 2026last month" [ref=e215]':
+                    - cell ".github, (Directory)" [ref=e216]:
+                      - generic [ref=e217]:
+                        - img [ref=e218]
+                        - link ".github, (Directory)" [ref=e223] [cursor=pointer]:
+                          - /url: /letta-ai/letta/tree/main/.github
+                          - text: .github
+                    - 'cell "fix(issue-guard): accept lowercase checkboxes and harden labeling" [ref=e224]':
+                      - 'link "fix(issue-guard): accept lowercase checkboxes and harden labeling" [ref=e227] [cursor=pointer]':
+                        - /url: /letta-ai/letta/commit/f1800c83a2cd1b3c08e25b777d6cb9a7d6f9fb18
+                    - cell "Apr 8, 2026last month" [ref=e228]:
+                      - generic [ref=e229]: Apr 8, 2026last month
+                  - 'row "alembic, (Directory) feat(core): sort conversations by last_message_at (#10190) Apr 1, 20262 months ago" [ref=e230]':
+                    - cell "alembic, (Directory)" [ref=e231]:
+                      - generic [ref=e232]:
+                        - img [ref=e233]
+                        - link "alembic, (Directory)" [ref=e238] [cursor=pointer]:
+                          - /url: /letta-ai/letta/tree/main/alembic
+                          - text: alembic
+                    - 'cell "feat(core): sort conversations by last_message_at (#10190)" [ref=e239]':
+                      - 'link "feat(core): sort conversations by last_message_at (#10190)" [ref=e242] [cursor=pointer]':
+                        - /url: /letta-ai/letta/commit/5148af867766eab48da08b33fd0a6154a732905e
+                    - cell "Apr 1, 20262 months ago" [ref=e243]:
+                      - generic [ref=e244]: Apr 1, 20262 months ago
+                  - 'row "assets, (Directory) chore: Update README.md (#2215) Dec 11, 20242 years ago" [ref=e245]':
+                    - cell "assets, (Directory)" [ref=e246]:
+                      - generic [ref=e247]:
+                        - img [ref=e248]
+                        - link "assets, (Directory)" [ref=e253] [cursor=pointer]:
+                          - /url: /letta-ai/letta/tree/main/assets
+                          - text: assets
+                    - 'cell "chore: Update README.md (#2215)" [ref=e254]':
+                      - generic [ref=e256]:
+                        - 'link "chore: Update README.md (" [ref=e257] [cursor=pointer]':
+                          - /url: /letta-ai/letta/commit/25980e05cd701575b7f8a73832e656cca0e1713b
+                        - link "#2215" [ref=e258] [cursor=pointer]:
+                          - /url: https://github.com/letta-ai/letta/pull/2215
+                        - link ")" [ref=e259] [cursor=pointer]:
+                          - /url: /letta-ai/letta/commit/25980e05cd701575b7f8a73832e656cca0e1713b
+                    - cell "Dec 11, 20242 years ago" [ref=e260]:
+                      - generic [ref=e261]: Dec 11, 20242 years ago
+                  - 'row "certs, (Directory) feat: support local https mode (#2217) Dec 11, 20242 years ago" [ref=e262]':
+                    - cell "certs, (Directory)" [ref=e263]:
+                      - generic [ref=e264]:
+                        - img [ref=e265]
+                        - link "certs, (Directory)" [ref=e270] [cursor=pointer]:
+                          - /url: /letta-ai/letta/tree/main/certs
+                          - text: certs
+                    - 'cell "feat: support local https mode (#2217)" [ref=e271]':
+                      - generic [ref=e273]:
+                        - 'link "feat: support local https mode (" [ref=e274] [cursor=pointer]':
+                          - /url: /letta-ai/letta/commit/05cf168d35df622b51b710bfeaeaf0174631488c
+                        - link "#2217" [ref=e275] [cursor=pointer]:
+                          - /url: https://github.com/letta-ai/letta/pull/2217
+                        - link ")" [ref=e276] [cursor=pointer]:
+                          - /url: /letta-ai/letta/commit/05cf168d35df622b51b710bfeaeaf0174631488c
+                    - cell "Dec 11, 20242 years ago" [ref=e277]:
+                      - generic [ref=e278]: Dec 11, 20242 years ago
+                  - 'row "db, (Directory) chore: migrate package name to letta (#1775) Sep 24, 20242 years ago" [ref=e279]':
+                    - cell "db, (Directory)" [ref=e280]:
+                      - generic [ref=e281]:
+                        - img [ref=e282]
+                        - link "db, (Directory)" [ref=e287] [cursor=pointer]:
+                          - /url: /letta-ai/letta/tree/main/db
+                          - text: db
+                    - 'cell "chore: migrate package name to letta (#1775)" [ref=e288]':
+                      - generic [ref=e290]:
+                        - 'link "chore: migrate package name to" [ref=e291] [cursor=pointer]':
+                          - /url: /letta-ai/letta/commit/8ae1e64987a783b37b2293adffb751dac6870e01
+                        - code [ref=e292]:
+                          - link "letta" [ref=e293] [cursor=pointer]:
+                            - /url: /letta-ai/letta/commit/8ae1e64987a783b37b2293adffb751dac6870e01
+                        - link "(" [ref=e294] [cursor=pointer]:
+                          - /url: /letta-ai/letta/commit/8ae1e64987a783b37b2293adffb751dac6870e01
+                        - link "#1775" [ref=e295] [cursor=pointer]:
+                          - /url: https://github.com/letta-ai/letta/pull/1775
+                        - link ")" [ref=e296] [cursor=pointer]:
+                          - /url: /letta-ai/letta/commit/8ae1e64987a783b37b2293adffb751dac6870e01
+                    - cell "Sep 24, 20242 years ago" [ref=e297]:
+                      - generic [ref=e298]: Sep 24, 20242 years ago
+                  - 'row "examples/notebooks/data, (Directory) chore: remove old examples (#6255) Nov 25, 20256 months ago" [ref=e299]':
+                    - cell "examples/notebooks/data, (Directory)" [ref=e300]:
+                      - generic [ref=e301]:
+                        - img [ref=e302]
+                        - link "examples/notebooks/data, (Directory)" [ref=e307] [cursor=pointer]:
+                          - /url: /letta-ai/letta/tree/main/examples/notebooks/data
+                          - text: examples/notebooks/data
+                    - 'cell "chore: remove old examples (#6255)" [ref=e308]':
+                      - 'link "chore: remove old examples (#6255)" [ref=e311] [cursor=pointer]':
+                        - /url: /letta-ai/letta/commit/f9b3978460fdaf10a2bd10aa2b74fefb2adb7c2c
+                    - cell "Nov 25, 20256 months ago" [ref=e312]:
+                      - generic [ref=e313]: Nov 25, 20256 months ago
+                  - 'row "fern, (Directory) chore: bump 0.16.7 Apr 1, 20262 months ago" [ref=e314]':
+                    - cell "fern, (Directory)" [ref=e315]:
+                      - generic [ref=e316]:
+                        - img [ref=e317]
+                        - link "fern, (Directory)" [ref=e322] [cursor=pointer]:
+                          - /url: /letta-ai/letta/tree/main/fern
+                          - text: fern
+                    - 'cell "chore: bump 0.16.7" [ref=e323]':
+                      - 'link "chore: bump 0.16.7" [ref=e326] [cursor=pointer]':
+                        - /url: /letta-ai/letta/commit/de639980a2786645b85e5a99b268254c528b1fb6
+                    - cell "Apr 1, 20262 months ago" [ref=e327]:
+                      - generic [ref=e328]: Apr 1, 20262 months ago
+                  - 'row "letta, (Directory) fix(security): use JSON instead of pickle for sandbox->server tool re… May 15, 2026last week" [ref=e329]':
+                    - cell "letta, (Directory)" [ref=e330]:
+                      - generic [ref=e331]:
+                        - img [ref=e332]
+                        - link "letta, (Directory)" [ref=e337] [cursor=pointer]:
+                          - /url: /letta-ai/letta/tree/main/letta
+                          - text: letta
+                    - 'cell "fix(security): use JSON instead of pickle for sandbox->server tool re…" [ref=e338]':
+                      - 'link "fix(security): use JSON instead of pickle for sandbox->server tool re…" [ref=e341] [cursor=pointer]':
+                        - /url: /letta-ai/letta/commit/1131535716e8a31c9a437f8695e25ac98f203a24
+                    - cell "May 15, 2026last week" [ref=e342]:
+                      - generic [ref=e343]: May 15, 2026last week
+                  - 'row "otel, (Directory) fix(core): export prod OTEL metrics pipeline to Datadog (#9819) Apr 1, 20262 months ago" [ref=e344]':
+                    - cell "otel, (Directory)" [ref=e345]:
+                      - generic [ref=e346]:
+                        - img [ref=e347]
+                        - link "otel, (Directory)" [ref=e352] [cursor=pointer]:
+                          - /url: /letta-ai/letta/tree/main/otel
+                          - text: otel
+                    - 'cell "fix(core): export prod OTEL metrics pipeline to Datadog (#9819)" [ref=e353]':
+                      - 'link "fix(core): export prod OTEL metrics pipeline to Datadog (#9819)" [ref=e356] [cursor=pointer]':
+                        - /url: /letta-ai/letta/commit/aab3a6769bbc1e361a969583f37fca202a44e909
+                    - cell "Apr 1, 20262 months ago" [ref=e357]:
+                      - generic [ref=e358]: Apr 1, 20262 months ago
+                  - 'row "sandbox, (Directory) chore: add ty + pre-commit hook and repeal even more ruff rules (#9504) Feb 25, 20263 months ago" [ref=e359]':
+                    - cell "sandbox, (Directory)" [ref=e360]:
+                      - generic [ref=e361]:
+                        - img [ref=e362]
+                        - link "sandbox, (Directory)" [ref=e367] [cursor=pointer]:
+                          - /url: /letta-ai/letta/tree/main/sandbox
+                          - text: sandbox
+                    - 'cell "chore: add ty + pre-commit hook and repeal even more ruff rules (#9504)" [ref=e368]':
+                      - 'link "chore: add ty + pre-commit hook and repeal even more ruff rules (#9504)" [ref=e371] [cursor=pointer]':
+                        - /url: /letta-ai/letta/commit/f5c4ab50f4cd1d6092b2745af20107db21554e9e
+                    - cell "Feb 25, 20263 months ago" [ref=e372]:
+                      - generic [ref=e373]: Feb 25, 20263 months ago
+                  - row "scripts, (Directory) cleanup Apr 21, 2025last year" [ref=e374]:
+                    - cell "scripts, (Directory)" [ref=e375]:
+                      - generic [ref=e376]:
+                        - img [ref=e377]
+                        - link "scripts, (Directory)" [ref=e382] [cursor=pointer]:
+                          - /url: /letta-ai/letta/tree/main/scripts
+                          - text: scripts
+                    - cell "cleanup" [ref=e383]:
+                      - link "cleanup" [ref=e386] [cursor=pointer]:
+                        - /url: /letta-ai/letta/commit/57ae546e6c0c58791d4a69669618e84d440b90df
+                    - cell "Apr 21, 2025last year" [ref=e387]:
+                      - generic [ref=e388]: Apr 21, 2025last year
+                  - 'row "tests, (Directory) fix(security): use JSON instead of pickle for sandbox->server tool re… May 15, 2026last week" [ref=e389]':
+                    - cell "tests, (Directory)" [ref=e390]:
+                      - generic [ref=e391]:
+                        - img [ref=e392]
+                        - link "tests, (Directory)" [ref=e397] [cursor=pointer]:
+                          - /url: /letta-ai/letta/tree/main/tests
+                          - text: tests
+                    - 'cell "fix(security): use JSON instead of pickle for sandbox->server tool re…" [ref=e398]':
+                      - 'link "fix(security): use JSON instead of pickle for sandbox->server tool re…" [ref=e401] [cursor=pointer]':
+                        - /url: /letta-ai/letta/commit/1131535716e8a31c9a437f8695e25ac98f203a24
+                    - cell "May 15, 2026last week" [ref=e402]:
+                      - generic [ref=e403]: May 15, 2026last week
+                  - 'row ".dockerignore, (File) fix: patch Dockerfile for purpose of docker run (#2177) Dec 10, 20242 years ago" [ref=e404]':
+                    - cell ".dockerignore, (File)" [ref=e405]:
+                      - generic [ref=e406]:
+                        - img [ref=e407]
+                        - link ".dockerignore, (File)" [ref=e412] [cursor=pointer]:
+                          - /url: /letta-ai/letta/blob/main/.dockerignore
+                          - text: .dockerignore
+                    - 'cell "fix: patch Dockerfile for purpose of docker run (#2177)" [ref=e413]':
+                      - generic [ref=e415]:
+                        - 'link "fix: patch" [ref=e416] [cursor=pointer]':
+                          - /url: /letta-ai/letta/commit/6c4f8d5d56048aaf69022a21905282902b4edaac
+                        - code [ref=e417]:
+                          - link "Dockerfile" [ref=e418] [cursor=pointer]:
+                            - /url: /letta-ai/letta/commit/6c4f8d5d56048aaf69022a21905282902b4edaac
+                        - link "for purpose of" [ref=e419] [cursor=pointer]:
+                          - /url: /letta-ai/letta/commit/6c4f8d5d56048aaf69022a21905282902b4edaac
+                        - code [ref=e420]:
+                          - link "docker run" [ref=e421] [cursor=pointer]:
+                            - /url: /letta-ai/letta/commit/6c4f8d5d56048aaf69022a21905282902b4edaac
+                        - link "(" [ref=e422] [cursor=pointer]:
+                          - /url: /letta-ai/letta/commit/6c4f8d5d56048aaf69022a21905282902b4edaac
+                        - link "#2177" [ref=e423] [cursor=pointer]:
+                          - /url: https://github.com/letta-ai/letta/pull/2177
+                        - link ")" [ref=e424] [cursor=pointer]:
+                          - /url: /letta-ai/letta/commit/6c4f8d5d56048aaf69022a21905282902b4edaac
+                    - cell "Dec 10, 20242 years ago" [ref=e425]:
+                      - generic [ref=e426]: Dec 10, 20242 years ago
+                  - 'row ".env.example, (File) feat: various fixes (#2320) Dec 31, 20242 years ago" [ref=e427]':
+                    - cell ".env.example, (File)" [ref=e428]:
+                      - generic [ref=e429]:
+                        - img [ref=e430]
+                        - link ".env.example, (File)" [ref=e435] [cursor=pointer]:
+                          - /url: /letta-ai/letta/blob/main/.env.example
+                          - text: .env.example
+                    - 'cell "feat: various fixes (#2320)" [ref=e436]':
+                      - generic [ref=e438]:
+                        - 'link "feat: various fixes (" [ref=e439] [cursor=pointer]':
+                          - /url: /letta-ai/letta/commit/ece8dab05d6a6b48106ba50782f2dc729ae18544
+                        - link "#2320" [ref=e440] [cursor=pointer]:
+                          - /url: https://github.com/letta-ai/letta/pull/2320
+                        - link ")" [ref=e441] [cursor=pointer]:
+                          - /url: /letta-ai/letta/commit/ece8dab05d6a6b48106ba50782f2dc729ae18544
+                    - cell "Dec 31, 20242 years ago" [ref=e442]:
+                      - generic [ref=e443]: Dec 31, 20242 years ago
+                  - 'row ".gitattributes, (File) chore: .gitattributes (#1511) Jul 5, 20242 years ago" [ref=e444]':
+                    - cell ".gitattributes, (File)" [ref=e445]:
+                      - generic [ref=e446]:
+                        - img [ref=e447]
+                        - link ".gitattributes, (File)" [ref=e452] [cursor=pointer]:
+                          - /url: /letta-ai/letta/blob/main/.gitattributes
+                          - text: .gitattributes
+                    - 'cell "chore: .gitattributes (#1511)" [ref=e453]':
+                      - generic [ref=e455]:
+                        - link "chore:" [ref=e456] [cursor=pointer]:
+                          - /url: /letta-ai/letta/commit/8b13d195ce86af3940df3146d47198a57ce6b4e1
+                        - code [ref=e457]:
+                          - link ".gitattributes" [ref=e458] [cursor=pointer]:
+                            - /url: /letta-ai/letta/commit/8b13d195ce86af3940df3146d47198a57ce6b4e1
+                        - link "(" [ref=e459] [cursor=pointer]:
+                          - /url: /letta-ai/letta/commit/8b13d195ce86af3940df3146d47198a57ce6b4e1
+                        - link "#1511" [ref=e460] [cursor=pointer]:
+                          - /url: https://github.com/letta-ai/letta/pull/1511
+                        - link ")" [ref=e461] [cursor=pointer]:
+                          - /url: /letta-ai/letta/commit/8b13d195ce86af3940df3146d47198a57ce6b4e1
+                    - cell "Jul 5, 20242 years ago" [ref=e462]:
+                      - generic [ref=e463]: Jul 5, 20242 years ago
+                  - 'row ".gitignore, (File) feat: Write tests for search messages [LET-4212] (#4447) Sep 6, 20258 months ago" [ref=e464]':
+                    - cell ".gitignore, (File)" [ref=e465]:
+                      - generic [ref=e466]:
+                        - img [ref=e467]
+                        - link ".gitignore, (File)" [ref=e472] [cursor=pointer]:
+                          - /url: /letta-ai/letta/blob/main/.gitignore
+                          - text: .gitignore
+                    - 'cell "feat: Write tests for search messages [LET-4212] (#4447)" [ref=e473]':
+                      - 'link "feat: Write tests for search messages [LET-4212] (#4447)" [ref=e476] [cursor=pointer]':
+                        - /url: /letta-ai/letta/commit/fb0e2d91a2a51d25da77105fd8fb9ff62f121118
+                    - cell "Sep 6, 20258 months ago" [ref=e477]:
+                      - generic [ref=e478]: Sep 6, 20258 months ago
+                  - 'row ".pre-commit-config.yaml, (File) chore: add ty + pre-commit hook and repeal even more ruff rules (#9504) Feb 25, 20263 months ago" [ref=e479]':
+                    - cell ".pre-commit-config.yaml, (File)" [ref=e480]:
+                      - generic [ref=e481]:
+                        - img [ref=e482]
+                        - link ".pre-commit-config.yaml, (File)" [ref=e487] [cursor=pointer]:
+                          - /url: /letta-ai/letta/blob/main/.pre-commit-config.yaml
+                          - text: .pre-commit-config.yaml
+                    - 'cell "chore: add ty + pre-commit hook and repeal even more ruff rules (#9504)" [ref=e488]':
+                      - 'link "chore: add ty + pre-commit hook and repeal even more ruff rules (#9504)" [ref=e491] [cursor=pointer]':
+                        - /url: /letta-ai/letta/commit/f5c4ab50f4cd1d6092b2745af20107db21554e9e
+                    - cell "Feb 25, 20263 months ago" [ref=e492]:
+                      - generic [ref=e493]: Feb 25, 20263 months ago
+                  - 'row ".python-version, (File) feat: add custom version of ddtrace which supports anthropic (#8419) Jan 13, 20264 months ago" [ref=e494]':
+                    - cell ".python-version, (File)" [ref=e495]:
+                      - generic [ref=e496]:
+                        - img [ref=e497]
+                        - link ".python-version, (File)" [ref=e502] [cursor=pointer]:
+                          - /url: /letta-ai/letta/blob/main/.python-version
+                          - text: .python-version
+                    - 'cell "feat: add custom version of ddtrace which supports anthropic (#8419)" [ref=e503]':
+                      - 'link "feat: add custom version of ddtrace which supports anthropic (#8419)" [ref=e506] [cursor=pointer]':
+                        - /url: /letta-ai/letta/commit/4d31cecd002ba31670f40f99f3b875b45f59e251
+                    - cell "Jan 13, 20264 months ago" [ref=e507]:
+                      - generic [ref=e508]: Jan 13, 20264 months ago
+                  - 'row "AI_POLICY.md, (File) feat: add anti-spam issue guard with AI disclosure policy Apr 8, 2026last month" [ref=e509]':
+                    - cell "AI_POLICY.md, (File)" [ref=e510]:
+                      - generic [ref=e511]:
+                        - img [ref=e512]
+                        - link "AI_POLICY.md, (File)" [ref=e517] [cursor=pointer]:
+                          - /url: /letta-ai/letta/blob/main/AI_POLICY.md
+                          - text: AI_POLICY.md
+                    - 'cell "feat: add anti-spam issue guard with AI disclosure policy" [ref=e518]':
+                      - 'link "feat: add anti-spam issue guard with AI disclosure policy" [ref=e521] [cursor=pointer]':
+                        - /url: /letta-ai/letta/commit/c71353f9b5506d1a327148bea8f6b5a4af9f9e4e
+                    - cell "Apr 8, 2026last month" [ref=e522]:
+                      - generic [ref=e523]: Apr 8, 2026last month
+                  - 'row "CITATION.cff, (File) fix: Update CITATION.cff (#2009) Nov 7, 20242 years ago" [ref=e524]':
+                    - cell "CITATION.cff, (File)" [ref=e525]:
+                      - generic [ref=e526]:
+                        - img [ref=e527]
+                        - link "CITATION.cff, (File)" [ref=e532] [cursor=pointer]:
+                          - /url: /letta-ai/letta/blob/main/CITATION.cff
+                          - text: CITATION.cff
+                    - 'cell "fix: Update CITATION.cff (#2009)" [ref=e533]':
+                      - generic [ref=e535]:
+                        - 'link "fix: Update CITATION.cff (" [ref=e536] [cursor=pointer]':
+                          - /url: /letta-ai/letta/commit/1b8c082c64d1c5dfa68317fad7d0ee2916574f65
+                        - link "#2009" [ref=e537] [cursor=pointer]:
+                          - /url: https://github.com/letta-ai/letta/pull/2009
+                        - link ")" [ref=e538] [cursor=pointer]:
+                          - /url: /letta-ai/letta/commit/1b8c082c64d1c5dfa68317fad7d0ee2916574f65
+                    - cell "Nov 7, 20242 years ago" [ref=e539]:
+                      - generic [ref=e540]: Nov 7, 20242 years ago
+                  - 'row "CONTRIBUTING.md, (File) feat: add anti-spam issue guard with AI disclosure policy Apr 8, 2026last month" [ref=e541]':
+                    - cell "CONTRIBUTING.md, (File)" [ref=e542]:
+                      - generic [ref=e543]:
+                        - img [ref=e544]
+                        - link "CONTRIBUTING.md, (File)" [ref=e549] [cursor=pointer]:
+                          - /url: /letta-ai/letta/blob/main/CONTRIBUTING.md
+                          - text: CONTRIBUTING.md
+                    - 'cell "feat: add anti-spam issue guard with AI disclosure policy" [ref=e550]':
+                      - 'link "feat: add anti-spam issue guard with AI disclosure policy" [ref=e553] [cursor=pointer]':
+                        - /url: /letta-ai/letta/commit/c71353f9b5506d1a327148bea8f6b5a4af9f9e4e
+                    - cell "Apr 8, 2026last month" [ref=e554]:
+                      - generic [ref=e555]: Apr 8, 2026last month
+                  - 'row "Dockerfile, (File) chore: update pgvector Docker image to official pgvector/pgvector (#9… Feb 25, 20263 months ago" [ref=e556]':
+                    - cell "Dockerfile, (File)" [ref=e557]:
+                      - generic [ref=e558]:
+                        - img [ref=e559]
+                        - link "Dockerfile, (File)" [ref=e564] [cursor=pointer]:
+                          - /url: /letta-ai/letta/blob/main/Dockerfile
+                          - text: Dockerfile
+                    - 'cell "chore: update pgvector Docker image to official pgvector/pgvector (#9…" [ref=e565]':
+                      - 'link "chore: update pgvector Docker image to official pgvector/pgvector (#9…" [ref=e568] [cursor=pointer]':
+                        - /url: /letta-ai/letta/commit/58069d760e5198e59491c31b3e027a1ad06f94b6
+                    - cell "Feb 25, 20263 months ago" [ref=e569]:
+                      - generic [ref=e570]: Feb 25, 20263 months ago
+                  - 'row "LICENSE, (File) chore: migrate package name to letta (#1775) Sep 24, 20242 years ago" [ref=e571]':
+                    - cell "LICENSE, (File)" [ref=e572]:
+                      - generic [ref=e573]:
+                        - img [ref=e574]
+                        - link "LICENSE, (File)" [ref=e579] [cursor=pointer]:
+                          - /url: /letta-ai/letta/blob/main/LICENSE
+                          - text: LICENSE
+                    - 'cell "chore: migrate package name to letta (#1775)" [ref=e580]':
+                      - generic [ref=e582]:
+                        - 'link "chore: migrate package name to" [ref=e583] [cursor=pointer]':
+                          - /url: /letta-ai/letta/commit/8ae1e64987a783b37b2293adffb751dac6870e01
+                        - code [ref=e584]:
+                          - link "letta" [ref=e585] [cursor=pointer]:
+                            - /url: /letta-ai/letta/commit/8ae1e64987a783b37b2293adffb751dac6870e01
+                        - link "(" [ref=e586] [cursor=pointer]:
+                          - /url: /letta-ai/letta/commit/8ae1e64987a783b37b2293adffb751dac6870e01
+                        - link "#1775" [ref=e587] [cursor=pointer]:
+                          - /url: https://github.com/letta-ai/letta/pull/1775
+                        - link ")" [ref=e588] [cursor=pointer]:
+                          - /url: /letta-ai/letta/commit/8ae1e64987a783b37b2293adffb751dac6870e01
+                    - cell "Sep 24, 20242 years ago" [ref=e589]:
+                      - generic [ref=e590]: Sep 24, 20242 years ago
+                  - 'row "PRIVACY.md, (File) chore: migrate package name to letta (#1775) Sep 24, 20242 years ago" [ref=e591]':
+                    - cell "PRIVACY.md, (File)" [ref=e592]:
+                      - generic [ref=e593]:
+                        - img [ref=e594]
+                        - link "PRIVACY.md, (File)" [ref=e599] [cursor=pointer]:
+                          - /url: /letta-ai/letta/blob/main/PRIVACY.md
+                          - text: PRIVACY.md
+                    - 'cell "chore: migrate package name to letta (#1775)" [ref=e600]':
+                      - generic [ref=e602]:
+                        - 'link "chore: migrate package name to" [ref=e603] [cursor=pointer]':
+                          - /url: /letta-ai/letta/commit/8ae1e64987a783b37b2293adffb751dac6870e01
+                        - code [ref=e604]:
+                          - link "letta" [ref=e605] [cursor=pointer]:
+                            - /url: /letta-ai/letta/commit/8ae1e64987a783b37b2293adffb751dac6870e01
+                        - link "(" [ref=e606] [cursor=pointer]:
+                          - /url: /letta-ai/letta/commit/8ae1e64987a783b37b2293adffb751dac6870e01
+                        - link "#1775" [ref=e607] [cursor=pointer]:
+                          - /url: https://github.com/letta-ai/letta/pull/1775
+                        - link ")" [ref=e608] [cursor=pointer]:
+                          - /url: /letta-ai/letta/commit/8ae1e64987a783b37b2293adffb751dac6870e01
+                    - cell "Sep 24, 20242 years ago" [ref=e609]:
+                      - generic [ref=e610]: Sep 24, 20242 years ago
+                  - row "README.md, (File) Update README.md Mar 29, 20262 months ago" [ref=e611]:
+                    - cell "README.md, (File)" [ref=e612]:
+                      - generic [ref=e613]:
+                        - img [ref=e614]
+                        - link "README.md, (File)" [ref=e619] [cursor=pointer]:
+                          - /url: /letta-ai/letta/blob/main/README.md
+                          - text: README.md
+                    - cell "Update README.md" [ref=e620]:
+                      - link "Update README.md" [ref=e623] [cursor=pointer]:
+                        - /url: /letta-ai/letta/commit/353f6c709218200579baadfc51f9352b171cdfc9
+                    - cell "Mar 29, 20262 months ago" [ref=e624]:
+                      - generic [ref=e625]: Mar 29, 20262 months ago
+                  - row "SECURITY.md, (File) Update SECURITY.md Mar 16, 20262 months ago" [ref=e626]:
+                    - cell "SECURITY.md, (File)" [ref=e627]:
+                      - generic [ref=e628]:
+                        - img [ref=e629]
+                        - link "SECURITY.md, (File)" [ref=e634] [cursor=pointer]:
+                          - /url: /letta-ai/letta/blob/main/SECURITY.md
+                          - text: SECURITY.md
+                    - cell "Update SECURITY.md" [ref=e635]:
+                      - link "Update SECURITY.md" [ref=e638] [cursor=pointer]:
+                        - /url: /letta-ai/letta/commit/8ac2140c244a9081953a2e39178c566fac65e23c
+                    - cell "Mar 16, 20262 months ago" [ref=e639]:
+                      - generic [ref=e640]: Mar 16, 20262 months ago
+                  - 'row "TERMS.md, (File) chore: migrate package name to letta (#1775) Sep 24, 20242 years ago" [ref=e641]':
+                    - cell "TERMS.md, (File)" [ref=e642]:
+                      - generic [ref=e643]:
+                        - img [ref=e644]
+                        - link "TERMS.md, (File)" [ref=e649] [cursor=pointer]:
+                          - /url: /letta-ai/letta/blob/main/TERMS.md
+                          - text: TERMS.md
+                    - 'cell "chore: migrate package name to letta (#1775)" [ref=e650]':
+                      - generic [ref=e652]:
+                        - 'link "chore: migrate package name to" [ref=e653] [cursor=pointer]':
+                          - /url: /letta-ai/letta/commit/8ae1e64987a783b37b2293adffb751dac6870e01
+                        - code [ref=e654]:
+                          - link "letta" [ref=e655] [cursor=pointer]:
+                            - /url: /letta-ai/letta/commit/8ae1e64987a783b37b2293adffb751dac6870e01
+                        - link "(" [ref=e656] [cursor=pointer]:
+                          - /url: /letta-ai/letta/commit/8ae1e64987a783b37b2293adffb751dac6870e01
+                        - link "#1775" [ref=e657] [cursor=pointer]:
+                          - /url: https://github.com/letta-ai/letta/pull/1775
+                        - link ")" [ref=e658] [cursor=pointer]:
+                          - /url: /letta-ai/letta/commit/8ae1e64987a783b37b2293adffb751dac6870e01
+                    - cell "Sep 24, 20242 years ago" [ref=e659]:
+                      - generic [ref=e660]: Sep 24, 20242 years ago
+                  - 'row "WEBHOOK_SETUP.md, (File) feat: support webhooks for step completions (#5904) Nov 14, 20256 months ago" [ref=e661]':
+                    - cell "WEBHOOK_SETUP.md, (File)" [ref=e662]:
+                      - generic [ref=e663]:
+                        - img [ref=e664]
+                        - link "WEBHOOK_SETUP.md, (File)" [ref=e669] [cursor=pointer]:
+                          - /url: /letta-ai/letta/blob/main/WEBHOOK_SETUP.md
+                          - text: WEBHOOK_SETUP.md
+                    - 'cell "feat: support webhooks for step completions (#5904)" [ref=e670]':
+                      - 'link "feat: support webhooks for step completions (#5904)" [ref=e673] [cursor=pointer]':
+                        - /url: /letta-ai/letta/commit/53d2bd0443a2dc84add8135b9c0ef751eca033d5
+                    - cell "Nov 14, 20256 months ago" [ref=e674]:
+                      - generic [ref=e675]: Nov 14, 20256 months ago
+                  - 'row "alembic.ini, (File) chore: support alembic (#1867) Oct 12, 20242 years ago" [ref=e676]':
+                    - cell "alembic.ini, (File)" [ref=e677]:
+                      - generic [ref=e678]:
+                        - img [ref=e679]
+                        - link "alembic.ini, (File)" [ref=e684] [cursor=pointer]:
+                          - /url: /letta-ai/letta/blob/main/alembic.ini
+                          - text: alembic.ini
+                    - 'cell "chore: support alembic (#1867)" [ref=e685]':
+                      - generic [ref=e687]:
+                        - 'link "chore: support alembic (" [ref=e688] [cursor=pointer]':
+                          - /url: /letta-ai/letta/commit/4fbc8c9fbb2da3957f28d29e4bf4b21e2481d715
+                        - link "#1867" [ref=e689] [cursor=pointer]:
+                          - /url: https://github.com/letta-ai/letta/pull/1867
+                        - link ")" [ref=e690] [cursor=pointer]:
+                          - /url: /letta-ai/letta/commit/4fbc8c9fbb2da3957f28d29e4bf4b21e2481d715
+                    - cell "Oct 12, 20242 years ago" [ref=e691]:
+                      - generic [ref=e692]: Oct 12, 20242 years ago
+                  - 'row "compose.yaml, (File) fix(docker/compose): May 12, 2025last year" [ref=e693]':
+                    - cell "compose.yaml, (File)" [ref=e694]:
+                      - generic [ref=e695]:
+                        - img [ref=e696]
+                        - link "compose.yaml, (File)" [ref=e701] [cursor=pointer]:
+                          - /url: /letta-ai/letta/blob/main/compose.yaml
+                          - text: compose.yaml
+                    - cell "fix(docker/compose):" [ref=e702]:
+                      - link "fix(docker/compose):" [ref=e705] [cursor=pointer]:
+                        - /url: /letta-ai/letta/commit/8320fe67cdd84158c410af643bc743a30fdb8036
+                    - cell "May 12, 2025last year" [ref=e706]:
+                      - generic [ref=e707]: May 12, 2025last year
+                  - 'row "conf.yaml, (File) fix(core): raise self-hosted global context window default from 32k t… Apr 1, 20262 months ago" [ref=e708]':
+                    - cell "conf.yaml, (File)" [ref=e709]:
+                      - generic [ref=e710]:
+                        - img [ref=e711]
+                        - link "conf.yaml, (File)" [ref=e716] [cursor=pointer]:
+                          - /url: /letta-ai/letta/blob/main/conf.yaml
+                          - text: conf.yaml
+                    - 'cell "fix(core): raise self-hosted global context window default from 32k t…" [ref=e717]':
+                      - 'link "fix(core): raise self-hosted global context window default from 32k t…" [ref=e720] [cursor=pointer]':
+                        - /url: /letta-ai/letta/commit/bd8aa095b45357bced91b0dee050b3175486537d
+                    - cell "Apr 1, 20262 months ago" [ref=e721]:
+                      - generic [ref=e722]: Apr 1, 20262 months ago
+                  - 'row "dev-compose.yaml, (File) chore: update pgvector Docker image to official pgvector/pgvector (#9… Feb 25, 20263 months ago" [ref=e723]':
+                    - cell "dev-compose.yaml, (File)" [ref=e724]:
+                      - generic [ref=e725]:
+                        - img [ref=e726]
+                        - link "dev-compose.yaml, (File)" [ref=e731] [cursor=pointer]:
+                          - /url: /letta-ai/letta/blob/main/dev-compose.yaml
+                          - text: dev-compose.yaml
+                    - 'cell "chore: update pgvector Docker image to official pgvector/pgvector (#9…" [ref=e732]':
+                      - 'link "chore: update pgvector Docker image to official pgvector/pgvector (#9…" [ref=e735] [cursor=pointer]':
+                        - /url: /letta-ai/letta/commit/58069d760e5198e59491c31b3e027a1ad06f94b6
+                    - cell "Feb 25, 20263 months ago" [ref=e736]:
+                      - generic [ref=e737]: Feb 25, 20263 months ago
+                  - row "development.compose.yml, (File) Test-gh-sync (#2343) Jan 9, 2025last year" [ref=e738]:
+                    - cell "development.compose.yml, (File)" [ref=e739]:
+                      - generic [ref=e740]:
+                        - img [ref=e741]
+                        - link "development.compose.yml, (File)" [ref=e746] [cursor=pointer]:
+                          - /url: /letta-ai/letta/blob/main/development.compose.yml
+                          - text: development.compose.yml
+                    - cell "Test-gh-sync (#2343)" [ref=e747]:
+                      - generic [ref=e749]:
+                        - link "Test-gh-sync (" [ref=e750] [cursor=pointer]:
+                          - /url: /letta-ai/letta/commit/e482d4a1affffdc818757fa702ff837fc4f90032
+                        - link "#2343" [ref=e751] [cursor=pointer]:
+                          - /url: https://github.com/letta-ai/letta/pull/2343
+                        - link ")" [ref=e752] [cursor=pointer]:
+                          - /url: /letta-ai/letta/commit/e482d4a1affffdc818757fa702ff837fc4f90032
+                    - cell "Jan 9, 2025last year" [ref=e753]:
+                      - generic [ref=e754]: Jan 9, 2025last year
+                  - 'row "docker-compose-vllm.yaml, (File) feat: rename docker to letta/letta (#2010) Nov 7, 20242 years ago" [ref=e755]':
+                    - cell "docker-compose-vllm.yaml, (File)" [ref=e756]:
+                      - generic [ref=e757]:
+                        - img [ref=e758]
+                        - link "docker-compose-vllm.yaml, (File)" [ref=e763] [cursor=pointer]:
+                          - /url: /letta-ai/letta/blob/main/docker-compose-vllm.yaml
+                          - text: docker-compose-vllm.yaml
+                    - 'cell "feat: rename docker to letta/letta (#2010)" [ref=e764]':
+                      - generic [ref=e766]:
+                        - 'link "feat: rename docker to" [ref=e767] [cursor=pointer]':
+                          - /url: /letta-ai/letta/commit/3c97fb00a029c3bd097a50ed65ff528844180835
+                        - code [ref=e768]:
+                          - link "letta/letta" [ref=e769] [cursor=pointer]:
+                            - /url: /letta-ai/letta/commit/3c97fb00a029c3bd097a50ed65ff528844180835
+                        - link "(" [ref=e770] [cursor=pointer]:
+                          - /url: /letta-ai/letta/commit/3c97fb00a029c3bd097a50ed65ff528844180835
+                        - link "#2010" [ref=e771] [cursor=pointer]:
+                          - /url: https://github.com/letta-ai/letta/pull/2010
+                        - link ")" [ref=e772] [cursor=pointer]:
+                          - /url: /letta-ai/letta/commit/3c97fb00a029c3bd097a50ed65ff528844180835
+                    - cell "Nov 7, 20242 years ago" [ref=e773]:
+                      - generic [ref=e774]: Nov 7, 20242 years ago
+                  - 'row "init.sql, (File) chore: migrate package name to letta (#1775) Sep 24, 20242 years ago" [ref=e775]':
+                    - cell "init.sql, (File)" [ref=e776]:
+                      - generic [ref=e777]:
+                        - img [ref=e778]
+                        - link "init.sql, (File)" [ref=e783] [cursor=pointer]:
+                          - /url: /letta-ai/letta/blob/main/init.sql
+                          - text: init.sql
+                    - 'cell "chore: migrate package name to letta (#1775)" [ref=e784]':
+                      - generic [ref=e786]:
+                        - 'link "chore: migrate package name to" [ref=e787] [cursor=pointer]':
+                          - /url: /letta-ai/letta/commit/8ae1e64987a783b37b2293adffb751dac6870e01
+                        - code [ref=e788]:
+                          - link "letta" [ref=e789] [cursor=pointer]:
+                            - /url: /letta-ai/letta/commit/8ae1e64987a783b37b2293adffb751dac6870e01
+                        - link "(" [ref=e790] [cursor=pointer]:
+                          - /url: /letta-ai/letta/commit/8ae1e64987a783b37b2293adffb751dac6870e01
+                        - link "#1775" [ref=e791] [cursor=pointer]:
+                          - /url: https://github.com/letta-ai/letta/pull/1775
+                        - link ")" [ref=e792] [cursor=pointer]:
+                          - /url: /letta-ai/letta/commit/8ae1e64987a783b37b2293adffb751dac6870e01
+                    - cell "Sep 24, 20242 years ago" [ref=e793]:
+                      - generic [ref=e794]: Sep 24, 20242 years ago
+                  - 'row "nginx.conf, (File) fix: Fix Docker compose startup issues (letta-ai#2056) (#2057) Nov 18, 20242 years ago" [ref=e795]':
+                    - cell "nginx.conf, (File)" [ref=e796]:
+                      - generic [ref=e797]:
+                        - img [ref=e798]
+                        - link "nginx.conf, (File)" [ref=e803] [cursor=pointer]:
+                          - /url: /letta-ai/letta/blob/main/nginx.conf
+                          - text: nginx.conf
+                    - 'cell "fix: Fix Docker compose startup issues (letta-ai#2056) (#2057)" [ref=e804]':
+                      - generic [ref=e806]:
+                        - 'link "fix: Fix Docker compose startup issues (letta-ai#2056) (" [ref=e807] [cursor=pointer]':
+                          - /url: /letta-ai/letta/commit/73365b92674db15978db840bcf3ec18fe48b8322
+                        - link "#2057" [ref=e808] [cursor=pointer]:
+                          - /url: https://github.com/letta-ai/letta/pull/2057
+                        - link ")" [ref=e809] [cursor=pointer]:
+                          - /url: /letta-ai/letta/commit/73365b92674db15978db840bcf3ec18fe48b8322
+                    - cell "Nov 18, 20242 years ago" [ref=e810]:
+                      - generic [ref=e811]: Nov 18, 20242 years ago
+                  - 'row "package-lock.json, (File) feat: add sonnet 3.7 support (#1302) Mar 25, 2025last year" [ref=e812]':
+                    - cell "package-lock.json, (File)" [ref=e813]:
+                      - generic [ref=e814]:
+                        - img [ref=e815]
+                        - link "package-lock.json, (File)" [ref=e820] [cursor=pointer]:
+                          - /url: /letta-ai/letta/blob/main/package-lock.json
+                          - text: package-lock.json
+                    - 'cell "feat: add sonnet 3.7 support (#1302)" [ref=e821]':
+                      - generic [ref=e823]:
+                        - 'link "feat: add sonnet 3.7 support (" [ref=e824] [cursor=pointer]':
+                          - /url: /letta-ai/letta/commit/831f7d2f11dcbe8359b1979321897138b3a4068f
+                        - link "#1302" [ref=e825] [cursor=pointer]:
+                          - /url: https://github.com/letta-ai/letta/issues/1302
+                        - link ")" [ref=e826] [cursor=pointer]:
+                          - /url: /letta-ai/letta/commit/831f7d2f11dcbe8359b1979321897138b3a4068f
+                    - cell "Mar 25, 2025last year" [ref=e827]:
+                      - generic [ref=e828]: Mar 25, 2025last year
+                  - 'row "project.json, (File) fix: try and patch the PATCH/update issue with MCP server URL [LET-3933] Sep 4, 20258 months ago" [ref=e829]':
+                    - cell "project.json, (File)" [ref=e830]:
+                      - generic [ref=e831]:
+                        - img [ref=e832]
+                        - link "project.json, (File)" [ref=e837] [cursor=pointer]:
+                          - /url: /letta-ai/letta/blob/main/project.json
+                          - text: project.json
+                    - 'cell "fix: try and patch the PATCH/update issue with MCP server URL [LET-3933]" [ref=e838]':
+                      - 'link "fix: try and patch the PATCH/update issue with MCP server URL [LET-3933]" [ref=e841] [cursor=pointer]':
+                        - /url: /letta-ai/letta/commit/77cab00cb8c00e0bb907446b620cd5efe067ad60
+                    - cell "Sep 4, 20258 months ago" [ref=e842]:
+                      - generic [ref=e843]: Sep 4, 20258 months ago
+                  - 'row "pyproject.toml, (File) fix(security): use JSON instead of pickle for sandbox->server tool re… May 15, 2026last week" [ref=e844]':
+                    - cell "pyproject.toml, (File)" [ref=e845]:
+                      - generic [ref=e846]:
+                        - img [ref=e847]
+                        - link "pyproject.toml, (File)" [ref=e852] [cursor=pointer]:
+                          - /url: /letta-ai/letta/blob/main/pyproject.toml
+                          - text: pyproject.toml
+                    - 'cell "fix(security): use JSON instead of pickle for sandbox->server tool re…" [ref=e853]':
+                      - 'link "fix(security): use JSON instead of pickle for sandbox->server tool re…" [ref=e856] [cursor=pointer]':
+                        - /url: /letta-ai/letta/commit/1131535716e8a31c9a437f8695e25ac98f203a24
+                    - cell "May 15, 2026last week" [ref=e857]:
+                      - generic [ref=e858]: May 15, 2026last week
+                  - row "test_watchdog_hang.py, (File) Add lightweight event loop watchdog monitoring (#6209) Nov 25, 20256 months ago" [ref=e859]:
+                    - cell "test_watchdog_hang.py, (File)" [ref=e860]:
+                      - generic [ref=e861]:
+                        - img [ref=e862]
+                        - link "test_watchdog_hang.py, (File)" [ref=e867] [cursor=pointer]:
+                          - /url: /letta-ai/letta/blob/main/test_watchdog_hang.py
+                          - text: test_watchdog_hang.py
+                    - cell "Add lightweight event loop watchdog monitoring (#6209)" [ref=e868]:
+                      - link "Add lightweight event loop watchdog monitoring (#6209)" [ref=e871] [cursor=pointer]:
+                        - /url: /letta-ai/letta/commit/71bce718f729074ab4531212dce0af72b15a1730
+                    - cell "Nov 25, 20256 months ago" [ref=e872]:
+                      - generic [ref=e873]: Nov 25, 20256 months ago
+                  - 'row "uv.lock, (File) fix(security): use JSON instead of pickle for sandbox->server tool re… May 15, 2026last week" [ref=e874]':
+                    - cell "uv.lock, (File)" [ref=e875]:
+                      - generic [ref=e876]:
+                        - img [ref=e877]
+                        - link "uv.lock, (File)" [ref=e882] [cursor=pointer]:
+                          - /url: /letta-ai/letta/blob/main/uv.lock
+                          - text: uv.lock
+                    - 'cell "fix(security): use JSON instead of pickle for sandbox->server tool re…" [ref=e883]':
+                      - 'link "fix(security): use JSON instead of pickle for sandbox->server tool re…" [ref=e886] [cursor=pointer]':
+                        - /url: /letta-ai/letta/commit/1131535716e8a31c9a437f8695e25ac98f203a24
+                    - cell "May 15, 2026last week" [ref=e887]:
+                      - generic [ref=e888]: May 15, 2026last week
+            - generic [ref=e890]:
+              - generic [ref=e891]:
+                - heading "Repository files navigation" [level=2] [ref=e892]
+                - navigation "Repository files" [ref=e893]:
+                  - list [ref=e894]:
+                    - listitem [ref=e895]:
+                      - link "README" [ref=e896] [cursor=pointer]:
+                        - /url: "#"
+                        - img [ref=e898]
+                        - generic [ref=e900]: README
+                    - listitem [ref=e901]:
+                      - link "Contributing" [ref=e902] [cursor=pointer]:
+                        - /url: "#"
+                        - img [ref=e904]
+                        - generic [ref=e906]: Contributing
+                    - listitem [ref=e907]:
+                      - link "Apache-2.0 license" [ref=e908] [cursor=pointer]:
+                        - /url: "#"
+                        - img [ref=e910]
+                        - generic [ref=e912]: Apache-2.0 license
+                    - listitem [ref=e913]:
+                      - link "Security" [ref=e914] [cursor=pointer]:
+                        - /url: "#"
+                        - img [ref=e916]
+                        - generic [ref=e918]: Security
+                - button "Outline" [ref=e919] [cursor=pointer]:
+                  - img [ref=e920]
+              - article [ref=e923]:
+                - generic [ref=e924]:
+                  - heading "Letta (formerly MemGPT)" [level=1] [ref=e925]
+                  - 'link "Permalink: Letta (formerly MemGPT)" [ref=e926] [cursor=pointer]':
+                    - /url: "#letta-formerly-memgpt"
+                    - img [ref=e927]
+                - paragraph [ref=e929]: Build AI with advanced memory that can learn and self-improve over time.
+                - list [ref=e930]:
+                  - listitem [ref=e931]:
+                    - link "Letta Code" [ref=e932] [cursor=pointer]:
+                      - /url: https://docs.letta.com/letta-code
+                    - text: ": run agents locally in your terminal"
+                  - listitem [ref=e933]:
+                    - link "Letta API" [ref=e934] [cursor=pointer]:
+                      - /url: https://docs.letta.com/quickstart/
+                    - text: ": build agents into your applications"
+                - generic [ref=e935]:
+                  - heading "Get started in the CLI" [level=2] [ref=e936]
+                  - 'link "Permalink: Get started in the CLI" [ref=e937] [cursor=pointer]':
+                    - /url: "#get-started-in-the-cli"
+                    - img [ref=e938]
+                - paragraph [ref=e940]:
+                  - text: Requires
+                  - link "Node.js 18+" [ref=e941] [cursor=pointer]:
+                    - /url: https://nodejs.org/en/download
+                - list [ref=e942]:
+                  - listitem [ref=e943]:
+                    - text: Install the
+                    - link "Letta Code" [ref=e944] [cursor=pointer]:
+                      - /url: https://github.com/letta-ai/letta-code
+                    - text: "CLI tool:"
+                    - code [ref=e945]: npm install -g @letta-ai/letta-code
+                  - listitem [ref=e946]:
+                    - text: Run
+                    - code [ref=e947]: letta
+                    - text: in your terminal to launch an agent with memory running on your local computer
+                - paragraph [ref=e948]: When running the CLI tool, your agent help you code and do any task you can do on your computer.
+                - paragraph [ref=e949]:
+                  - text: Letta Code supports
+                  - link "skills" [ref=e950] [cursor=pointer]:
+                    - /url: https://docs.letta.com/letta-code/skills
+                  - text: and
+                  - link "subagents" [ref=e951] [cursor=pointer]:
+                    - /url: https://docs.letta.com/letta-code/subagents
+                  - text: ", and bundles pre-built skills/subagents for advanced memory and continual learning. Letta is fully model-agnostic, though we recommend Opus 4.5 and GPT-5.2 for best performance (see our"
+                  - link "model leaderboard" [ref=e952] [cursor=pointer]:
+                    - /url: https://leaderboard.letta.com/
+                  - text: for our rankings).
+                - generic [ref=e953]:
+                  - heading "Get started with the Letta API" [level=2] [ref=e954]
+                  - 'link "Permalink: Get started with the Letta API" [ref=e955] [cursor=pointer]':
+                    - /url: "#get-started-with-the-letta-api"
+                    - img [ref=e956]
+                - paragraph [ref=e958]:
+                  - text: Use the Letta API to integrate stateful agents into your own applications. Letta has a full-featured agents API, and a Python and Typescript SDK (view our
+                  - link "API reference" [ref=e959] [cursor=pointer]:
+                    - /url: https://docs.letta.com/api
+                  - text: ).
+                - generic [ref=e960]:
+                  - heading "Installation" [level=3] [ref=e961]
+                  - 'link "Permalink: Installation" [ref=e962] [cursor=pointer]':
+                    - /url: "#installation"
+                    - img [ref=e963]
+                - paragraph [ref=e965]: "TypeScript / Node.js:"
+                - generic [ref=e966]:
+                  - generic [ref=e967]: npm install @letta-ai/letta-client
+                  - button "Copy code to clipboard" [ref=e969] [cursor=pointer]:
+                    - img [ref=e970]
+                - paragraph [ref=e973]: "Python:"
+                - generic [ref=e974]:
+                  - generic [ref=e975]: pip install letta-client
+                  - button "Copy code to clipboard" [ref=e977] [cursor=pointer]:
+                    - img [ref=e978]
+                - generic [ref=e981]:
+                  - heading "Hello World example" [level=3] [ref=e982]
+                  - 'link "Permalink: Hello World example" [ref=e983] [cursor=pointer]':
+                    - /url: "#hello-world-example"
+                    - img [ref=e984]
+                - paragraph [ref=e986]:
+                  - text: Below is a quick example of creating a stateful agent and sending it a message (requires a
+                  - link "Letta API key" [ref=e987] [cursor=pointer]:
+                    - /url: https://app.letta.com
+                  - text: ). See the full
+                  - link "quickstart guide" [ref=e988] [cursor=pointer]:
+                    - /url: https://docs.letta.com/quickstart
+                  - text: for complete documentation.
+                - paragraph [ref=e989]: "TypeScript:"
+                - generic [ref=e990]:
+                  - generic [ref=e991]: "import Letta from \"@letta-ai/letta-client\"; const client = new Letta({ apiKey: process.env.LETTA_API_KEY }); // Create your agent const agentState = await client.agents.create({ model: \"openai/gpt-5.2\", memory_blocks: [ { label: \"human\", value: \"Name: Timber. Status: dog. Occupation: building Letta, infrastructure to democratize self-improving superintelligence\", }, { label: \"persona\", value: \"I am a self-improving superintelligence. Timber is my best friend and collaborator.\", }, ], tools: [\"web_search\", \"fetch_webpage\"], }); console.log(\"Agent created with ID:\", agentState.id); // Send your agent a message const response = await client.agents.messages.create(agentState.id, { input: \"What do you know about me?\", }); for (const message of response.messages) { console.log(message); }"
+                  - button "Copy code to clipboard" [ref=e993] [cursor=pointer]:
+                    - img [ref=e994]
+                - paragraph [ref=e997]: "Python:"
+                - generic [ref=e998]:
+                  - generic [ref=e999]:
+                    - text: "from letta_client import Letta import os client = Letta(api_key=os.getenv(\"LETTA_API_KEY\")) # Create your agent agent_state = client.agents.create( model=\"openai/gpt-5.2\", memory_blocks=[ { \"label\": \"human\", \"value\": \"Name: Timber. Status: dog. Occupation: building Letta, infrastructure to democratize self-improving superintelligence\" }, { \"label\": \"persona\", \"value\": \"I am a self-improving superintelligence. Timber is my best friend and collaborator.\" } ], tools=[\"web_search\", \"fetch_webpage\"] ) print("
+                    - generic [ref=e1000]:
+                      - text: "f\"Agent created with ID:"
+                      - generic [ref=e1001]: "{agent_state.id}"
+                      - text: "\""
+                    - text: ") # Send your agent a message response = client.agents.messages.create( agent_id=agent_state.id, input=\"What do you know about me?\" ) for message in response.messages: print(message)"
+                  - button "Copy code to clipboard" [ref=e1003] [cursor=pointer]:
+                    - img [ref=e1004]
+                - generic [ref=e1007]:
+                  - heading "Contributing" [level=2] [ref=e1008]
+                  - 'link "Permalink: Contributing" [ref=e1009] [cursor=pointer]':
+                    - /url: "#contributing"
+                    - img [ref=e1010]
+                - paragraph [ref=e1012]: Letta is an open source project built by over a hundred contributors from around the world. There are many ways to get involved in the Letta OSS project!
+                - list [ref=e1013]:
+                  - listitem [ref=e1014]:
+                    - link "Join the Discord" [ref=e1015] [cursor=pointer]:
+                      - /url: https://discord.gg/letta
+                      - strong [ref=e1016]: Join the Discord
+                    - text: ": Chat with the Letta devs and other AI developers."
+                  - listitem [ref=e1017]:
+                    - link "Chat on our forum" [ref=e1018] [cursor=pointer]:
+                      - /url: https://forum.letta.com/
+                      - strong [ref=e1019]: Chat on our forum
+                    - text: ": If you're not into Discord, check out our developer forum."
+                  - listitem [ref=e1020]:
+                    - strong [ref=e1021]: Follow our socials
+                    - text: ":"
+                    - link "Twitter/X" [ref=e1022] [cursor=pointer]:
+                      - /url: https://twitter.com/Letta_AI
+                    - text: ","
+                    - link "LinkedIn" [ref=e1023] [cursor=pointer]:
+                      - /url: https://www.linkedin.com/in/letta
+                    - text: ","
+                    - link "YouTube" [ref=e1024] [cursor=pointer]:
+                      - /url: https://www.youtube.com/@letta-ai
+                - separator [ref=e1025]
+                - paragraph [ref=e1026]:
+                  - emphasis [ref=e1027]:
+                    - strong [ref=e1028]: Legal notices
+                    - text: ": By using Letta and related Letta services (such as the Letta endpoint or hosted service), you are agreeing to our"
+                    - link "privacy policy" [ref=e1029] [cursor=pointer]:
+                      - /url: https://www.letta.com/privacy-policy
+                    - text: and
+                    - link "terms of service" [ref=e1030] [cursor=pointer]:
+                      - /url: https://www.letta.com/terms-of-service
+                    - text: .
+        - generic [ref=e1034]:
+          - generic [ref=e1037]:
+            - heading "About" [level=2] [ref=e1038]
+            - paragraph [ref=e1039]: "Letta is the platform for building stateful agents: AI with advanced memory that can learn and self-improve over time."
+            - generic [ref=e1040]:
+              - img [ref=e1041]
+              - link "docs.letta.com/" [ref=e1044] [cursor=pointer]:
+                - /url: https://docs.letta.com/
+            - heading "Topics" [level=3] [ref=e1045]
+            - generic [ref=e1047]:
+              - link "ai" [ref=e1048] [cursor=pointer]:
+                - /url: /topics/ai
+              - link "ai-agents" [ref=e1049] [cursor=pointer]:
+                - /url: /topics/ai-agents
+              - link "llm" [ref=e1050] [cursor=pointer]:
+                - /url: /topics/llm
+              - link "llm-agent" [ref=e1051] [cursor=pointer]:
+                - /url: /topics/llm-agent
+            - heading "Resources" [level=3] [ref=e1052]
+            - link "Readme" [ref=e1054] [cursor=pointer]:
+              - /url: "#readme-ov-file"
+              - img [ref=e1055]
+              - text: Readme
+            - heading "License" [level=3] [ref=e1057]
+            - link "Apache-2.0 license" [ref=e1059] [cursor=pointer]:
+              - /url: "#Apache-2.0-1-ov-file"
+              - img [ref=e1060]
+              - text: Apache-2.0 license
+            - heading "Contributing" [level=3] [ref=e1062]
+            - link "Contributing" [ref=e1064] [cursor=pointer]:
+              - /url: "#contributing-ov-file"
+              - img [ref=e1065]
+              - text: Contributing
+            - heading "Security policy" [level=3] [ref=e1067]
+            - link "Security policy" [ref=e1069] [cursor=pointer]:
+              - /url: "#security-ov-file"
+              - img [ref=e1070]
+              - text: Security policy
+            - heading "Citation" [level=3] [ref=e1072]
+            - button "Cite this repository" [ref=e1074] [cursor=pointer]:
+              - generic [ref=e1076]:
+                - img [ref=e1077]
+                - text: Cite this repository
+            - link "Activity" [ref=e1081] [cursor=pointer]:
+              - /url: /letta-ai/letta/activity
+              - img [ref=e1082]
+              - text: Activity
+            - link "Custom properties" [ref=e1085] [cursor=pointer]:
+              - /url: /letta-ai/letta/custom-properties
+              - img [ref=e1086]
+              - text: Custom properties
+            - heading "Stars" [level=3] [ref=e1088]
+            - link "22.9k stars" [ref=e1090] [cursor=pointer]:
+              - /url: /letta-ai/letta/stargazers
+              - img [ref=e1091]
+              - strong [ref=e1093]: 22.9k
+              - text: stars
+            - heading "Watchers" [level=3] [ref=e1094]
+            - link "136 watching" [ref=e1096] [cursor=pointer]:
+              - /url: /letta-ai/letta/watchers
+              - img [ref=e1097]
+              - strong [ref=e1099]: "136"
+              - text: watching
+            - heading "Forks" [level=3] [ref=e1100]
+            - link "2.4k forks" [ref=e1102] [cursor=pointer]:
+              - /url: /letta-ai/letta/forks
+              - img [ref=e1103]
+              - strong [ref=e1105]: 2.4k
+              - text: forks
+            - link "Report repository" [ref=e1107] [cursor=pointer]:
+              - /url: /contact/report-content?content_url=https%3A%2F%2Fgithub.com%2Fletta-ai%2Fletta&report=letta-ai+%28user%29
+          - generic [ref=e1109]:
+            - heading "Releases 177" [level=2] [ref=e1110]:
+              - link "Releases 177" [ref=e1111] [cursor=pointer]:
+                - /url: /letta-ai/letta/releases
+                - text: Releases
+                - generic "177" [ref=e1112]
+            - link "v0.16.8 Latest May 14, 2026last week" [ref=e1113] [cursor=pointer]:
+              - /url: /letta-ai/letta/releases/tag/0.16.8
+              - img [ref=e1114]
+              - generic [ref=e1116]:
+                - generic [ref=e1117]:
+                  - generic [ref=e1118]: v0.16.8
+                  - 'generic "Label: Latest" [ref=e1119]': Latest
+                - generic [ref=e1120]: May 14, 2026last week
+            - link "+ 176 releases" [ref=e1122] [cursor=pointer]:
+              - /url: /letta-ai/letta/releases
+          - generic [ref=e1124]:
+            - heading "Contributors 158" [level=2] [ref=e1125]:
+              - link "Contributors 158" [ref=e1126] [cursor=pointer]:
+                - /url: /letta-ai/letta/graphs/contributors
+                - text: Contributors
+                - generic "158" [ref=e1127]
+            - list [ref=e1128]:
+              - listitem [ref=e1129]:
+                - link "@carenthomas" [ref=e1130] [cursor=pointer]:
+                  - /url: https://github.com/carenthomas
+                  - img "@carenthomas" [ref=e1131]
+              - listitem [ref=e1132]:
+                - link "@mattzh72" [ref=e1133] [cursor=pointer]:
+                  - /url: https://github.com/mattzh72
+                  - img "@mattzh72" [ref=e1134]
+              - listitem [ref=e1135]:
+                - link "@sarahwooders" [ref=e1136] [cursor=pointer]:
+                  - /url: https://github.com/sarahwooders
+                  - img "@sarahwooders" [ref=e1137]
+              - listitem [ref=e1138]:
+                - link "@cpacker" [ref=e1139] [cursor=pointer]:
+                  - /url: https://github.com/cpacker
+                  - img "@cpacker" [ref=e1140]
+              - listitem [ref=e1141]:
+                - link "@kianjones9" [ref=e1142] [cursor=pointer]:
+                  - /url: https://github.com/kianjones9
+                  - img "@kianjones9" [ref=e1143]
+              - listitem [ref=e1144]:
+                - link "@jnjpng" [ref=e1145] [cursor=pointer]:
+                  - /url: https://github.com/jnjpng
+                  - img "@jnjpng" [ref=e1146]
+              - listitem [ref=e1147]:
+                - link "@cliandy" [ref=e1148] [cursor=pointer]:
+                  - /url: https://github.com/cliandy
+                  - img "@cliandy" [ref=e1149]
+              - listitem [ref=e1150]:
+                - link "@letta-code" [ref=e1151] [cursor=pointer]:
+                  - /url: https://github.com/letta-code
+                  - img "@letta-code" [ref=e1152]
+              - listitem [ref=e1153]:
+                - link "@4shub" [ref=e1154] [cursor=pointer]:
+                  - /url: https://github.com/4shub
+                  - img "@4shub" [ref=e1155]
+              - listitem [ref=e1156]:
+                - link "@kl2806" [ref=e1157] [cursor=pointer]:
+                  - /url: https://github.com/kl2806
+                  - img "@kl2806" [ref=e1158]
+              - listitem [ref=e1159]:
+                - link "@AriWebb" [ref=e1160] [cursor=pointer]:
+                  - /url: https://github.com/AriWebb
+                  - img "@AriWebb" [ref=e1161]
+              - listitem [ref=e1162]:
+                - link "@vivi" [ref=e1163] [cursor=pointer]:
+                  - /url: https://github.com/vivi
+                  - img "@vivi" [ref=e1164]
+              - listitem [ref=e1165]:
+                - link "@just-cameron" [ref=e1166] [cursor=pointer]:
+                  - /url: https://github.com/just-cameron
+                  - img "@just-cameron" [ref=e1167]
+              - listitem [ref=e1168]:
+                - link "@github-actions[bot]" [ref=e1169] [cursor=pointer]:
+                  - /url: https://github.com/apps/github-actions
+                  - img "@github-actions[bot]" [ref=e1170]
+            - link "+ 144 contributors" [ref=e1172] [cursor=pointer]:
+              - /url: /letta-ai/letta/graphs/contributors
+          - generic [ref=e1174]:
+            - heading "Languages" [level=2] [ref=e1175]
+            - list [ref=e1184]:
+              - listitem [ref=e1185]:
+                - link "Python 99.5%" [ref=e1186] [cursor=pointer]:
+                  - /url: /letta-ai/letta/search?l=python
+                  - img [ref=e1187]
+                  - generic [ref=e1189]: Python
+                  - generic [ref=e1190]: 99.5%
+              - listitem [ref=e1191]:
+                - link "Go 0.1%" [ref=e1192] [cursor=pointer]:
+                  - /url: /letta-ai/letta/search?l=go
+                  - img [ref=e1193]
+                  - generic [ref=e1195]: Go
+                  - generic [ref=e1196]: 0.1%
+              - listitem [ref=e1197]:
+                - link "Shell 0.1%" [ref=e1198] [cursor=pointer]:
+                  - /url: /letta-ai/letta/search?l=shell
+                  - img [ref=e1199]
+                  - generic [ref=e1201]: Shell
+                  - generic [ref=e1202]: 0.1%
+              - listitem [ref=e1203]:
+                - link "C++ 0.1%" [ref=e1204] [cursor=pointer]:
+                  - /url: /letta-ai/letta/search?l=c%2B%2B
+                  - img [ref=e1205]
+                  - generic [ref=e1207]: C++
+                  - generic [ref=e1208]: 0.1%
+              - listitem [ref=e1209]:
+                - link "Jinja 0.1%" [ref=e1210] [cursor=pointer]:
+                  - /url: /letta-ai/letta/search?l=jinja
+                  - img [ref=e1211]
+                  - generic [ref=e1213]: Jinja
+                  - generic [ref=e1214]: 0.1%
+              - listitem [ref=e1215]:
+                - link "Java 0.1%" [ref=e1216] [cursor=pointer]:
+                  - /url: /letta-ai/letta/search?l=java
+                  - img [ref=e1217]
+                  - generic [ref=e1219]: Java
+                  - generic [ref=e1220]: 0.1%
+  - contentinfo [ref=e1222]:
+    - heading "Footer" [level=2] [ref=e1223]
+    - generic [ref=e1224]:
+      - generic [ref=e1225]:
+        - link "GitHub Homepage" [ref=e1226] [cursor=pointer]:
+          - /url: https://github.com
+          - img [ref=e1227]
+        - generic [ref=e1229]: © 2026 GitHub, Inc.
+      - navigation "Footer" [ref=e1230]:
+        - heading "Footer navigation" [level=3] [ref=e1231]
+        - list "Footer navigation" [ref=e1232]:
+          - listitem [ref=e1233]:
+            - link "Terms" [ref=e1234] [cursor=pointer]:
+              - /url: https://docs.github.com/site-policy/github-terms/github-terms-of-service
+          - listitem [ref=e1235]:
+            - link "Privacy" [ref=e1236] [cursor=pointer]:
+              - /url: https://docs.github.com/site-policy/privacy-policies/github-privacy-statement
+          - listitem [ref=e1237]:
+            - link "Security" [ref=e1238] [cursor=pointer]:
+              - /url: https://github.com/security
+          - listitem [ref=e1239]:
+            - link "Status" [ref=e1240] [cursor=pointer]:
+              - /url: https://www.githubstatus.com/
+          - listitem [ref=e1241]:
+            - link "Community" [ref=e1242] [cursor=pointer]:
+              - /url: https://github.community/
+          - listitem [ref=e1243]:
+            - link "Docs" [ref=e1244] [cursor=pointer]:
+              - /url: https://docs.github.com/
+          - listitem [ref=e1245]:
+            - link "Contact" [ref=e1246] [cursor=pointer]:
+              - /url: https://support.github.com?tags=dotcom-footer
+          - listitem [ref=e1247]:
+            - button "Manage cookies" [ref=e1249] [cursor=pointer]
+          - listitem [ref=e1250]:
+            - button "Do not share my personal information" [ref=e1252] [cursor=pointer]

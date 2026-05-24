@@ -127,6 +127,8 @@ mod tests {
             context: None,
             enable_topic_extraction: true,
             enable_context_synthesis: true,
+            resource_id: None,
+            category_path: None,
         };
         
         // 验证 retrieve 方法存在且可调用

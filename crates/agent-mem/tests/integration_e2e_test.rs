@@ -31,9 +31,7 @@ mod e2e_tests {
         assert!(!search_results.is_empty());
 
         // Step 4: 验证结果相关性
-        let found_coffee = search_results
-            .iter()
-            .any(|m| m.content.contains("咖啡"));
+        let found_coffee = search_results.iter().any(|m| m.content.contains("咖啡"));
         assert!(found_coffee, "Should find coffee memory");
     }
 
@@ -55,10 +53,7 @@ mod e2e_tests {
         }
 
         // 搜索验证
-        let results = memory
-            .search("张三")
-            .await
-            .expect("Failed to search");
+        let results = memory.search("张三").await.expect("Failed to search");
         assert!(!results.is_empty());
     }
 
@@ -82,13 +77,8 @@ mod e2e_tests {
             .expect("Failed to update memory");
 
         // 验证更新
-        let results = memory
-            .search("住在哪里")
-            .await
-            .expect("Failed to search");
-        let updated = results
-            .iter()
-            .any(|m| m.content.contains("上海"));
+        let results = memory.search("住在哪里").await.expect("Failed to search");
+        let updated = results.iter().any(|m| m.content.contains("上海"));
         assert!(updated, "Memory should be updated to Shanghai");
     }
 
@@ -112,10 +102,7 @@ mod e2e_tests {
             .expect("Failed to delete memory");
 
         // 验证删除
-        let results = memory
-            .search("测试记忆")
-            .await
-            .expect("Failed to search");
+        let results = memory.search("测试记忆").await.expect("Failed to search");
         assert!(results.is_empty(), "Deleted memory should not be found");
     }
 
@@ -126,16 +113,19 @@ mod e2e_tests {
         let memory = Memory::quick();
 
         // 添加中文记忆
-        memory.add("我喜欢喝茶").await.expect("Failed to add Chinese memory");
+        memory
+            .add("我喜欢喝茶")
+            .await
+            .expect("Failed to add Chinese memory");
 
         // 添加英文记忆
-        memory.add("I like drinking coffee").await.expect("Failed to add English memory");
+        memory
+            .add("I like drinking coffee")
+            .await
+            .expect("Failed to add English memory");
 
         // 搜索中文
-        let chinese_results = memory
-            .search("茶")
-            .await
-            .expect("Failed to search Chinese");
+        let chinese_results = memory.search("茶").await.expect("Failed to search Chinese");
         assert!(!chinese_results.is_empty());
 
         // 搜索英文
@@ -170,10 +160,11 @@ mod e2e_tests {
             .await
             .expect("Failed to search for user A");
 
-        let has_user_b_memory = user_a_results
-            .iter()
-            .any(|m| m.content.contains("User B"));
-        assert!(!has_user_b_memory, "User A should not see User B's memories");
+        let has_user_b_memory = user_a_results.iter().any(|m| m.content.contains("User B"));
+        assert!(
+            !has_user_b_memory,
+            "User A should not see User B's memories"
+        );
     }
 
     /// 测试智能去重
@@ -194,10 +185,7 @@ mod e2e_tests {
             .expect("Failed to add second memory");
 
         // 搜索应该只返回一条（去重后）
-        let results = memory
-            .search("编程")
-            .await
-            .expect("Failed to search");
+        let results = memory.search("编程").await.expect("Failed to search");
 
         // 验证去重逻辑
         assert!(!results.is_empty());
@@ -245,14 +233,14 @@ mod e2e_tests {
 
         // 搜索性能测试
         let start = std::time::Instant::now();
-        let results = memory
-            .search("测试")
-            .await
-            .expect("Failed to search");
+        let results = memory.search("测试").await.expect("Failed to search");
         let elapsed = start.elapsed();
 
         assert!(!results.is_empty());
-        assert!(elapsed.as_secs() < 5, "Search should complete within 5 seconds");
+        assert!(
+            elapsed.as_secs() < 5,
+            "Search should complete within 5 seconds"
+        );
     }
 
     /// 测试并发操作
@@ -318,7 +306,10 @@ mod e2e_tests {
             .search("持久化测试")
             .await
             .expect("Failed to search");
-        assert!(!results.is_empty(), "Memory should persist across instances");
+        assert!(
+            !results.is_empty(),
+            "Memory should persist across instances"
+        );
     }
 }
 
@@ -348,10 +339,7 @@ mod real_world_scenarios {
         }
 
         // 验证记忆整合
-        let results = memory
-            .search("李明的职业")
-            .await
-            .expect("Failed to search");
+        let results = memory.search("李明的职业").await.expect("Failed to search");
         assert!(!results.is_empty());
     }
 
@@ -448,10 +436,7 @@ mod real_world_scenarios {
         }
 
         // 搜索笔记
-        let results = memory
-            .search("会议")
-            .await
-            .expect("Failed to search notes");
+        let results = memory.search("会议").await.expect("Failed to search notes");
         assert!(!results.is_empty());
     }
 }

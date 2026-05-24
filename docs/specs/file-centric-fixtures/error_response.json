@@ -1,0 +1,8 @@
+{
+  "code": "category_not_found",
+  "message": "Category not found: /preferences/communication",
+  "details": {
+    "path": "/preferences/communication"
+  },
+  "timestamp": "2026-03-18T10:15:00Z"
+}

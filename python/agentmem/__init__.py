@@ -1,24 +1,12 @@
 """
-AgentMem Python SDK
+AgentMem - AI Agent Memory Platform
 
-Python bindings for AgentMem - High-performance AI agent memory system.
+Simple Memory API (Mem0-compatible) for AgentMem.
 """
 
-from .client import MemoryClient, AsyncMemoryClient, Memory
-from .langchain import (
-    AgentMemMemory,
-    AgentMemBufferMemory,
-    AgentMemSummaryMemory,
-    create_agentmem_memory
-)
+# Import directly from memory module to avoid langchain dependency issues
+from .memory import Memory
+from .types import MemoryRecord, SearchResult
 
-__version__ = "2.0.0"
-__all__ = [
-    "MemoryClient",
-    "AsyncMemoryClient",
-    "Memory",
-    "AgentMemMemory",
-    "AgentMemBufferMemory",
-    "AgentMemSummaryMemory",
-    "create_agentmem_memory"
-]
+__all__ = ["Memory", "MemoryRecord", "SearchResult"]
+__version__ = "1.0.0"

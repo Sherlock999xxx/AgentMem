@@ -93,11 +93,13 @@ async fn main() -> Result<()> {
     println!("📝 Step 4: 进行多轮对话\n");
     println!("{}", "=".repeat(60));
 
-    let conversations = [("What is my profession?", true),
+    let conversations = [
+        ("What is my profession?", true),
         ("Where do I live?", true),
         ("What are my hobbies?", true),
         ("What programming language do I prefer?", true),
-        ("Tell me about my pet", true)];
+        ("Tell me about my pet", true),
+    ];
 
     for (i, (question, save_to_memory)) in conversations.iter().enumerate() {
         println!("\n🗣️  Round {}: {}", i + 1, question);

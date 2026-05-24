@@ -398,7 +398,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_add_hierarchical_memory() {
+    async fn test_add_hierarchical_memory() -> anyhow::Result<()> {
         let config = HierarchicalServiceConfig::default();
         let service = HierarchicalMemoryService::new(config).await?;
 

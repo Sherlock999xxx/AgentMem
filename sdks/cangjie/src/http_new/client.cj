@@ -16,6 +16,31 @@ public enum HttpMethod {
     | PUT
     | DELETE
     | PATCH
+
+    public operator func ==(right: HttpMethod): Bool {
+        return match (this) {
+            case GET => match (right) {
+                case GET => true
+                case _ => false
+            }
+            case POST => match (right) {
+                case POST => true
+                case _ => false
+            }
+            case PUT => match (right) {
+                case PUT => true
+                case _ => false
+            }
+            case DELETE => match (right) {
+                case DELETE => true
+                case _ => false
+            }
+            case PATCH => match (right) {
+                case PATCH => true
+                case _ => false
+            }
+        }
+    }
 }
 
 /// AgentMem HTTP客户端配置
@@ -32,12 +57,28 @@ public class ClientConfig {
     public let writeTimeout: Int32
     
     /// 构造函数
+    public init(baseUrl: String) {
+        this.baseUrl = baseUrl
+        this.apiKey = None
+        this.connectTimeout = 10
+        this.readTimeout = 30
+        this.writeTimeout = 30
+    }
+
+    public init(baseUrl: String, apiKey: Option<String>) {
+        this.baseUrl = baseUrl
+        this.apiKey = apiKey
+        this.connectTimeout = 10
+        this.readTimeout = 30
+        this.writeTimeout = 30
+    }
+
     public init(
-        baseUrl: String, 
-        apiKey: Option<String> = None,
-        connectTimeout: Int32 = 10,
-        readTimeout: Int32 = 30,
-        writeTimeout: Int32 = 30
+        baseUrl: String,
+        apiKey: Option<String>,
+        connectTimeout: Int32,
+        readTimeout: Int32,
+        writeTimeout: Int32
     ) {
         this.baseUrl = baseUrl
         this.apiKey = apiKey
@@ -110,8 +151,8 @@ public class AgentMemHttpClient {
     /// 添加认证头
     private func addAuthHeader(headers: Map<String, String>) {
         match (this.config.apiKey) {
-            | Some(key) => headers.put("Authorization", "Bearer ${key}")
-            | None => {}
+            case Some(key) => headers.put("Authorization", "Bearer ${key}")
+            case None => headers
         }
     }
 }
@@ -169,4 +210,3 @@ public class AgentMemHttpClientBuilder {
         return AgentMemHttpClient(config)
     }
 }
-

@@ -315,3 +315,264 @@ func (c *Client) GetConfig() *Config {
 	config.APIKey = "***" // Mask API key for security
 	return config
 }
+
+// ============================================================================
+// File-Centric API Methods (Phase D2 - Go SDK Stabilization)
+// ============================================================================
+
+// --- Resource Operations ---
+
+// MountResource mounts a resource from a URI
+func (c *Client) MountResource(ctx context.Context, uri string, mediaType string, scope ScopeDescriptor, metadata *ResourceMetadataDescriptor) (*ResourceDescriptor, error) {
+	data := map[string]interface{}{
+		"uri":         uri,
+		"media_type":  mediaType,
+		"scope":       scope,
+	}
+	if metadata != nil {
+		data["metadata"] = metadata
+	}
+
+	var response ResourceDescriptor
+	err := c.makeRequest(ctx, "POST", "/api/v1/file-centric/resources", data, &response, false)
+	if err != nil {
+		return nil, err
+	}
+	return &response, nil
+}
+
+// GetResource retrieves a resource by ID
+func (c *Client) GetResource(ctx context.Context, resourceID string) (*ResourceDescriptor, error) {
+	var response ResourceDescriptor
+	err := c.makeRequest(ctx, "GET", fmt.Sprintf("/api/v1/file-centric/resources/%s", resourceID), nil, &response, false)
+	if err != nil {
+		return nil, err
+	}
+	return &response, nil
+}
+
+// ListResources lists resources for a user/agent
+func (c *Client) ListResources(ctx context.Context, userID, agentID string, status *ResourceStatus) ([]ResourceDescriptor, error) {
+	params := map[string]string{
+		"user_id":  userID,
+		"agent_id": agentID,
+	}
+	if status != nil {
+		params["status"] = string(*status)
+	}
+
+	var response struct {
+		Resources []ResourceDescriptor `json:"resources"`
+	}
+	err := c.makeRequest(ctx, "GET", "/api/v1/file-centric/resources", params, &response, false)
+	if err != nil {
+		return nil, err
+	}
+	return response.Resources, nil
+}
+
+// --- Category Operations ---
+
+// GetCategory retrieves a category by ID
+func (c *Client) GetCategory(ctx context.Context, categoryID string) (*CategoryDescriptor, error) {
+	var response CategoryDescriptor
+	err := c.makeRequest(ctx, "GET", fmt.Sprintf("/api/v1/file-centric/categories/%s", categoryID), nil, &response, false)
+	if err != nil {
+		return nil, err
+	}
+	return &response, nil
+}
+
+// GetCategoryByPath retrieves a category by path
+func (c *Client) GetCategoryByPath(ctx context.Context, path, userID, agentID string) (*CategoryDescriptor, error) {
+	params := map[string]string{
+		"path":     path,
+		"user_id":  userID,
+		"agent_id": agentID,
+	}
+
+	var response CategoryDescriptor
+	err := c.makeRequest(ctx, "GET", "/api/v1/file-centric/categories/by-path", params, &response, false)
+	if err != nil {
+		return nil, err
+	}
+	return &response, nil
+}
+
+// ListCategories lists categories for a user/agent
+func (c *Client) ListCategories(ctx context.Context, userID, agentID string, parentID *string) ([]CategoryDescriptor, error) {
+	params := map[string]string{
+		"user_id":  userID,
+		"agent_id": agentID,
+	}
+	if parentID != nil {
+		params["parent_id"] = *parentID
+	}
+
+	var response struct {
+		Categories []CategoryDescriptor `json:"categories"`
+	}
+	err := c.makeRequest(ctx, "GET", "/api/v1/file-centric/categories", params, &response, false)
+	if err != nil {
+		return nil, err
+	}
+	return response.Categories, nil
+}
+
+// SearchCategories searches categories by query
+func (c *Client) SearchCategories(ctx context.Context, userID, agentID, query string, limit *int) ([]CategoryDescriptor, error) {
+	data := map[string]interface{}{
+		"user_id":  userID,
+		"agent_id": agentID,
+		"query":    query,
+	}
+	if limit != nil {
+		data["limit"] = *limit
+	}
+
+	var response struct {
+		Categories []CategoryDescriptor `json:"categories"`
+	}
+	err := c.makeRequest(ctx, "POST", "/api/v1/file-centric/categories/search", data, &response, false)
+	if err != nil {
+		return nil, err
+	}
+	return response.Categories, nil
+}
+
+// --- Extraction Operations ---
+
+// ExtractResource extracts structured data from a mounted resource
+func (c *Client) ExtractResource(ctx context.Context, request ExtractionRequest) (*ExtractionResult, error) {
+	var response ExtractionResult
+	err := c.makeRequest(ctx, "POST", "/api/v1/file-centric/extraction/extract", request, &response, false)
+	if err != nil {
+		return nil, err
+	}
+	return &response, nil
+}
+
+// GetExtractionStatus gets the status of an extraction job
+func (c *Client) GetExtractionStatus(ctx context.Context, jobID string) (*ExtractionResult, error) {
+	var response ExtractionResult
+	err := c.makeRequest(ctx, "GET", fmt.Sprintf("/api/v1/file-centric/extraction/jobs/%s", jobID), nil, &response, false)
+	if err != nil {
+		return nil, err
+	}
+	return &response, nil
+}
+
+// --- Migration Operations ---
+
+// PlanLegacyMigration creates a migration plan for legacy memories
+func (c *Client) PlanLegacyMigration(ctx context.Context, scope ScopeDescriptor, dryRun bool) (*MigrationPlan, error) {
+	data := map[string]interface{}{
+		"scope":    scope,
+		"dry_run":  dryRun,
+	}
+
+	var response MigrationPlan
+	err := c.makeRequest(ctx, "POST", "/api/v1/file-centric/migration/plan", data, &response, false)
+	if err != nil {
+		return nil, err
+	}
+	return &response, nil
+}
+
+// ApplyLegacyMigration applies a migration plan
+func (c *Client) ApplyLegacyMigration(ctx context.Context, planID string) (*MigrationReport, error) {
+	data := map[string]interface{}{
+		"plan_id": planID,
+	}
+
+	var response MigrationReport
+	err := c.makeRequest(ctx, "POST", "/api/v1/file-centric/migration/apply", data, &response, false)
+	if err != nil {
+		return nil, err
+	}
+	return &response, nil
+}
+
+// GetMigrationStatus gets the status of a migration
+func (c *Client) GetMigrationStatus(ctx context.Context, migrationID string) (*MigrationReport, error) {
+	var response MigrationReport
+	err := c.makeRequest(ctx, "GET", fmt.Sprintf("/api/v1/file-centric/migration/migrations/%s", migrationID), nil, &response, false)
+	if err != nil {
+		return nil, err
+	}
+	return &response, nil
+}
+
+// RollbackMigration rolls back a migration
+func (c *Client) RollbackMigration(ctx context.Context, migrationID string) (bool, error) {
+	var response struct {
+		Success bool `json:"success"`
+	}
+	err := c.makeRequest(ctx, "POST", fmt.Sprintf("/api/v1/file-centric/migration/migrations/%s/rollback", migrationID), nil, &response, false)
+	if err != nil {
+		return false, err
+	}
+	return response.Success, nil
+}
+
+// --- Proactive Task Operations ---
+
+// ListProactiveTasks lists proactive tasks for a user/agent
+func (c *Client) ListProactiveTasks(ctx context.Context, userID, agentID string, taskType *string) ([]ProactiveTaskInfo, error) {
+	params := map[string]string{
+		"user_id":  userID,
+		"agent_id": agentID,
+	}
+	if taskType != nil {
+		params["task_type"] = *taskType
+	}
+
+	var response struct {
+		Tasks []ProactiveTaskInfo `json:"tasks"`
+	}
+	err := c.makeRequest(ctx, "GET", "/api/v1/file-centric/proactive/tasks", params, &response, false)
+	if err != nil {
+		return nil, err
+	}
+	return response.Tasks, nil
+}
+
+// GetProactiveTask gets a proactive task by ID
+func (c *Client) GetProactiveTask(ctx context.Context, taskID string) (*ProactiveTaskInfo, error) {
+	var response ProactiveTaskInfo
+	err := c.makeRequest(ctx, "GET", fmt.Sprintf("/api/v1/file-centric/proactive/tasks/%s", taskID), nil, &response, false)
+	if err != nil {
+		return nil, err
+	}
+	return &response, nil
+}
+
+// RunProactiveTask triggers a proactive task to run immediately
+func (c *Client) RunProactiveTask(ctx context.Context, taskID string) (*ProactiveTaskInfo, error) {
+	var response ProactiveTaskInfo
+	err := c.makeRequest(ctx, "POST", fmt.Sprintf("/api/v1/file-centric/proactive/tasks/%s/run", taskID), nil, &response, false)
+	if err != nil {
+		return nil, err
+	}
+	return &response, nil
+}
+
+// CancelProactiveTask cancels a running proactive task
+func (c *Client) CancelProactiveTask(ctx context.Context, taskID string) (*ProactiveTaskInfo, error) {
+	var response ProactiveTaskInfo
+	err := c.makeRequest(ctx, "POST", fmt.Sprintf("/api/v1/file-centric/proactive/tasks/%s/cancel", taskID), nil, &response, false)
+	if err != nil {
+		return nil, err
+	}
+	return &response, nil
+}
+
+// GetSchedulerStats gets scheduler statistics
+func (c *Client) GetSchedulerStats(ctx context.Context) (*SchedulerStats, error) {
+	var response SchedulerStats
+	err := c.makeRequest(ctx, "GET", "/api/v1/file-centric/proactive/scheduler/stats", nil, &response, false)
+	if err != nil {
+		return nil, err
+	}
+	return &response, nil
+}

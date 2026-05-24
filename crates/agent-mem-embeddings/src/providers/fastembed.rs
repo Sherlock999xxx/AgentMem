@@ -5,8 +5,8 @@ use crate::config::EmbeddingConfig;
 use agent_mem_traits::{AgentMemError, Embedder, Result};
 use async_trait::async_trait;
 use fastembed::{EmbeddingModel, InitOptions, TextEmbedding};
-use std::sync::{Arc, Mutex};
 use std::sync::atomic::{AtomicUsize, Ordering};
+use std::sync::{Arc, Mutex};
 use tracing::{debug, info, warn};
 
 /// FastEmbed 提供商
@@ -86,7 +86,10 @@ impl FastEmbedProvider {
     /// 使用多个模型实例可以避免 Mutex 锁竞争，提升并发性能。
     /// 参考 Mem0 的实现，每个 CPU 核心使用一个模型实例。
     pub async fn new_with_pool_size(config: EmbeddingConfig, pool_size: usize) -> Result<Self> {
-        info!("初始化 FastEmbed 提供商: {} (池大小: {})", config.model, pool_size);
+        info!(
+            "初始化 FastEmbed 提供商: {} (池大小: {})",
+            config.model, pool_size
+        );
 
         // 解析模型名称
         let embedding_model = Self::parse_model(&config.model)?;
@@ -95,9 +98,9 @@ impl FastEmbedProvider {
         // 创建模型池：每个 CPU 核心一个模型实例
         // 这样可以避免 Mutex 锁竞争，多个并发请求可以使用不同的模型实例
         let mut model_pool = Vec::with_capacity(pool_size);
-        
+
         info!("正在初始化 {} 个模型实例...", pool_size);
-        
+
         // 并行初始化模型实例（使用 tokio::join! 并行执行）
         let init_tasks: Vec<_> = (0..pool_size)
             .map(|i| {
@@ -105,8 +108,7 @@ impl FastEmbedProvider {
                 tokio::task::spawn_blocking(move || {
                     info!("初始化模型实例 {} / {}", i + 1, pool_size);
                     TextEmbedding::try_new(
-                        InitOptions::new(model_clone)
-                            .with_show_download_progress(i == 0) // 只显示第一个的进度
+                        InitOptions::new(model_clone).with_show_download_progress(i == 0), // 只显示第一个的进度
                     )
                 })
             })
@@ -117,7 +119,12 @@ impl FastEmbedProvider {
             let model = task
                 .await
                 .map_err(|e| AgentMemError::embedding_error(format!("任务失败: {e}")))?
-                .map_err(|e| AgentMemError::embedding_error(format!("FastEmbed 初始化失败 (实例 {}): {e}", i + 1)))?;
+                .map_err(|e| {
+                    AgentMemError::embedding_error(format!(
+                        "FastEmbed 初始化失败 (实例 {}): {e}",
+                        i + 1
+                    ))
+                })?;
             model_pool.push(Arc::new(Mutex::new(model)));
         }
 
@@ -222,16 +229,19 @@ impl Embedder for FastEmbedProvider {
             let mut model_guard = match model.lock() {
                 Ok(guard) => guard,
                 Err(e) => {
-                    return Err(AgentMemError::embedding_error(format!("无法获取模型锁: {e}")));
+                    return Err(AgentMemError::embedding_error(format!(
+                        "无法获取模型锁: {e}"
+                    )));
                 }
             };
-            model_guard.embed(vec![text], None)
+            model_guard
+                .embed(vec![text], None)
                 .map_err(|e| AgentMemError::embedding_error(format!("嵌入生成失败: {e}")))
         })
         .await
         .map_err(|e| AgentMemError::embedding_error(format!("任务失败: {e}")))?
         .map_err(|e| AgentMemError::embedding_error(format!("嵌入生成失败: {e}")))?;
-        
+
         let embedding = embedding_result;
 
         embedding
@@ -259,16 +269,19 @@ impl Embedder for FastEmbedProvider {
             let mut model_guard = match model.lock() {
                 Ok(guard) => guard,
                 Err(e) => {
-                    return Err(AgentMemError::embedding_error(format!("无法获取模型锁: {e}")));
+                    return Err(AgentMemError::embedding_error(format!(
+                        "无法获取模型锁: {e}"
+                    )));
                 }
             };
-            model_guard.embed(texts, Some(batch_size))
+            model_guard
+                .embed(texts, Some(batch_size))
                 .map_err(|e| AgentMemError::embedding_error(format!("批量嵌入失败: {e}")))
         })
         .await
         .map_err(|e| AgentMemError::embedding_error(format!("任务失败: {e}")))?
         .map_err(|e| AgentMemError::embedding_error(format!("批量嵌入失败: {e}")))?;
-        
+
         let embeddings = embeddings_result;
 
         Ok(embeddings)
@@ -375,7 +388,11 @@ mod tests {
         };
 
         // 创建一个小池（2个实例）用于测试
-        let provider = Arc::new(FastEmbedProvider::new_with_pool_size(config, 2).await.unwrap());
+        let provider = Arc::new(
+            FastEmbedProvider::new_with_pool_size(config, 2)
+                .await
+                .unwrap(),
+        );
         assert_eq!(provider.dimension(), 384);
 
         // 并发测试：多个请求应该能够并行处理

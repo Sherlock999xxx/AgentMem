@@ -139,7 +139,7 @@ impl IntelligenceModule {
             // 性能提升: 从 O(n) 顺序执行改为 O(1) 并行执行（n 个事实）
             // 预期提升: 2-5x（取决于事实数量和 LLM 响应时间）
             use futures::future::join_all;
-            
+
             let evaluation_tasks: Vec<_> = structured_facts
                 .iter()
                 .map(|fact| {
@@ -147,7 +147,7 @@ impl IntelligenceModule {
                     let agent_id_clone = agent_id.to_string();
                     let user_id_clone = user_id.clone();
                     let evaluator_ref = evaluator.clone();
-                    
+
                     async move {
                         // 将 StructuredFact 转换为 MemoryItem
                         let memory_item = UtilsModule::structured_fact_to_memory_item(
@@ -170,17 +170,14 @@ impl IntelligenceModule {
 
             // 并行执行所有评估任务
             let evaluation_results = join_all(evaluation_tasks).await;
-            
+
             // 收集结果并处理错误
             let mut evaluations = Vec::new();
             for (i, result) in evaluation_results.into_iter().enumerate() {
                 match result {
                     Ok(evaluation) => evaluations.push(evaluation),
                     Err(e) => {
-                        warn!(
-                            "重要性评估失败 (fact {}): {}",
-                            i, e
-                        );
+                        warn!("重要性评估失败 (fact {}): {}", i, e);
                         // 降级：使用默认重要性评估
                         let fact = &structured_facts[i];
                         use agent_mem_intelligence::ImportanceFactors;
@@ -263,13 +260,11 @@ impl IntelligenceModule {
         {
             if let Some(hybrid_engine) = &orchestrator.hybrid_search_engine {
                 // 生成查询向量
-                let embedder = orchestrator.embedder.as_ref()
-                    .ok_or_else(|| AgentMemError::ConfigError("Embedder not configured".to_string()))?;
-                let query_vector = UtilsModule::generate_query_embedding(
-                    content,
-                    embedder.as_ref(),
-                )
-                .await?;
+                let embedder = orchestrator.embedder.as_ref().ok_or_else(|| {
+                    AgentMemError::ConfigError("Embedder not configured".to_string())
+                })?;
+                let query_vector =
+                    UtilsModule::generate_query_embedding(content, embedder.as_ref()).await?;
 
                 // 构建搜索查询
                 use agent_mem_core::search::SearchQuery;
@@ -317,13 +312,11 @@ impl IntelligenceModule {
         {
             // 非 postgres 版本：使用 vector_store 搜索
             if let Some(vector_store) = &orchestrator.vector_store {
-                let embedder = orchestrator.embedder.as_ref()
-                    .ok_or_else(|| AgentMemError::ConfigError("Embedder not configured".to_string()))?;
-                let query_vector = UtilsModule::generate_query_embedding(
-                    content,
-                    embedder.as_ref(),
-                )
-                .await?;
+                let embedder = orchestrator.embedder.as_ref().ok_or_else(|| {
+                    AgentMemError::ConfigError("Embedder not configured".to_string())
+                })?;
+                let query_vector =
+                    UtilsModule::generate_query_embedding(content, embedder.as_ref()).await?;
 
                 let mut filter_map = HashMap::new();
                 filter_map.insert("agent_id".to_string(), serde_json::json!(agent_id));
@@ -436,7 +429,7 @@ impl IntelligenceModule {
         existing_memories: &[ExistingMemory],
         importance_evaluations: &[ImportanceEvaluation],
         conflicts: &[ConflictDetection],
-        agent_id: &str,
+        _agent_id: &str,
         _user_id: Option<String>,
     ) -> Result<Vec<MemoryDecision>> {
         if let Some(engine) = &orchestrator.enhanced_decision_engine {
@@ -780,11 +773,11 @@ impl IntelligenceModule {
             async {
                 info!("并行任务 1: 重要性评估");
                 Self::evaluate_importance(
-            orchestrator,
-            &structured_facts,
-            &agent_id_for_importance,
-            user_id_for_importance.clone(),
-        )
+                    orchestrator,
+                    &structured_facts,
+                    &agent_id_for_importance,
+                    user_id_for_importance.clone(),
+                )
                 .await
             },
             async {

@@ -15,7 +15,6 @@ use axum::{
 };
 use chrono::Utc;
 use std::backtrace::Backtrace;
-use std::fmt;
 use thiserror::Error;
 
 /// Error context for additional information
@@ -96,6 +95,12 @@ pub enum ServerError {
 
     #[error("Validation failed: {message}")]
     ValidationError {
+        message: String,
+        context: Option<ErrorContext>,
+    },
+
+    #[error("Not implemented: {message}")]
+    NotImplemented {
         message: String,
         context: Option<ErrorContext>,
     },
@@ -251,6 +256,14 @@ impl ServerError {
             context: None,
         }
     }
+
+    /// Create a not implemented error
+    pub fn not_implemented(msg: impl Into<String>) -> Self {
+        ServerError::NotImplemented {
+            message: msg.into(),
+            context: None,
+        }
+    }
 }
 
 impl IntoResponse for ServerError {
@@ -260,23 +273,36 @@ impl IntoResponse for ServerError {
                 (StatusCode::INTERNAL_SERVER_ERROR, "MEMORY_ERROR", message)
             }
             ServerError::NotFound { message, .. } => (StatusCode::NOT_FOUND, "NOT_FOUND", message),
-            ServerError::BadRequest { message, .. } => (StatusCode::BAD_REQUEST, "BAD_REQUEST", message),
-            ServerError::Unauthorized { message, .. } => (StatusCode::UNAUTHORIZED, "UNAUTHORIZED", message),
+            ServerError::BadRequest { message, .. } => {
+                (StatusCode::BAD_REQUEST, "BAD_REQUEST", message)
+            }
+            ServerError::Unauthorized { message, .. } => {
+                (StatusCode::UNAUTHORIZED, "UNAUTHORIZED", message)
+            }
             ServerError::Forbidden { message, .. } => (StatusCode::FORBIDDEN, "FORBIDDEN", message),
             ServerError::QuotaExceeded { message, .. } => {
                 (StatusCode::TOO_MANY_REQUESTS, "QUOTA_EXCEEDED", message)
             }
-            ServerError::ValidationError { message, .. } => (StatusCode::BAD_REQUEST, "VALIDATION_ERROR", message),
-            ServerError::BindError { message, .. } => (StatusCode::INTERNAL_SERVER_ERROR, "BIND_ERROR", message),
+            ServerError::ValidationError { message, .. } => {
+                (StatusCode::BAD_REQUEST, "VALIDATION_ERROR", message)
+            }
+            ServerError::NotImplemented { message, .. } => {
+                (StatusCode::NOT_IMPLEMENTED, "NOT_IMPLEMENTED", message)
+            }
+            ServerError::BindError { message, .. } => {
+                (StatusCode::INTERNAL_SERVER_ERROR, "BIND_ERROR", message)
+            }
             ServerError::ServerError { message, .. } => {
                 (StatusCode::INTERNAL_SERVER_ERROR, "SERVER_ERROR", message)
             }
             ServerError::ConfigError { message, .. } => {
                 (StatusCode::INTERNAL_SERVER_ERROR, "CONFIG_ERROR", message)
             }
-            ServerError::TelemetryError { message, .. } => {
-                (StatusCode::INTERNAL_SERVER_ERROR, "TELEMETRY_ERROR", message)
-            }
+            ServerError::TelemetryError { message, .. } => (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "TELEMETRY_ERROR",
+                message,
+            ),
             ServerError::Internal { message, .. } => {
                 (StatusCode::INTERNAL_SERVER_ERROR, "INTERNAL_ERROR", message)
             }
@@ -340,5 +366,11 @@ mod tests {
             ServerError::MemoryError { .. } => {}
             _ => panic!("Expected MemoryError"),
         }
+    }
+
+    #[test]
+    fn test_not_implemented_error_status() {
+        let response = ServerError::not_implemented("preview route").into_response();
+        assert_eq!(response.status(), StatusCode::NOT_IMPLEMENTED);
     }
 }

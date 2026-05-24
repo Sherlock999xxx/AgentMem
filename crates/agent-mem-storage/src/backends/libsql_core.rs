@@ -1,21 +1,22 @@
 //! LibSQL implementation of CoreMemoryStore
+//!
+//! Note: Statement caching removed due to libsql::Statement not implementing Clone
 
 use agent_mem_traits::{AgentMemError, CoreMemoryItem, CoreMemoryStore, Result};
 use async_trait::async_trait;
 use chrono::{DateTime, Utc};
-use libsql::{params, Connection, Row};
+use libsql::{params, Database, Row};
 use std::sync::Arc;
-use tokio::sync::Mutex;
 
 /// LibSQL implementation of CoreMemoryStore
 pub struct LibSqlCoreStore {
-    conn: Arc<Mutex<Connection>>,
+    db: Arc<Database>,
 }
 
 impl LibSqlCoreStore {
     /// Create a new LibSQL core memory store
-    pub fn new(conn: Arc<Mutex<Connection>>) -> Self {
-        Self { conn }
+    pub fn new(db: Arc<Database>) -> Self {
+        Self { db }
     }
 }
 
@@ -74,7 +75,9 @@ fn row_to_item(row: &Row) -> Result<CoreMemoryItem> {
 #[async_trait]
 impl CoreMemoryStore for LibSqlCoreStore {
     async fn set_value(&self, item: CoreMemoryItem) -> Result<CoreMemoryItem> {
-        let conn = self.conn.lock().await;
+        let conn = self.db.connect().map_err(|e| {
+            AgentMemError::storage_error(format!("Failed to connect to database: {e}"))
+        })?;
 
         let metadata_json = serde_json::to_string(&item.metadata).map_err(|e| {
             AgentMemError::storage_error(format!("Failed to serialize metadata: {e}"))
@@ -111,8 +114,9 @@ impl CoreMemoryStore for LibSqlCoreStore {
     }
 
     async fn get_value(&self, user_id: &str, key: &str) -> Result<Option<CoreMemoryItem>> {
-        let conn = self.conn.lock().await;
-
+        let conn = self.db.connect().map_err(|e| {
+            AgentMemError::storage_error(format!("Failed to connect to database: {e}"))
+        })?;
         let mut stmt = conn
             .prepare("SELECT * FROM core_memory WHERE user_id = ? AND key = ?")
             .await
@@ -137,8 +141,9 @@ impl CoreMemoryStore for LibSqlCoreStore {
     }
 
     async fn get_all(&self, user_id: &str) -> Result<Vec<CoreMemoryItem>> {
-        let conn = self.conn.lock().await;
-
+        let conn = self.db.connect().map_err(|e| {
+            AgentMemError::storage_error(format!("Failed to connect to database: {e}"))
+        })?;
         let mut stmt = conn
             .prepare("SELECT * FROM core_memory WHERE user_id = ? ORDER BY category, key")
             .await
@@ -164,8 +169,9 @@ impl CoreMemoryStore for LibSqlCoreStore {
     }
 
     async fn get_by_category(&self, user_id: &str, category: &str) -> Result<Vec<CoreMemoryItem>> {
-        let conn = self.conn.lock().await;
-
+        let conn = self.db.connect().map_err(|e| {
+            AgentMemError::storage_error(format!("Failed to connect to database: {e}"))
+        })?;
         let mut stmt = conn
             .prepare("SELECT * FROM core_memory WHERE user_id = ? AND category = ? ORDER BY key")
             .await
@@ -191,7 +197,9 @@ impl CoreMemoryStore for LibSqlCoreStore {
     }
 
     async fn delete_value(&self, user_id: &str, key: &str) -> Result<bool> {
-        let conn = self.conn.lock().await;
+        let conn = self.db.connect().map_err(|e| {
+            AgentMemError::storage_error(format!("Failed to connect to database: {e}"))
+        })?;
 
         let result = conn
             .execute(
@@ -207,7 +215,9 @@ impl CoreMemoryStore for LibSqlCoreStore {
     }
 
     async fn update_value(&self, user_id: &str, key: &str, new_value: &str) -> Result<bool> {
-        let conn = self.conn.lock().await;
+        let conn = self.db.connect().map_err(|e| {
+            AgentMemError::storage_error(format!("Failed to connect to database: {e}"))
+        })?;
 
         let result = conn
             .execute(

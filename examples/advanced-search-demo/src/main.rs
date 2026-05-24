@@ -10,8 +10,8 @@ use agent_mem_compat::client::{
     BatchAddRequest, EnhancedAddRequest, EnhancedSearchRequest, Messages,
 };
 use agent_mem_compat::{
-    BatchDeleteItem, BatchDeleteRequest, BatchUpdateItem, BatchUpdateRequest,
-    Mem0Client, MemoryFilter,
+    BatchDeleteItem, BatchDeleteRequest, BatchUpdateItem, BatchUpdateRequest, Mem0Client,
+    MemoryFilter,
 };
 use anyhow::Result;
 use serde_json::json;

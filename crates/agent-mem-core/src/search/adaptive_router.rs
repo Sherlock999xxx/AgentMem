@@ -395,7 +395,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_adaptive_router() {
+    async fn test_adaptive_router() -> anyhow::Result<()> {
         let config = AgentMemConfig::default();
         let router = AdaptiveRouter::new(config);
 

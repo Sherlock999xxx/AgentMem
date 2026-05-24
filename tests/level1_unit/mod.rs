@@ -8,3 +8,4 @@
 pub mod test_memory_engine;
 pub mod test_memory_types;
 pub mod test_search_engine;
+pub mod test_memory_effect;

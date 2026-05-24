@@ -133,7 +133,7 @@ class Memory:
         user_id: Optional[str] = None,
         session_id: Optional[str] = None,
         memory_type: Optional[str] = None,
-        limit: int = 10,
+        limit: int = 100,  # Increased default limit
         threshold: float = 0.0,
     ) -> List[Dict[str, Any]]:
         """
@@ -164,7 +164,7 @@ class Memory:
             if memory_type and memory.memory_type != memory_type:
                 continue
             
-            # Simple text matching for now (will be replaced with vector search)
+            # Enhanced similarity calculation
             score = self._calculate_similarity(query, memory.content)
             
             if score >= threshold:
@@ -329,23 +329,68 @@ class Memory:
     
     def _calculate_similarity(self, query: str, content: str) -> float:
         """
-        Calculate simple text similarity.
+        Calculate text similarity with multiple strategies.
         
-        This is a placeholder implementation. In production, this would use
-        vector embeddings and cosine similarity.
+        Combines multiple similarity metrics for better recall:
+        1. Exact substring match (highest score)
+        2. Word overlap (Jaccard)
+        3. Partial word match (fuzzy)
+        4. Character n-gram overlap
+        
+        Returns a score between 0.0 and 1.0.
         """
         query_lower = query.lower()
         content_lower = content.lower()
         
-        # Simple word overlap scoring
+        # Strategy 1: Exact substring match
+        if query_lower in content_lower:
+            # Find position and calculate score based on length ratio
+            position_score = len(query_lower) / max(len(content_lower), 1)
+            return min(1.0, 0.8 + position_score * 0.2)
+        
+        # Strategy 2: Word-level matching
         query_words = set(query_lower.split())
         content_words = set(content_lower.split())
         
-        if not query_words or not content_words:
-            return 0.0
+        if query_words and content_words:
+            # Exact word overlap
+            exact_overlap = len(query_words & content_words)
+            exact_score = exact_overlap / len(query_words) if query_words else 0
+            
+            # Partial word match (word contains query word or vice versa)
+            partial_matches = 0
+            for qw in query_words:
+                for cw in content_words:
+                    if qw in cw or cw in qw:
+                        partial_matches += 1
+                        break
+            
+            partial_score = partial_matches / len(query_words) if query_words else 0
+            word_score = max(exact_score, partial_score * 0.9)
+            
+            # Strategy 3: Character n-gram overlap (for fuzzy matching)
+            n = 3
+            query_ngrams = set(query_lower[i:i+n] for i in range(max(len(query_lower) - n + 1, 1)))
+            content_ngrams = set(content_lower[i:i+n] for i in range(max(len(content_lower) - n + 1, 1)))
+            
+            if query_ngrams and content_ngrams:
+                ngram_overlap = len(query_ngrams & content_ngrams)
+                ngram_score = ngram_overlap / len(query_ngrams)
+            else:
+                ngram_score = 0
+            
+            # Combine scores with weights
+            final_score = max(word_score, ngram_score * 0.7)
+            
+            # Boost score if significant word match
+            if exact_overlap > 0:
+                final_score = max(final_score, 0.5)
+            
+            return min(1.0, final_score)
         
-        overlap = len(query_words & content_words)
-        union = len(query_words | content_words)
+        # Strategy 4: Character-level fuzzy match for very short queries
+        if len(query_lower) <= 3:
+            if query_lower in content_lower:
+                return 0.7
         
-        return overlap / union if union > 0 else 0.0
-
+        return 0.0

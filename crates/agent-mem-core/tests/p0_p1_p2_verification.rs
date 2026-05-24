@@ -54,28 +54,28 @@ fn verify_p1_memory_v4_attributes() {
 
     // 添加自定义属性
     memory.attributes.set(
-        AttributeKey::custom("custom_field"),
+        AttributeKey::new("custom_field"),
         AttributeValue::String("custom_value".to_string()),
     );
     memory.attributes.set(
-        AttributeKey::custom("numeric"),
+        AttributeKey::new("numeric"),
         AttributeValue::Number(42.0),
     );
     memory.attributes.set(
-        AttributeKey::custom("boolean"),
+        AttributeKey::new("boolean"),
         AttributeValue::Boolean(true),
     );
 
     // 验证属性可访问
     assert!(memory
         .attributes
-        .contains_key(&AttributeKey::custom("custom_field")));
+        .contains_key(&AttributeKey::new("custom_field")));
     assert!(memory
         .attributes
-        .contains_key(&AttributeKey::custom("numeric")));
+        .contains_key(&AttributeKey::new("numeric")));
     assert!(memory
         .attributes
-        .contains_key(&AttributeKey::custom("boolean")));
+        .contains_key(&AttributeKey::new("boolean")));
 }
 
 /// 验证 P2: ContextCompressor 已实现
@@ -120,11 +120,11 @@ async fn verify_p0_p1_p2_integration() {
                 0.5 + (i as f64 * 0.1),
             );
             memory.attributes.set(
-                AttributeKey::custom("importance"),
+                AttributeKey::new("importance"),
                 AttributeValue::Number(0.5 + (i as f64 * 0.1)),
             );
             memory.attributes.set(
-                AttributeKey::custom("category"),
+                AttributeKey::new("category"),
                 AttributeValue::String("test".to_string()),
             );
             memory

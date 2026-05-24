@@ -1,16 +1,13 @@
-//! CognitiveMemory Manager - 统一8种认知记忆的管理器
+//! Cognitive Memory Module
 //!
-//! 本模块实现了CognitiveMemoryProvider Trait，融合了：
-//! - CoreMemory: 核心身份和角色记忆
-//! - ContextualMemory: 上下文情境记忆  
-//! - SemanticMemory: 语义知识记忆
-//! - EpisodicMemory: 事件情景记忆
-//! - ProceduralMemory: 程序性步骤记忆
-//! - WorkingMemory: 工作短期记忆
-//! - ResourceMemory: 资源引用记忆
-//! - KnowledgeMemory: 知识库记忆
+//! Provides unified cognitive memory management with:
+//! - CognitiveMemoryManager: Main memory management interface
+//! - CognitiveMemoryConfig: Configuration options
+//! - CognitiveStats: Statistics collection
+//! - MemoryMetrics: Performance metrics
 
 pub mod manager;
+pub mod metrics;
 
-pub use manager::CognitiveMemoryManager;
-
+pub use manager::{CognitiveMemoryManager, CognitiveMemoryConfig, CognitiveOperation, CognitiveResult, CognitiveStats};
+pub use metrics::{MemoryMetrics, MemoryStatsByType, OperationTimer};

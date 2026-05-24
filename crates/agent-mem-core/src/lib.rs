@@ -13,6 +13,7 @@ pub mod agent_state;
 // pub mod v4_migration;  // 临时禁用，等核心功能完成后再修复
 /// Specialized memory agents for different cognitive memory types
 pub mod agents;
+pub mod cognitive_memory;
 /// Background agent processing system
 pub mod background_agent;
 /// Multi-level caching system with warming strategies

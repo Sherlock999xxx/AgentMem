@@ -6,6 +6,7 @@
 pub mod abstractions;
 pub mod batch;
 pub mod cache;
+pub mod cognitive_memory;
 pub mod embedder;
 pub mod error;
 pub mod intelligence;
@@ -33,6 +34,10 @@ pub use intelligence::{
     IntelligentProcessingResult, MemoryActionType, MemoryDecision,
 };
 pub use llm::{LLMProvider, ModelInfo};
+pub use cognitive_memory::{
+    CognitiveMemoryProvider, CognitiveMemoryItem, CognitiveMemoryType,
+    CognitiveRecallOptions, CognitiveRecallResult, CognitiveMemoryStats,
+};
 pub use memory::MemoryProvider;
 pub use memory_store::{
     CoreMemoryItem, CoreMemoryStore, EpisodicEvent, EpisodicMemoryStore, EpisodicQuery,

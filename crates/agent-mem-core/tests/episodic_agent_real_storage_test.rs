@@ -189,6 +189,8 @@ async fn test_episodic_agent_insert_with_real_store() {
         priority: 1,
         timeout: None,
         retry_count: 0,
+        category_path: None,
+        resource_id: None,
     };
 
     let response = agent.execute_task(task).await.unwrap();
@@ -268,6 +270,8 @@ async fn test_episodic_agent_search_with_real_store() {
         priority: 1,
         timeout: None,
         retry_count: 0,
+        category_path: None,
+        resource_id: None,
     };
 
     let response = agent.execute_task(task).await.unwrap();
@@ -324,6 +328,8 @@ async fn test_episodic_agent_update_with_real_store() {
         priority: 1,
         timeout: None,
         retry_count: 0,
+        category_path: None,
+        resource_id: None,
     };
 
     let response = agent.execute_task(task).await.unwrap();

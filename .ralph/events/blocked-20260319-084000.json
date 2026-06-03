@@ -1,1 +1,0 @@
-{"event":"task.blocked","timestamp":"2026-03-19T08:40:00Z","payload":"Environmental blocker: /tmp directory ENOTDIR prevents all git/ralph/cargo operations. Phase D complete but uncommitted. Phase E cannot start. Requires system administrator intervention.","loop_id":"primary-20260319-xxxx","blocked_reason":"infrastructure_failure"}
